@@ -1,0 +1,61 @@
+#!/bin/bash
+
+#
+# gets passed the original command line. The function extracts and sets as global variables clad-specific options
+#
+# Sets:
+#
+# verbose - true|false
+# debug   - true|false
+# version - true|false
+#
+# args    - the rest of the remaining args
+#
+#
+function process-command-line() {
+
+    args=""
+
+    while [ -n "$1" ]; do
+
+        if [ "$1" = "-v" -o "" = "--verbose" ]; then
+            verbose=true
+        elif [ "$1" = "-d" -o "" = "--debug" ]; then
+            debug=true
+        elif [ "$1" = "version" ]; then
+            version=true
+        else
+            [ -z "${args}" ] && args=$1 || args="${args} $1"
+        fi
+        shift
+    done
+}
+
+#
+# must receive the path to the lib directory
+#
+function get-classpath() {
+
+    local lib_dir=$1
+
+    [ -z "${lib_dir}" ] && { echo "'lib_dir' not provided" 1>&2; exit 1; }
+    [ -d ${lib_dir} ] || { echo "lib_dir ${lib_dir} not a directory" 1>&2; exit 1; }
+
+    local first=true
+
+    #
+    # add the lib directory itself at the top of the classpath
+    #
+
+    echo -n "${lib_dir}:";
+
+    for i in ${lib_dir}/*.jar; do
+        if ${first}; then
+            first=false
+        else
+            echo -n ":"
+        fi
+        echo -n ${i}
+    done
+}
+

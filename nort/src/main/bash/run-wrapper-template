@@ -1,0 +1,194 @@
+#!/bin/bash
+
+#
+# Command-line wrapper script - generated from Nova Ordis Release Tools' run-wrapper-template
+#
+# For more details see https://kb.novaordis.com/index.php/novaordis-release-tools
+#
+
+reldir=$(dirname $0)
+home_dir=${reldir}/..
+main_class=${main_class}
+memory=1024m
+
+verbose=false
+
+function debug()
+{
+    ${verbose} && echo "$@" 1>&2;
+    return 0
+}
+
+function debug-arguments
+{
+    ${verbose} && echo "${FUNCNAME[1]}($@)" 1>&2;
+    return 0
+}
+
+#
+# 'verbose' initialization
+#
+# while [ -n "$1" ]; do
+#     [ $1 = "--verbose" -o $1 = "-v" ] && verbose=true;
+#     ...
+#     shift
+# done
+#
+
+function fail
+{
+    echo "[error]: $@" 1>&2 && exit 1
+}
+
+function get_java_home()
+{
+    # local java_home="/usr/java/jdk64-1.7.0_45"
+    local java_home=""
+
+    if [ -n "${JAVA_HOME}" ]; then
+        debug "using JAVA_HOME from environment ${JAVA_HOME}"
+        java_home=${JAVA_HOME}
+    else
+        local name;
+        name=$(uname -n)
+        name=${name##*.}
+
+        [ "${name}" = "local" -o "${name}" = "ovidius-mbp" ] && java_home="/Library/Java/JavaVirtualMachines/jdk1.7.0_60.jdk/Contents/Home"
+    fi
+
+    echo ${java_home}
+}
+
+function get_classpath()
+{
+    debug "${FUNCNAME[0]}: home_dir=${home_dir}"
+    local first=true
+    for i in ${home_dir}/lib/*.jar; do
+        ${first} && first=false || echo -n ":"
+        echo -n ${i}
+    done
+}
+
+# may return empty string or more than one PID (in a space separated list)
+function get-pids()
+{
+    local pids=$(ps -ef | grep java | grep ${main_class} | awk '{print $2}')
+    echo ${pids}
+}
+
+#
+# gets the pids as positional arguments. If the list is empty, attempt to detect and stop all processes
+#
+function stop()
+{
+    local pids
+    local force=false
+
+    while [ -n "$1" ]; do
+        if [ "$1" = "--force" ]; then
+            force=true;
+        elif [ ${1:0:2} = "--" ]; then
+            fail "unknown stop option '$1'"
+        else
+            [ "${pids}" = "" ] && pids=$1 || pids="${pids} $1"
+        fi
+        shift
+    done
+
+    if [ "${pids}" = "" ]; then
+        pids=$(get-pids) || fail "failed to get gld pids"
+    fi
+
+    [ -z "${pids}" ] && { echo "no gld processes running on $(uname -n)"; exit 0; }
+
+    local signal=""
+    local signal_name="SIGTERM"
+    if ${force}; then
+        signal="-9"
+        signal_name="SIGKILL"
+    fi
+
+    for pid in ${pids}; do
+        kill ${signal} ${pid} && \
+            echo "sent ${signal_name} into gld processes (${pid})" || \
+            echo "fail to send ${signal_name} into gld processes with pid ${pid}"
+    done
+}
+
+function status()
+{
+    local pids
+    pids=$(get-pids) || fail "failed to get pids"
+    [ -z "${pids}" ] && { echo "no processes running on $(uname -n)"; exit 0; }
+    echo "${pids}"
+}
+
+debug_args=""
+output_settings=""
+background=false
+do_kill=false
+
+while [ "$1" != "" ]; do
+    if [ "$1" = "--debug" ]; then
+        debug_args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5011"
+        verbose=true
+    elif [ "$1" = "--verbose" ]; then
+        verbose=true
+    elif [ "$1" = "--background" ]; then
+        background=true
+        args="${args} $1"
+    elif [ "$1" = "stop" ]; then
+        shift;
+        stop $@ && exit 0 || exit 1
+    elif [ "$1" = "status" ]; then
+        status && exit 0
+    else
+        #
+        # if the argument contains spaces, it means double quotes were used, we need to pass those down so the java
+        # command parsing line logic can detect quoted strings; more than that, if the double quoted string contains
+        # escaped quotes, we want to pass them as such
+        #
+        if [ "$1" = "${1/ //}" ]; then
+            # no spaces, pass as is
+            args="${args} $1"
+        else
+            # quoted string that contains spaces, escape inner quotes, in case they exist
+            escaped_inner_quotes=${1//\"/\\\"}
+            args="${args} \"${escaped_inner_quotes}\""
+        fi
+    fi
+    shift;
+done
+
+java_home=$(get_java_home) || fail "failed to get JAVA_HOME"
+classpath=$(get_classpath) || fail "failed to build classpath"
+
+if ${do_kill}; then
+    #
+    # used to remotely kill gld processes stuck in receiving
+    #
+    pids=$(get-pids)
+    pids=$(echo "${pids}")
+    [ -z ${pids} ] && echo "no gld processes running on $(hostname)" || { kill -9 ${pids}; echo "killed ${pids}"; }
+    exit 0
+fi
+
+java_bin="java"
+[ "${java_home}" != "" ] && java_bin="${java_home}/bin/java"
+
+command="${java_bin} -Xms${memory} -Xmx${memory} -cp ${classpath} ${debug_args} ${output_settings} ${main_class} ${args}"
+
+${verbose} && echo "${command}" 1>&2;
+
+if ${background}; then
+    nohup ${command} 1>./gld.log 2>&1 < /dev/null &
+    pid=$!
+    echo "gld launched in background (pid ${pid}), use gld stop|status to interact with it"
+    sleep 1
+else
+    ${command}
+fi
+
+
+
+

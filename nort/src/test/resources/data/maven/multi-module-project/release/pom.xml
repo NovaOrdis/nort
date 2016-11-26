@@ -1,0 +1,16 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.test</groupId>
+        <artifactId>maven-root</artifactId>
+        <version>0</version>
+    </parent>
+
+    <artifactId>release-artifact</artifactId>
+    <packaging>zip</packaging>
+
+    <version>3.0</version>
+
+</project>

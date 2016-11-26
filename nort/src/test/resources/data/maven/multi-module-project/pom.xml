@@ -1,0 +1,16 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.test</groupId>
+    <artifactId>maven-root</artifactId>
+    <version>0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>module1</module>
+        <module>module2</module>
+        <module>release</module>
+    </modules>
+
+</project>

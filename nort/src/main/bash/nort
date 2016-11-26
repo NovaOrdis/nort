@@ -1,0 +1,47 @@
+#!/bin/bash
+
+[ -f $(dirname $0)/../lib/clad.shlib ] && . $(dirname $0)/../lib/clad.shlib || { echo "library file $(dirname $0)/../lib/clad.shlib not found" 1>&2; exit 1; }
+
+application_name=Release
+
+function main() {
+
+    local verbose=false
+    local debug=false
+    local version=false
+    local args=""
+
+    # sets verbose, debug, args, ...
+    process-command-line $@
+
+    local verbose_option
+    local debug_option
+    ${verbose} && verbose_option="--verbose"
+    ${debug} && debug_option="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"
+
+    local classpath
+    classpath=$(get-classpath $(dirname $0)/../lib) || exit 1
+
+    #
+    # figure out the name we're invoked under
+    #
+    local command
+    command=$(basename $0)
+
+    #
+    # support for universal command "version"
+    #
+
+    ${version} && command=version
+
+    java \
+        -cp ${classpath} \
+        -Dapplication.name=${application_name} \
+        ${debug_option} \
+        io.novaordis.clad.CommandLineApplication \
+        ${verbose_option} \
+        ${command} \
+        ${args}
+}
+
+main $@
