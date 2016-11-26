@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #
 # gets passed the original command line. The function extracts and sets as global variables clad-specific options
 #

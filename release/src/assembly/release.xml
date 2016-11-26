@@ -34,23 +34,24 @@
     </moduleSets>
 
     <files>
-
-        <!--
         <file>
             <source>./src/main/bash/nort</source>
             <outputDirectory>bin</outputDirectory>
             <fileMode>0755</fileMode>
         </file>
         <file>
-            <source>./temporary-resources/log4j.xml</source>
-            <outputDirectory>lib</outputDirectory>
+            <source>./src/main/bash/.install</source>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
         </file>
         <file>
             <source>./src/main/bash/clad.shlib</source>
             <outputDirectory>lib</outputDirectory>
         </file>
-        -->
-
+        <file>
+            <source>./src/main/resources/log4j.xml</source>
+            <outputDirectory>lib</outputDirectory>
+        </file>
     </files>
 
     <dependencySets>
