@@ -50,10 +50,10 @@ public class CompletionSequence implements Sequence {
     @Override
     public boolean execute(SequenceExecutionContext context) throws Exception {
 
-        Project m = context.getProject();
+        Project p = context.getProject();
         ReleaseMode rm = context.getReleaseMode();
 
-        Version currentVersion = m.getVersion();
+        Version currentVersion = p.getVersion();
 
         if ((rm.isSnapshot() && currentVersion.isDot()) || (rm.isDot() && currentVersion.isSnapshot())) {
 
@@ -69,12 +69,12 @@ public class CompletionSequence implements Sequence {
         Version nextVersion = Version.nextVersion(currentVersion, ReleaseMode.snapshot);
 
         log.debug("incrementing release metadata to the next " + rm + " version " + nextVersion + " in " +
-                m.getBaseDirectory().getAbsolutePath() + " workarea ...");
+                p.getBaseDirectory().getAbsolutePath() + " workarea ...");
 
-        m.setVersion(nextVersion);
-        executeChangedState = m.save() || executeChangedState;
+        p.setVersion(nextVersion);
+        executeChangedState = p.save() || executeChangedState;
 
-        log.debug("version " + nextVersion + " written to " + m.getFile());
+        log.debug("version " + nextVersion + " written to " + p.getFile());
 
         return executeChangedState;
     }

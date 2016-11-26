@@ -91,7 +91,7 @@ public class InstallSequenceTest extends SequenceTest {
 
         MockProject mp = new MockProject("1.0");
 
-        mp.putArtifact(ArtifactType.JAR_LIBRARY, new File("mock.jar"));
+        mp.addArtifact(ArtifactType.JAR_LIBRARY, new File("mock.jar"));
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
 
@@ -110,7 +110,7 @@ public class InstallSequenceTest extends SequenceTest {
 
         SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
 
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("/does/not/matter.zip"));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("/does/not/matter.zip"));
 
         try {
 
@@ -134,7 +134,7 @@ public class InstallSequenceTest extends SequenceTest {
         mc.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, "/I/am/sure/there/is/no/such/directory");
 
         MockProject mp = new MockProject("1.0");
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("/does/not/matter.zip"));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("/does/not/matter.zip"));
 
         SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
 
@@ -165,7 +165,7 @@ public class InstallSequenceTest extends SequenceTest {
         mc.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, localArtifactRepositoryRoot.getAbsolutePath());
 
         MockProject mp = new MockProject("1.0");
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("I/am/sure/there/is/no/such/file/in/repository.zip"));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("I/am/sure/there/is/no/such/file/in/repository.zip"));
 
         SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
 
@@ -197,7 +197,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0");
         File distributionFile = new File(localArtifactRepositoryRoot, "test.zip");
         assertTrue(Files.write(distributionFile, "..."));
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
 
         SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
 
@@ -229,7 +229,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0");
         File distributionFile = new File(localArtifactRepositoryRoot, "test.zip");
         assertTrue(Files.write(distributionFile, "..."));
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
 
         mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, "/I/am/sure/there/is/no/such/directory");
 
@@ -263,7 +263,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0");
         File distributionFile = new File(localArtifactRepositoryRoot, "test.zip");
         assertTrue(Files.write(distributionFile, "..."));
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
@@ -301,7 +301,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0");
         File distributionFile = new File(localArtifactRepositoryRoot, "test.zip");
         assertTrue(Files.write(distributionFile, "..."));
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
@@ -342,7 +342,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0");
         File distributionFile = new File(localArtifactRepositoryRoot, "test.zip");
         assertTrue(Files.write(distributionFile, "..."));
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
@@ -385,7 +385,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0");
         File distributionFile = new File(localArtifactRepositoryRoot, distributionFileName + ".zip");
         assertTrue(Files.write(distributionFile, "..."));
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
@@ -441,7 +441,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0");
         File distributionFile = new File(localArtifactRepositoryRoot, distributionFileName + ".zip");
         assertTrue(Files.write(distributionFile, "..."));
-        mp.putArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()));
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());

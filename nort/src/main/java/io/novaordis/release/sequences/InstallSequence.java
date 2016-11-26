@@ -68,9 +68,9 @@ public class InstallSequence implements Sequence {
         // if we are a library, the publish sequence already published the artifacts in the repository, nothing to do
         //
 
-        Project m = c.getProject();
+        Project p = c.getProject();
 
-        Set<ArtifactType> artifactTypes = m.getArtifactTypes();
+        Set<ArtifactType> artifactTypes = p.getArtifactTypes();
 
         if (artifactTypes.size() == 1 && artifactTypes.contains(ArtifactType.JAR_LIBRARY)) {
 
@@ -113,7 +113,7 @@ public class InstallSequence implements Sequence {
         // figure out the distribution file, in the artifact repository
         //
 
-        List<Artifact> binaryDistributions = m.getArtifacts(ArtifactType.BINARY_DISTRIBUTION);
+        List<Artifact> binaryDistributions = p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION);
 
         if (binaryDistributions.isEmpty()) {
 

@@ -164,15 +164,15 @@ public class ReleaseCommand extends CommandBase {
     public void execute(Configuration c, ApplicationRuntime runtime) throws Exception {
 
         ReleaseApplicationRuntime r = (ReleaseApplicationRuntime)runtime;
-        Project m = projectBuilder.build(r.getCurrentDirectory());
+        Project p = projectBuilder.build(r.getCurrentDirectory());
 
         if (ReleaseMode.info.equals(mode)) {
 
-            info(r, m);
+            info(r, p);
         }
         else if (mode.isIncrement()) {
 
-            incrementRelease(c, r, m, mode);
+            incrementRelease(c, r, p, mode);
         }
         else {
             throw new RuntimeException("NOT YET IMPLEMENTED: release " + mode);

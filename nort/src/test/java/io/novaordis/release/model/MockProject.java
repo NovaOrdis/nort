@@ -139,7 +139,7 @@ public class MockProject implements Project {
         return savedVersionHistory;
     }
 
-    public void putArtifact(ArtifactType type, File f) {
+    public void addArtifact(ArtifactType type, File f) {
 
         List<Artifact> as = artifacts.get(type);
 

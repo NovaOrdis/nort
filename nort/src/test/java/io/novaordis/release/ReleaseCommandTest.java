@@ -19,6 +19,7 @@ package io.novaordis.release;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
+import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.model.MockProject;
 import io.novaordis.release.model.MockProjectBuilder;
 import io.novaordis.release.sequences.BuildSequence;
@@ -371,12 +372,40 @@ public class ReleaseCommandTest {
     public void execute_Success_Snapshot() throws Exception {
 
         MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
-        Configuration conf = new MockConfiguration();
+        MockConfiguration conf = new MockConfiguration();
         r.init(conf);
 
         ReleaseCommand c = new ReleaseCommand();
 
         MockProject mp = new MockProject("1-SNAPSHOT-1");
+
+        //
+        // simulate a binary installation - the artifact must be a real file
+        //
+
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("mock-artifact.zip"));
+
+        //
+        // we need that artifact to "exist"
+        //
+        assertTrue(Files.write(new File(scratchDirectory, "mock-artifact.zip"), "MOCK ZIP FILE"));
+
+        //
+        // overwrite whatever is available in the mock configuration as
+        // ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT with the scratch directory
+        //
+        conf.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, scratchDirectory.getAbsolutePath());
+
+        //
+        // create a "runtime directory" and the files we expect to find there
+        //
+        File runtimeDir = new File(scratchDirectory, "mock-runtime-dir");
+        assertTrue(runtimeDir.mkdir());
+        conf.set(ConfigurationLabels.RUNTIME_DIRECTORY, runtimeDir.getAbsolutePath());
+        File installationFile = new File(runtimeDir, "mock-artifact/bin/.install");
+        assertTrue(Files.write(installationFile, "MOCK INSTALLATION FILE"));
+        assertTrue(Files.chmod(installationFile, "r-xr--r--"));
+
         MockProjectBuilder mb = new MockProjectBuilder(mp);
         c.setProjectBuilder(mb);
 
@@ -424,7 +453,7 @@ public class ReleaseCommandTest {
                 assertTrue(so.didChangeState());
             }
             else if (type.equals(InstallSequence.class)) {
-                assertFalse(so.didChangeState());
+                assertTrue(so.didChangeState());
             }
             else if (type.equals(CompletionSequence.class)) {
                 assertTrue(so.didChangeState());
@@ -448,12 +477,40 @@ public class ReleaseCommandTest {
     public void execute_Success_Dot() throws Exception {
 
         MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
-        Configuration conf = new MockConfiguration();
+        MockConfiguration conf = new MockConfiguration();
         r.init(conf);
 
         ReleaseCommand c = new ReleaseCommand();
 
         MockProject mp = new MockProject("1-SNAPSHOT-1");
+
+        //
+        // simulate a binary installation - the artifact must be a real file
+        //
+
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("mock-artifact.zip"));
+
+        //
+        // we need that artifact to "exist"
+        //
+        assertTrue(Files.write(new File(scratchDirectory, "mock-artifact.zip"), "MOCK ZIP FILE"));
+
+        //
+        // overwrite whatever is available in the mock configuration as
+        // ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT with the scratch directory
+        //
+        conf.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, scratchDirectory.getAbsolutePath());
+
+        //
+        // create a "runtime directory" and the files we expect to find there
+        //
+        File runtimeDir = new File(scratchDirectory, "mock-runtime-dir");
+        assertTrue(runtimeDir.mkdir());
+        conf.set(ConfigurationLabels.RUNTIME_DIRECTORY, runtimeDir.getAbsolutePath());
+        File installationFile = new File(runtimeDir, "mock-artifact/bin/.install");
+        assertTrue(Files.write(installationFile, "MOCK INSTALLATION FILE"));
+        assertTrue(Files.chmod(installationFile, "r-xr--r--"));
+
         MockProjectBuilder mb = new MockProjectBuilder(mp);
         c.setProjectBuilder(mb);
 
@@ -501,7 +558,7 @@ public class ReleaseCommandTest {
                 assertTrue(so.didChangeState());
             }
             else if (type.equals(InstallSequence.class)) {
-                assertFalse(so.didChangeState());
+                assertTrue(so.didChangeState());
             }
             else if (type.equals(CompletionSequence.class)) {
                 assertTrue(so.didChangeState());
@@ -512,16 +569,13 @@ public class ReleaseCommandTest {
         }
 
         //
-        // the "saved" version should be 1
+        // the "saved" version should be 1-SNAPSHOT-2
         //
 
-        Version crt = mp.getVersion();
-        assertEquals(new Version("1.0.1-SNAPSHOT-1"), crt);
-
-        List<Version> savedVersionHistory = mp.getSavedVersionHistory();
-        assertEquals(2, savedVersionHistory.size());
-        assertEquals(new Version("1"), savedVersionHistory.get(0));
-        assertEquals(new Version("1.0.1-SNAPSHOT-1"), savedVersionHistory.get(1));
+        Version v = mp.getVersion();
+        assertEquals(new Version("1.0.1-SNAPSHOT-1"), v);
+        Version sv = mp.getLastSavedVersion();
+        assertEquals(new Version("1.0.1-SNAPSHOT-1"), sv);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -60,7 +60,7 @@ public class QualificationSequence implements Sequence {
 
         Configuration c = context.getConfiguration();
         ApplicationRuntime r = context.getRuntime();
-        Project m = context.getProject();
+        Project p = context.getProject();
 
         ReleaseMode rm = context.getReleaseMode();
         log.debug("release mode: " + rm);
@@ -69,7 +69,7 @@ public class QualificationSequence implements Sequence {
         // make sure the current version is a snapshot
         //
 
-        Version currentVersion = m.getVersion();
+        Version currentVersion = p.getVersion();
 
         log.debug("current version " + currentVersion);
 
@@ -86,11 +86,11 @@ public class QualificationSequence implements Sequence {
             //
 
             Version nextVersion = Version.nextVersion(currentVersion, rm);
-            m.setVersion(nextVersion);
+            p.setVersion(nextVersion);
             //
             // we need the version change on disk, so the tests can be executed in top of the changed version
             //
-            executeChangedState = m.save() || executeChangedState;
+            executeChangedState = p.save() || executeChangedState;
             currentVersion = nextVersion;
         }
 

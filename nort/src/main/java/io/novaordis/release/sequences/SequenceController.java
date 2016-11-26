@@ -189,18 +189,18 @@ public class SequenceController {
             return "null sequence list";
         }
 
-        String s = "[";
+        String s = "sequences: ";
 
         for(Iterator<Sequence> i = sequences.iterator(); i.hasNext(); ) {
 
             s += i.next().getClass().getSimpleName();
+            s = s.replace("Sequence", "");
+            s = s.toLowerCase();
 
             if (i.hasNext()) {
                 s += ", ";
             }
         }
-
-        s += "]";
 
         return s;
     }
