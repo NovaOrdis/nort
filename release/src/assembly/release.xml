@@ -25,11 +25,15 @@
 
     <includeBaseDirectory>true</includeBaseDirectory>
 
+    <moduleSets>
+        <moduleSet>
+            <binaries>
+                <outputDirectory>lib</outputDirectory>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+
     <files>
-        <file>
-            <source>./target/nort-${version}.jar</source>
-            <outputDirectory>lib</outputDirectory>
-        </file>
 
         <!--
         <file>
