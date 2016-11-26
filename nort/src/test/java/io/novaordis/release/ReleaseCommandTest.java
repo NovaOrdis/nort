@@ -30,6 +30,7 @@ import io.novaordis.release.sequences.QualificationSequence;
 import io.novaordis.release.sequences.Sequence;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.release.sequences.SequenceOperation;
+import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.OS;
@@ -366,162 +367,162 @@ public class ReleaseCommandTest {
         }
     }
 
-//    @Test
-//    public void execute_Success_Snapshot() throws Exception {
-//
-//        MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
-//        Configuration conf = new MockConfiguration();
-//        r.init(conf);
-//
-//        ReleaseCommand c = new ReleaseCommand();
-//
-//        MockProject mp = new MockProject("1-SNAPSHOT-1");
-//        MockProjectBuilder mb = new MockProjectBuilder(mp);
-//        c.setProjectBuilder(mb);
-//
-//        c.setMode(ReleaseMode.snapshot);
-//
-//        //
-//        // we're executing into a mock OS, tell it execute successfully *all* commands
-//        //
-//
-//        ((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
-//
-//        //
-//        // execution must be successful
-//        //
-//
-//        c.execute(conf, r);
-//
-//        //
-//        // make sure all sequences have been executed in order and are successful
-//        //
-//
-//        SequenceExecutionContext ctx = r.getLastExecutionContext();
-//        ExecutionHistory history = ctx.getHistory();
-//
-//        List<Class<? extends Sequence>> types = ReleaseCommand.getSequenceTypes();
-//        assertEquals(history.length(), types.size());
-//
-//        for(int i = 0; i < history.length(); i++) {
-//
-//            SequenceOperation so = history.getOperation(i);
-//
-//            assertEquals("execute", so.getMethodName());
-//
-//            Class<? extends Sequence> type = types.get(i);
-//            assertEquals(type, so.getTarget().getClass());
-//            assertTrue(so.wasSuccess());
-//
-//            if (type.equals(QualificationSequence.class)) {
-//                assertFalse(so.didChangeState());
-//            }
-//            else if (type.equals(BuildSequence.class)) {
-//                assertTrue(so.didChangeState());
-//            }
-//            else if (type.equals(PublishSequence.class)) {
-//                assertTrue(so.didChangeState());
-//            }
-//            else if (type.equals(InstallSequence.class)) {
-//                assertFalse(so.didChangeState());
-//            }
-//            else if (type.equals(CompletionSequence.class)) {
-//                assertTrue(so.didChangeState());
-//            }
-//            else {
-//                fail("unknown sequence type " + type);
-//            }
-//        }
-//
-//        //
-//        // the "saved" version should be 1-SNAPSHOT-2
-//        //
-//
-//        Version v = mp.getVersion();
-//        assertEquals(new Version("1-SNAPSHOT-2"), v);
-//        Version sv = mp.getLastSavedVersion();
-//        assertEquals(new Version("1-SNAPSHOT-2"), sv);
-//    }
+    @Test
+    public void execute_Success_Snapshot() throws Exception {
 
-//    @Test
-//    public void execute_Success_Dot() throws Exception {
-//
-//        MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
-//        Configuration conf = new MockConfiguration();
-//        r.init(conf);
-//
-//        ReleaseCommand c = new ReleaseCommand();
-//
-//        MockProject mp = new MockProject("1-SNAPSHOT-1");
-//        MockProjectBuilder mb = new MockProjectBuilder(mp);
-//        c.setProjectBuilder(mb);
-//
-//        c.setMode(ReleaseMode.major);
-//
-//        //
-//        // we're executing into a mock OS, tell it execute successfully *all* commands
-//        //
-//
-//        ((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
-//
-//        //
-//        // execution must be successful
-//        //
-//
-//        c.execute(conf, r);
-//
-//        //
-//        // make sure all sequences have been executed in order and are successful
-//        //
-//
-//        SequenceExecutionContext ctx = r.getLastExecutionContext();
-//        ExecutionHistory history = ctx.getHistory();
-//
-//        List<Class<? extends Sequence>> types = ReleaseCommand.getSequenceTypes();
-//        assertEquals(history.length(), types.size());
-//
-//        for(int i = 0; i < history.length(); i++) {
-//
-//            SequenceOperation so = history.getOperation(i);
-//
-//            assertEquals("execute", so.getMethodName());
-//
-//            Class<? extends Sequence> type = types.get(i);
-//            assertEquals(type, so.getTarget().getClass());
-//            assertTrue(so.wasSuccess());
-//
-//            if (type.equals(QualificationSequence.class)) {
-//                assertTrue(so.didChangeState());
-//            }
-//            else if (type.equals(BuildSequence.class)) {
-//                assertTrue(so.didChangeState());
-//            }
-//            else if (type.equals(PublishSequence.class)) {
-//                assertTrue(so.didChangeState());
-//            }
-//            else if (type.equals(InstallSequence.class)) {
-//                assertFalse(so.didChangeState());
-//            }
-//            else if (type.equals(CompletionSequence.class)) {
-//                assertTrue(so.didChangeState());
-//            }
-//            else {
-//                fail("unknown sequence type " + type);
-//            }
-//        }
-//
-//        //
-//        // the "saved" version should be 1
-//        //
-//
-//        Version crt = mp.getVersion();
-//        assertEquals(new Version("1.0.1-SNAPSHOT-1"), crt);
-//
-//        List<Version> savedVersionHistory = mp.getSavedVersionHistory();
-//        assertEquals(2, savedVersionHistory.size());
-//        assertEquals(new Version("1"), savedVersionHistory.get(0));
-//        assertEquals(new Version("1.0.1-SNAPSHOT-1"), savedVersionHistory.get(1));
-//    }
+        MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
+        Configuration conf = new MockConfiguration();
+        r.init(conf);
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        MockProject mp = new MockProject("1-SNAPSHOT-1");
+        MockProjectBuilder mb = new MockProjectBuilder(mp);
+        c.setProjectBuilder(mb);
+
+        c.setMode(ReleaseMode.snapshot);
+
+        //
+        // we're executing into a mock OS, tell it execute successfully *all* commands
+        //
+
+        ((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
+
+        //
+        // execution must be successful
+        //
+
+        c.execute(conf, r);
+
+        //
+        // make sure all sequences have been executed in order and are successful
+        //
+
+        SequenceExecutionContext ctx = r.getLastExecutionContext();
+        ExecutionHistory history = ctx.getHistory();
+
+        List<Class<? extends Sequence>> types = ReleaseCommand.getSequenceTypes();
+        assertEquals(history.length(), types.size());
+
+        for(int i = 0; i < history.length(); i++) {
+
+            SequenceOperation so = history.getOperation(i);
+
+            assertEquals("execute", so.getMethodName());
+
+            Class<? extends Sequence> type = types.get(i);
+            assertEquals(type, so.getTarget().getClass());
+            assertTrue(so.wasSuccess());
+
+            if (type.equals(QualificationSequence.class)) {
+                assertFalse(so.didChangeState());
+            }
+            else if (type.equals(BuildSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else if (type.equals(PublishSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else if (type.equals(InstallSequence.class)) {
+                assertFalse(so.didChangeState());
+            }
+            else if (type.equals(CompletionSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else {
+                fail("unknown sequence type " + type);
+            }
+        }
+
+        //
+        // the "saved" version should be 1-SNAPSHOT-2
+        //
+
+        Version v = mp.getVersion();
+        assertEquals(new Version("1-SNAPSHOT-2"), v);
+        Version sv = mp.getLastSavedVersion();
+        assertEquals(new Version("1-SNAPSHOT-2"), sv);
+    }
+
+    @Test
+    public void execute_Success_Dot() throws Exception {
+
+        MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
+        Configuration conf = new MockConfiguration();
+        r.init(conf);
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        MockProject mp = new MockProject("1-SNAPSHOT-1");
+        MockProjectBuilder mb = new MockProjectBuilder(mp);
+        c.setProjectBuilder(mb);
+
+        c.setMode(ReleaseMode.major);
+
+        //
+        // we're executing into a mock OS, tell it execute successfully *all* commands
+        //
+
+        ((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
+
+        //
+        // execution must be successful
+        //
+
+        c.execute(conf, r);
+
+        //
+        // make sure all sequences have been executed in order and are successful
+        //
+
+        SequenceExecutionContext ctx = r.getLastExecutionContext();
+        ExecutionHistory history = ctx.getHistory();
+
+        List<Class<? extends Sequence>> types = ReleaseCommand.getSequenceTypes();
+        assertEquals(history.length(), types.size());
+
+        for(int i = 0; i < history.length(); i++) {
+
+            SequenceOperation so = history.getOperation(i);
+
+            assertEquals("execute", so.getMethodName());
+
+            Class<? extends Sequence> type = types.get(i);
+            assertEquals(type, so.getTarget().getClass());
+            assertTrue(so.wasSuccess());
+
+            if (type.equals(QualificationSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else if (type.equals(BuildSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else if (type.equals(PublishSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else if (type.equals(InstallSequence.class)) {
+                assertFalse(so.didChangeState());
+            }
+            else if (type.equals(CompletionSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else {
+                fail("unknown sequence type " + type);
+            }
+        }
+
+        //
+        // the "saved" version should be 1
+        //
+
+        Version crt = mp.getVersion();
+        assertEquals(new Version("1.0.1-SNAPSHOT-1"), crt);
+
+        List<Version> savedVersionHistory = mp.getSavedVersionHistory();
+        assertEquals(2, savedVersionHistory.size());
+        assertEquals(new Version("1"), savedVersionHistory.get(0));
+        assertEquals(new Version("1.0.1-SNAPSHOT-1"), savedVersionHistory.get(1));
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

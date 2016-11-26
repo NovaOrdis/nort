@@ -62,7 +62,8 @@ public class MavenProjectBuilder implements ProjectBuilder {
         }
         catch(Exception e) {
 
-            throw new UserErrorException("failed to read POM file " + pomFile + ": " + e.getMessage(), e);
+            throw new UserErrorException(
+                    "failed to read POM file " + pomFile.getAbsolutePath() + ": " + e.getMessage(), e);
         }
 
         return mp;
