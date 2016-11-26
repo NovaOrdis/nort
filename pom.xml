@@ -25,7 +25,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <nort.version>1.0.0-SNAPSHOT-1</nort.version>
+        <nort.version>1.0.0-SNAPSHOT-4</nort.version>
     </properties>
 
     <modules>
