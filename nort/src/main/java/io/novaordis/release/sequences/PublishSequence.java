@@ -18,13 +18,13 @@ package io.novaordis.release.sequences;
 
 import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
-import io.novaordis.clad.variable.StringWithVariables;
 import io.novaordis.release.OutputUtil;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
+import io.novaordis.utilities.variable.StringWithVariables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
