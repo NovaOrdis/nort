@@ -22,6 +22,8 @@ import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.variable.VariableProvider;
+import io.novaordis.utilities.variable.VariableProviderImpl;
 import io.novaordis.utilities.xml.editor.BasicInLineXmlEditor;
 import org.junit.After;
 import org.junit.Before;
@@ -333,7 +335,52 @@ public class POMTest {
         assertEquals(new File("io/test/release/33.33/binary-release-A-33.33.tar.gz"), a.getRepositoryFile());
     }
 
+    // POM hierarchy ---------------------------------------------------------------------------------------------------
+
+    @Test
+    public void parentChildRelationship() throws Exception {
+
+        VariableProvider parentVariableProvider = new VariableProviderImpl();
+
+        MockPOM parent = new MockPOM();
+        parent.setLocalVariableProvider(parentVariableProvider);
+
+        File f = Util.cp("maven/pom-sample.xml", scratchDirectory);
+
+        POM child = new POM(parent, f);
+
+        //
+        // verify that the variable provider relationship is established
+        //
+
+        VariableProvider childVariableProvider = child.getLocalVariableProvider();
+
+        VariableProvider parentVariableProvider2 = childVariableProvider.getVariableProviderParent();
+
+        assertEquals(parentVariableProvider, parentVariableProvider2);
+    }
+
     // variable support ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void customVariableSupport() throws Exception {
+
+        File f = Util.cp("maven/poms-with-variables/pom-with-variable-as-custom-property.xml", scratchDirectory);
+
+        POM p = new POM(f);
+
+        VariableProvider lvp = p.getLocalVariableProvider();
+        assertNull(lvp.getVariableProviderParent());
+
+        String v = lvp.getVariableValue("my.version");
+
+        assertEquals("3.2.1", v);
+
+        String s = p.getFinalName();
+
+        assertEquals("blah-3.2.1", s);
+    }
+
 
 //    @Test
 //    public void mavenVariableSupport() throws Exception {
@@ -349,19 +396,6 @@ public class POMTest {
 //        assertEquals("blah-8888", s);
 //    }
 //
-//    @Test
-//    public void customVariableSupport() throws Exception {
-//
-//        File f = Util.cp(baseDirectory,
-//                "src/test/resources/data/maven/poms-with-variables/pom-with-variable-as-maven-property.xml",
-//                scratchDirectory);
-//
-//        POM p = new POM(f);
-//
-//        String s = p.getFinalName();
-//
-//        assertEquals("blah-3.2.1", s);
-//    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

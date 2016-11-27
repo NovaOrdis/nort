@@ -23,8 +23,11 @@ import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.variable.VariableProvider;
+import io.novaordis.utilities.variable.VariableProviderImpl;
 import io.novaordis.utilities.xml.editor.BasicInLineXmlEditor;
 import io.novaordis.utilities.xml.editor.InLineXmlEditor;
+import io.novaordis.utilities.xml.editor.InLineXmlEditorWithVariableSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +59,14 @@ public class POM {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private InLineXmlEditor pomEditor;
+    //
+    // the variable provider that gets initialized with properties declared this POM instance's XML file. It handles
+    // these properties as variables. It has access to the variables (properties) declared by its parent (if any) and
+    // the runtime, but locally declared variables supersede those declared by the above layers
+
+    private VariableProvider localVariableProvider;
+
+    private InLineXmlEditorWithVariableSupport pomEditor;
 
     // may be null
     private POM parent;
@@ -106,9 +116,42 @@ public class POM {
 
         this.moduleNames = Collections.emptyList();
 
+        this.localVariableProvider = new VariableProviderImpl();
+
         this.parent = parent;
 
-        pomEditor = new BasicInLineXmlEditor(pomFile);
+        //
+        // install the local variable provider in POM-owned variable providers: the local variable provider should
+        // be the child of the parent POM's variable provider.
+        //
+
+        if (parent != null) {
+
+            this.localVariableProvider.setVariableProviderParent(parent.getLocalVariableProvider());
+        }
+
+        this.pomEditor = new InLineXmlEditorWithVariableSupport(pomFile);
+
+        //
+        // install the local variable provider
+        //
+
+        pomEditor.setVariableProvider(localVariableProvider);
+
+        //
+        // populate the local variable provider with the variables corresponding to the properties declared in the
+        // associated XML file
+        //
+
+        List<String> propertyNames = pomEditor.getElementNames("/project/properties");
+
+        if (!propertyNames.isEmpty()) {
+
+            for(String pn: propertyNames) {
+
+                throw new RuntimeException("READ PROPERTY VALUE and INSTALL IT AS VARIABLE");
+            }
+        }
 
         //
         // cache the read-only information
@@ -357,6 +400,11 @@ public class POM {
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
+
+    VariableProvider getLocalVariableProvider() {
+
+        return localVariableProvider;
+    }
 
     // Protected -------------------------------------------------------------------------------------------------------
 

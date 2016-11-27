@@ -86,12 +86,12 @@
         <dependency>
             <groupId>io.novaordis.utilities</groupId>
             <artifactId>novaordis-utilities</artifactId>
-            <version>4.2.2-SNAPSHOT-23</version>
+            <version>4.2.2-SNAPSHOT-26</version>
         </dependency>
         <dependency>
             <groupId>io.novaordis.clad</groupId>
             <artifactId>novaordis-clad</artifactId>
-            <version>3.3.2-SNAPSHOT-6</version>
+            <version>3.3.2-SNAPSHOT-7</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

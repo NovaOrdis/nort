@@ -61,6 +61,16 @@ public class Util {
         return cp(baseDirectory, srcPathRelativeToBaseDir, scratchDirectory, null);
     }
 
+    /**
+     * @param srcPathRelativeToBaseDataDir the path must be relative to
+     *                                     System.getProperty("basedir") + "/src/test/resources/data"
+     */
+    public static File cp(String srcPathRelativeToBaseDataDir, File scratchDirectory) {
+
+        return cp(new File(System.getProperty("basedir"), "src/test/resources/data"), srcPathRelativeToBaseDataDir,
+                scratchDirectory);
+    }
+
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
