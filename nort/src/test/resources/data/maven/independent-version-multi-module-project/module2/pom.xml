@@ -9,8 +9,8 @@
     </parent>
 
     <artifactId>module2-artifact</artifactId>
+    <version>2.0</version>
     <packaging>jar</packaging>
 
-    <version>2.0</version>
 
 </project>

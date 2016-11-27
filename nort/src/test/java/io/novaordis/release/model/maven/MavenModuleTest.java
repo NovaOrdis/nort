@@ -18,6 +18,7 @@ package io.novaordis.release.model.maven;
 
 import io.novaordis.release.MockMavenProject;
 import io.novaordis.release.Util;
+import io.novaordis.release.model.Artifact;
 import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.model.MockArtifact;
 import io.novaordis.release.version.Version;
@@ -103,16 +104,21 @@ public class MavenModuleTest {
                 scratchDirectory);
 
         MockMavenProject mp = new MockMavenProject();
+        MockPOM rootPom = new MockPOM();
+        mp.setPOM(rootPom);
+        mp.setVersion(new Version("3.3.3"));
 
         MavenModule m = new MavenModule(mp, f);
 
-        fail("return here");
+        Artifact a = m.getArtifact();
 
-        m.getArtifact();
-        m.getName();
-        m.getArtifactType();
-        m.getProject();
-        m.getVersion();
+        assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
+        assertEquals(new File("io/test/module1-artifact/3.3.3/module1-artifact-3.3.3.jar"), a.getRepositoryFile());
+        assertEquals("test-scratch", m.getName());
+        assertEquals(ArtifactType.JAR_LIBRARY, m.getArtifactType());
+        assertEquals(mp, m.getProject());
+        Version v = m.getVersion();
+        assertEquals(new Version("3.3.3"), v);
     }
 
     // getArtifactType() -----------------------------------------------------------------------------------------------
@@ -171,13 +177,41 @@ public class MavenModuleTest {
     // setVersion() ----------------------------------------------------------------------------------------------------
 
     @Test
-    public void setVersion() throws Exception {
+    public void setVersion_LockstepVersioningModel() throws Exception {
 
         MockMavenProject mmp = new MockMavenProject();
+        mmp.setVersioningModel(ProjectVersioningModel.MULTIPLE_MODULE_LOCKSTEP);
         mmp.setPOM(new MockPOM());
 
         MockPOM mockModulePom = new MockPOM();
         mockModulePom.setParent(mmp.getPOM());
+
+        MavenModule m = new MavenModule(mmp, mockModulePom);
+
+        try {
+
+            m.setVersion(new Version("1"));
+            fail("should throw exception");
+        }
+        catch(UnsupportedOperationException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals(
+                    "cannot independently set version on modules in " + ProjectVersioningModel.MULTIPLE_MODULE_LOCKSTEP +
+                            " versioning mode", msg);
+        }
+    }
+
+    @Test
+    public void setVersion_IndependentVersioningModel() throws Exception {
+
+        MockMavenProject mmp = new MockMavenProject();
+        mmp.setVersioningModel(ProjectVersioningModel.MULTIPLE_MODULE_INDEPENDENT);
+        mmp.setPOM(new MockPOM());
+
+        MockPOM mockModulePom = new MockPOM();
+        mockModulePom.setParent(mmp.getPOM());
+        mockModulePom.setVersion(new Version("1"));
 
         MavenModule m = new MavenModule(mmp, mockModulePom);
 

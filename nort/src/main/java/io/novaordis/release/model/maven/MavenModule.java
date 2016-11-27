@@ -20,6 +20,7 @@ import io.novaordis.release.model.Artifact;
 import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
+import io.novaordis.utilities.UserErrorException;
 
 import java.io.File;
 
@@ -52,18 +53,32 @@ public class MavenModule {
     /**
      * Used for testing.
      */
-    MavenModule(MavenProject p, POM pom) {
+    MavenModule(MavenProject p, POM pom) throws Exception {
 
         this.project = p;
         this.pom = pom;
 
         //
-        // consistency check
+        // consistency checks
         //
 
         if (!project.getPOM().equals(pom.getParent())) {
             throw new IllegalArgumentException(
                     "the POM associated with the the project " + p + " differs from the this POM's parent");
+        }
+
+        //
+        // verify versioning model consistency
+        //
+
+        ProjectVersioningModel versioningModel = p.getVersioningModel();
+        Version localVersion = pom.getLocalVersion();
+
+        if (versioningModel.equals(ProjectVersioningModel.MULTIPLE_MODULE_LOCKSTEP) && localVersion != null) {
+
+            throw new UserErrorException(
+                    "we only support lockstep versioning mode, yet the project " + p.getName() +
+                            " seems to contain independent module versions (" + pom.getFile().getAbsolutePath() + ")");
         }
     }
 
@@ -111,7 +126,16 @@ public class MavenModule {
         return pom.getVersion();
     }
 
-    public boolean setVersion(Version v) {
+    /**
+     * If the project is in lockstep versioning mode, it is not allowed to set version independently on modules,
+     * so the invocation will throw an UnsupportedOperationException.
+     */
+    public boolean setVersion(Version v) throws UnsupportedOperationException {
+
+        if (project.getVersioningModel().equals(ProjectVersioningModel.MULTIPLE_MODULE_LOCKSTEP)) {
+            throw new UnsupportedOperationException("cannot independently set version on modules in " +
+                    ProjectVersioningModel.MULTIPLE_MODULE_LOCKSTEP + " versioning mode");
+        }
 
         return pom.setVersion(v);
     }

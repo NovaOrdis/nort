@@ -49,8 +49,6 @@ public class MockPOM extends POM {
     public MockPOM() throws Exception {
 
         super();
-
-        version = new Version("1");
     }
 
     // Overrides -------------------------------------------------------------------------------------------------------

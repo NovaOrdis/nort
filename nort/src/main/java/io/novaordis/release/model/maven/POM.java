@@ -153,9 +153,49 @@ public class POM {
         return groupId;
     }
 
+    /**
+     * If the version is not specified in the file, and there is a parent, the method will attempt to get the version
+     * from the parent. May still return null.
+     */
     public Version getVersion() throws VersionFormatException {
 
+        Version localVersion = getLocalVersion();
+
+        if (localVersion == null) {
+
+            //
+            //  no version information, it's probably inherited from the parent, try the parent
+            //
+            //
+
+            if (parent == null) {
+
+                return null;
+            }
+
+            return parent.getVersion();
+        }
+
+        return localVersion;
+    }
+
+    /**
+     * @return the version written in the file, or null if not available, without attempting to delegate to parent.
+     */
+    public Version getLocalVersion() throws VersionFormatException {
+
+        if (pomEditor == null) {
+
+            return null;
+        }
+
         String s = pomEditor.get("/project/version");
+
+        if (s == null) {
+
+            return null;
+        }
+
         return new Version(s);
     }
 

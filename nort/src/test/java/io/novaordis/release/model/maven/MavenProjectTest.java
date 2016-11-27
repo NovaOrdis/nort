@@ -141,57 +141,7 @@ public class MavenProjectTest extends ProjectTest {
         assertEquals(ProjectVersioningModel.SINGLE_MODULE, p.getVersioningModel());
     }
 
-    @Test
-    public void constructor_MultiModules_ModulesCannotBeResolved() throws Exception {
-
-        File pf = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project/pom.xml",
-                scratchDirectory, "multi-module-pom.xml");
-
-        try {
-            new MavenProject(pf);
-            fail("should throw exception");
-        }
-        catch(UserErrorException e) {
-            String msg = e.getMessage();
-            log.info(msg);
-            assertTrue(msg.matches("no module directory .*/module1"));
-        }
-    }
-
-    @Test
-    public void moduleRelatedAccessors() throws Exception {
-
-        File pd = Util.cp(baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project", scratchDirectory);
-
-        File pf = new File(pd, "pom.xml");
-        assertTrue(pf.isFile());
-
-        MavenProject p = new MavenProject(pf);
-
-        Set<ArtifactType> ts = p.getArtifactTypes();
-        assertEquals(2, ts.size());
-        assertTrue(ts.contains(ArtifactType.JAR_LIBRARY));
-        assertTrue(ts.contains(ArtifactType.BINARY_DISTRIBUTION));
-
-        List<Artifact> artifacts = p.getArtifacts();
-        assertEquals(3, artifacts.size());
-
-        Artifact a = artifacts.get(0);
-        assertEquals(a, p.getArtifacts(ArtifactType.JAR_LIBRARY).get(0));
-        assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
-        assertEquals(new File("io/test/module1-artifact/1.0/module1-artifact-1.0.jar"), a.getRepositoryFile());
-
-        Artifact a2 = artifacts.get(1);
-        assertEquals(a2, p.getArtifacts(ArtifactType.JAR_LIBRARY).get(1));
-        assertEquals(ArtifactType.JAR_LIBRARY, a2.getType());
-        assertEquals(new File("io/test/module2-artifact/2.0/module2-artifact-2.0.jar"), a2.getRepositoryFile());
-
-        Artifact a3 = artifacts.get(2);
-        assertEquals(a3, p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0));
-        assertEquals(ArtifactType.BINARY_DISTRIBUTION, a3.getType());
-        assertEquals(new File("io/test/release/3.0/binary-release-A-3.0.tar.gz"), a3.getRepositoryFile());
-    }
+    // save/undo -------------------------------------------------------------------------------------------------------
 
     @Test
     public void set_save_undo() throws Exception {
@@ -303,15 +253,67 @@ public class MavenProjectTest extends ProjectTest {
         MavenProject p = new MavenProject(pf);
 
         Artifact a = p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0);
-        assertEquals(new File("io/test/release/3.0/binary-release-A-3.0.tar.gz"), a.getRepositoryFile());
+        assertEquals(new File("io/test/release/88/binary-release-A-88.tar.gz"), a.getRepositoryFile());
 
-        assertTrue(p.getModule("release").setVersion(new Version("77.77")));
+        assertTrue(p.setVersion(new Version("77.77")));
 
         Artifact a2 = p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0);
         assertEquals(new File("io/test/release/77.77/binary-release-A-77.77.tar.gz"), a2.getRepositoryFile());
     }
 
     // module management -----------------------------------------------------------------------------------------------
+
+    @Test
+    public void constructor_MultiModules_ModulesCannotBeResolved() throws Exception {
+
+        File pf = Util.cp(
+                baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project/pom.xml",
+                scratchDirectory, "multi-module-pom.xml");
+
+        try {
+            new MavenProject(pf);
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+            assertTrue(msg.matches("no module directory .*/module1"));
+        }
+    }
+
+    @Test
+    public void moduleRelatedAccessors() throws Exception {
+
+        File pd = Util.cp(baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project", scratchDirectory);
+
+        File pf = new File(pd, "pom.xml");
+        assertTrue(pf.isFile());
+
+        MavenProject p = new MavenProject(pf);
+
+        Set<ArtifactType> ts = p.getArtifactTypes();
+        assertEquals(2, ts.size());
+        assertTrue(ts.contains(ArtifactType.JAR_LIBRARY));
+        assertTrue(ts.contains(ArtifactType.BINARY_DISTRIBUTION));
+
+        List<Artifact> artifacts = p.getArtifacts();
+        assertEquals(3, artifacts.size());
+
+        Artifact a = artifacts.get(0);
+        assertEquals(a, p.getArtifacts(ArtifactType.JAR_LIBRARY).get(0));
+        assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
+        assertEquals(new File("io/test/module1-artifact/88/module1-artifact-88.jar"), a.getRepositoryFile());
+
+        Artifact a2 = artifacts.get(1);
+        assertEquals(a2, p.getArtifacts(ArtifactType.JAR_LIBRARY).get(1));
+        assertEquals(ArtifactType.JAR_LIBRARY, a2.getType());
+        assertEquals(new File("io/test/module2-artifact/88/module2-artifact-88.jar"), a2.getRepositoryFile());
+
+        Artifact a3 = artifacts.get(2);
+        assertEquals(a3, p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0));
+        assertEquals(ArtifactType.BINARY_DISTRIBUTION, a3.getType());
+        assertEquals(new File("io/test/release/88/binary-release-A-88.tar.gz"), a3.getRepositoryFile());
+    }
 
     @Test
     public void getModule() throws Exception {
@@ -365,13 +367,36 @@ public class MavenProjectTest extends ProjectTest {
         assertEquals(new Version("88"), p.getVersion());
     }
 
+    @Test
+    public void getVersion_MultiModuleMavenProject_Lockstep_DifferentVersionsOnDisk() throws Exception {
+
+        File projectDirectory = Util.cp(
+                baseDirectory, "src/test/resources/data/maven/independent-version-multi-module-project",
+                scratchDirectory);
+
+        File pom = new File(projectDirectory, "pom.xml");
+
+        try {
+            new MavenProject(pom);
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertTrue(msg.matches(
+                    "we only support lockstep versioning mode, yet the project .* seems to contain independent module versions \\(.*\\)"));
+        }
+    }
+
     // project version - multiple modules, independent -----------------------------------------------------------------
 
     @Test
     public void getVersion_MultiModuleMavenProject_ReleaseModule_Independent() throws Exception {
 
         File projectDirectory = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/independent-multi-module-project", scratchDirectory);
+                baseDirectory, "src/test/resources/data/maven/independent-version-multi-module-project",
+                scratchDirectory);
 
         File pom = new File(projectDirectory, "pom.xml");
 
@@ -380,14 +405,16 @@ public class MavenProjectTest extends ProjectTest {
         //
 
         try {
+
             new MavenProject(pom);
-            fail("should have thrown exception");
+            fail("should throw exception");
         }
-        catch(RuntimeException e) {
+        catch(UserErrorException e) {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("NOT YET IMPLEMENTED - INDEPENDENT MODULE VERSION MODEL SUPPORT", msg);
+            assertTrue(msg.matches(
+                    "we only support lockstep versioning mode, yet the project .* seems to contain independent module versions \\(.*\\)"));
         }
     }
 

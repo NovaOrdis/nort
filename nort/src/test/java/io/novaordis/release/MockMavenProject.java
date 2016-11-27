@@ -18,6 +18,7 @@ package io.novaordis.release;
 
 import io.novaordis.release.model.maven.MavenProject;
 import io.novaordis.release.model.maven.POM;
+import io.novaordis.release.model.maven.ProjectVersioningModel;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -31,10 +32,25 @@ public class MockMavenProject extends MavenProject {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private ProjectVersioningModel versioningModel;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public MockMavenProject() throws Exception {
         super();
+
+        //
+        // default behavior
+        //
+        this.versioningModel = ProjectVersioningModel.MULTIPLE_MODULE_LOCKSTEP;
+    }
+
+    // Overrides -------------------------------------------------------------------------------------------------------
+
+    @Override
+    public ProjectVersioningModel getVersioningModel() {
+
+        return versioningModel;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -42,6 +58,11 @@ public class MockMavenProject extends MavenProject {
     public void setPOM(POM pom) {
 
         super.setPOM(pom);
+    }
+
+    public void setVersioningModel(ProjectVersioningModel versioningModel) {
+
+        this.versioningModel = versioningModel;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

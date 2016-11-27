@@ -120,6 +120,7 @@ public class POMTest {
         assertEquals("example-artifact", pom.getArtifactId());
         assertEquals("io.novaordis.example-group", pom.getGroupId());
         assertEquals(new Version("1.2.3"), pom.getVersion());
+        assertEquals(new Version("1.2.3"), pom.getLocalVersion());
         assertEquals(ArtifactType.JAR_LIBRARY, pom.getArtifactType());
 
         Artifact artifact = pom.getArtifact();
@@ -155,6 +156,34 @@ public class POMTest {
         Artifact a2 = p.getArtifact();
         assertEquals(new File("io/novaordis/example-group/example-artifact/3.2.1/example-artifact-3.2.1.jar"),
                 a2.getRepositoryFile());
+    }
+
+    @Test
+    public void getVersion_NoVersionSpecifiedInPOM_NoParent() throws Exception {
+
+        File f = Util.cp(baseDirectory,
+                "src/test/resources/data/maven/lockstep-multi-module-project/module1/pom.xml", scratchDirectory);
+
+        POM p = new POM(f);
+
+        assertNull(p.getLocalVersion());
+        assertNull(p.getVersion());
+    }
+
+    @Test
+    public void getVersion_NoVersionSpecifiedInPOM_ParentPresent() throws Exception {
+
+        File f = Util.cp(baseDirectory,
+                "src/test/resources/data/maven/lockstep-multi-module-project/module1/pom.xml", scratchDirectory);
+
+        MockPOM parent = new MockPOM();
+        parent.setVersion(new Version("77.77"));
+
+        POM p = new POM(parent, f);
+
+        Version v = p.getVersion();
+        assertEquals(new Version("77.77"), v);
+        assertNull(p.getLocalVersion());
     }
 
     // multiple modules ------------------------------------------------------------------------------------------------
@@ -269,13 +298,14 @@ public class POMTest {
         File dir = Util.cp(baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project", scratchDirectory);
         File pomFile = new File(dir, "release/pom.xml");
         MockPOM root = new MockPOM();
+        root.setVersion(new Version("33.33"));
 
         POM pom = new POM(root, pomFile);
 
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, pom.getArtifactType());
         Artifact a = pom.getArtifact();
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, a.getType());
-        assertEquals(new File("io/test/release/3.0/binary-release-A-3.0.tar.gz"), a.getRepositoryFile());
+        assertEquals(new File("io/test/release/33.33/binary-release-A-33.33.tar.gz"), a.getRepositoryFile());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
