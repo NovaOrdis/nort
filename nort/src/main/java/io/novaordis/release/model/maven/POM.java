@@ -23,6 +23,7 @@ import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.xml.editor.BasicInLineXmlEditor;
 import io.novaordis.utilities.xml.editor.InLineXmlEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +108,7 @@ public class POM {
 
         this.parent = parent;
 
-        pomEditor = new InLineXmlEditor(pomFile);
+        pomEditor = new BasicInLineXmlEditor(pomFile);
 
         //
         // cache the read-only information
@@ -468,7 +469,7 @@ public class POM {
                     "assembly descriptor " + assemblyFile.getAbsolutePath() + " not available or cannot be read");
         }
 
-        InLineXmlEditor assemblyEditor = new InLineXmlEditor(assemblyFile);
+        InLineXmlEditor assemblyEditor = new BasicInLineXmlEditor(assemblyFile);
 
         List<String> formats = assemblyEditor.getList("/assembly/formats/format");
 
