@@ -103,6 +103,9 @@ public interface Project {
     /**
      * Returns all artifacts produced by this project, in the order they were declared in the project descriptor. The
      * list is never empty, as a project must have at least one artifact.
+     *
+     * Consult the implementation to find out if the returned list is a copy of the internal state or the internal
+     * storage.
      */
     List<Artifact> getArtifacts();
 

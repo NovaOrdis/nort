@@ -31,8 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -64,30 +64,48 @@ public class InstallSequence implements Sequence {
 
         log.debug("executing the install sequence ...");
 
+        ApplicationRuntime runtime = c.getRuntime();
+
         //
-        // if we are a library, the publish sequence already published the artifacts in the repository, nothing to do
+        // if we are a library, the publish sequence already published the artifacts in the repository, info and
+        // skip
         //
 
         Project p = c.getProject();
 
-        Set<ArtifactType> artifactTypes = p.getArtifactTypes();
+        List<Artifact> artifacts = p.getArtifacts();
 
-        if (artifactTypes.size() == 1 && artifactTypes.contains(ArtifactType.JAR_LIBRARY)) {
+        for(Iterator<Artifact> i = artifacts.iterator(); i.hasNext(); ) {
 
-            c.getRuntime().info(
-                    "nothing to install for a " + ArtifactType.JAR_LIBRARY.getLabel() +
-                            ", the artifact was published in the local Maven repository");
+            Artifact a = i.next();
+
+            if (ArtifactType.JAR_LIBRARY.equals(a.getType())) {
+
+                File f = a.getRepositoryFile();
+                runtime.info(f.getName() + " " + a.getType().getLabel() +
+                        " already published to the Maven artifact repository");
+
+                i.remove();
+            }
+        }
+
+        if (artifacts.isEmpty()) {
+
             return false;
-
         }
 
         //
-        // for the time being we only support installation of binary distributions
+        // for the time being we only support installation of ONE binary distributions
         //
 
-        if (artifactTypes.size() != 1 || !artifactTypes.contains(ArtifactType.BINARY_DISTRIBUTION)) {
+        if (artifacts.size() > 1) {
+            throw new RuntimeException("NOT YET IMPLEMENTED: for the time being we only can install one binary distribution");
+        }
 
-            throw new RuntimeException("NOT YET IMPLEMENTED: we can only support binary distribution installations");
+        ArtifactType t = artifacts.get(0).getType();
+
+        if (!ArtifactType.BINARY_DISTRIBUTION.equals(t)) {
+            throw new RuntimeException("NOT YET IMPLEMENTED: don't know how to install " + t + " artifacts");
         }
 
         //

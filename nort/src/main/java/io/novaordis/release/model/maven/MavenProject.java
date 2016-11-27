@@ -246,6 +246,9 @@ public class MavenProject implements Project {
         return result;
     }
 
+    /**
+     * @return a copy of the internal storage.
+     */
     @Override
     public List<Artifact> getArtifacts() {
 
@@ -254,6 +257,8 @@ public class MavenProject implements Project {
 
     /**
      * @param artifactType null is acceptable, will return all artifacts.
+     *
+     * @return a copy of the internal storag
      */
     @Override
     public List<Artifact> getArtifacts(ArtifactType artifactType) {

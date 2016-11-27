@@ -116,7 +116,14 @@ public class MockProject implements Project {
 
     @Override
     public List<Artifact> getArtifacts() {
-        throw new RuntimeException("getArtifacts() NOT YET IMPLEMENTED");
+
+        List<Artifact> result = new ArrayList<>();
+
+        for(List<Artifact> as: artifacts.values()) {
+            result.addAll(as);
+        }
+
+        return result;
     }
 
     @Override
