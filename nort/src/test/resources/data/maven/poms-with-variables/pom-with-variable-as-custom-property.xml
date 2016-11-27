@@ -1,0 +1,18 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.novaordis.example-group</groupId>
+    <artifactId>example-artifact</artifactId>
+    <version>1.2.3</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <my.version>3.2.1</my.version>
+    </properties>
+
+    <build>
+        <finalName>blah-${my.version}</finalName>
+    </build>
+
+</project>

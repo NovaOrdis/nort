@@ -333,6 +333,36 @@ public class POMTest {
         assertEquals(new File("io/test/release/33.33/binary-release-A-33.33.tar.gz"), a.getRepositoryFile());
     }
 
+    // variable support ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void mavenVariableSupport() throws Exception {
+
+        File f = Util.cp(baseDirectory,
+                "src/test/resources/data/maven/poms-with-variables/pom-with-variable-as-maven-property.xml",
+                scratchDirectory);
+
+        POM p = new POM(f);
+
+        String s = p.getFinalName();
+
+        assertEquals("blah-8888", s);
+    }
+
+    @Test
+    public void customVariableSupport() throws Exception {
+
+        File f = Util.cp(baseDirectory,
+                "src/test/resources/data/maven/poms-with-variables/pom-with-variable-as-maven-property.xml",
+                scratchDirectory);
+
+        POM p = new POM(f);
+
+        String s = p.getFinalName();
+
+        assertEquals("blah-3.2.1", s);
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
