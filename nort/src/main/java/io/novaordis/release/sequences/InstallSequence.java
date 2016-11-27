@@ -142,7 +142,8 @@ public class InstallSequence implements Sequence {
             throw new RuntimeException("NOT YET IMPLEMENTED: we don't know how to handle the case when the project has more than one binary distribution");
         }
 
-        File f = binaryDistributions.get(0).getRepositoryFile();
+        Artifact binaryDistribution = binaryDistributions.get(0);
+        File f = binaryDistribution.getRepositoryFile();
 
         //
         // resolve the file relative to the local artifact repository root
