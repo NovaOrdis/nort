@@ -149,7 +149,7 @@ public class PublishSequence implements Sequence {
 
         if (currentVersion.isSnapshot()) {
 
-            log.debug("local source repository is not tagged for snapshot versions");
+            log.debug("local source repository will not be tagged because this is a snapshot versions");
             return false;
         }
 
