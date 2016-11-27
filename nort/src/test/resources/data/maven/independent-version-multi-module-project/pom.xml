@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.test</groupId>
-    <artifactId>multi-module-project</artifactId>
+    <artifactId>independent-multi-module-project</artifactId>
     <version>0</version>
     <packaging>pom</packaging>
 

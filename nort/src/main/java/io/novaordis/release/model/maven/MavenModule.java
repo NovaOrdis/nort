@@ -39,26 +39,32 @@ public class MavenModule {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private MavenProject project;
     private POM pom;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MavenModule(POM parent, File pomFile) throws Exception {
+    public MavenModule(MavenProject p, File pomFile) throws Exception {
 
-        this(new POM(parent, pomFile));
+        this(p, new POM(p.getPOM(), pomFile));
     }
 
-    MavenModule(POM pom) {
+    /**
+     * Used for testing.
+     */
+    MavenModule(MavenProject p, POM pom) {
 
-        //
-        // make sure the pom has a parent
-        //
-
-        if (pom.getParent() == null) {
-            throw new IllegalArgumentException("attempt to build a MavenModule based on a POM without a parent");
-        }
-
+        this.project = p;
         this.pom = pom;
+
+        //
+        // consistency check
+        //
+
+        if (!project.getPOM().equals(pom.getParent())) {
+            throw new IllegalArgumentException(
+                    "the POM associated with the the project " + p + " differs from the this POM's parent");
+        }
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -108,6 +114,14 @@ public class MavenModule {
     public boolean setVersion(Version v) {
 
         return pom.setVersion(v);
+    }
+
+    /**
+     * @return the parent project.
+     */
+    public MavenProject getProject() {
+
+        return project;
     }
 
     @Override

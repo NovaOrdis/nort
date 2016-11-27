@@ -1,0 +1,11 @@
+<assembly>
+
+    <id>public-binary-release</id>
+
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+
+    <includeBaseDirectory>true</includeBaseDirectory>
+
+</assembly>

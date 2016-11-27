@@ -145,7 +145,7 @@ public class MavenProjectTest extends ProjectTest {
     public void constructor_MultiModules_ModulesCannotBeResolved() throws Exception {
 
         File pf = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/multi-module-project/pom.xml",
+                baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project/pom.xml",
                 scratchDirectory, "multi-module-pom.xml");
 
         try {
@@ -162,7 +162,7 @@ public class MavenProjectTest extends ProjectTest {
     @Test
     public void moduleRelatedAccessors() throws Exception {
 
-        File pd = Util.cp(baseDirectory, "src/test/resources/data/maven/multi-module-project", scratchDirectory);
+        File pd = Util.cp(baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project", scratchDirectory);
 
         File pf = new File(pd, "pom.xml");
         assertTrue(pf.isFile());
@@ -294,9 +294,9 @@ public class MavenProjectTest extends ProjectTest {
     }
 
     @Test
-    public void artifacts_MULTI_MODULE_PROJECT() throws Exception {
+    public void artifacts_MultiModuleProject() throws Exception {
 
-        File pd = Util.cp(baseDirectory, "src/test/resources/data/maven/multi-module-project", scratchDirectory);
+        File pd = Util.cp(baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project", scratchDirectory);
         File pf = new File(pd, "pom.xml");
         assertTrue(pf.isFile());
 
@@ -322,15 +322,16 @@ public class MavenProjectTest extends ProjectTest {
         MockPOM modulePom = new MockPOM();
         modulePom.setParent(parent);
         modulePom.setFile(new File("a/b/test/pom.xml"));
+        p.setPOM(parent);
 
-        MavenModule module = new MavenModule(modulePom);
+        MavenModule module = new MavenModule(p, modulePom);
 
         p.addModule(module);
 
         assertEquals(module, p.getModule("test"));
     }
 
-    // project version -------------------------------------------------------------------------------------------------
+    // project version - single module ---------------------------------------------------------------------------------
 
     @Test
     public void getVersion_SimpleSingleFileMavenProject() throws Exception {
@@ -344,20 +345,50 @@ public class MavenProjectTest extends ProjectTest {
 
         assertEquals("simple-project", p.getName());
         assertEquals(new Version("1.7"), p.getVersion());
+        assertEquals(ProjectVersioningModel.SINGLE_MODULE, p.getVersioningModel());
     }
 
+    // project version - multiple modules, lockstep --------------------------------------------------------------------
+
     @Test
-    public void getVersion_MultiModuleMavenProject_ReleaseModule() throws Exception {
+    public void getVersion_MultiModuleMavenProject_ReleaseModule_Lockstep() throws Exception {
 
         File projectDirectory = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/multi-module-project", scratchDirectory);
+                baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project", scratchDirectory);
 
         File pom = new File(projectDirectory, "pom.xml");
 
         MavenProject p = new MavenProject(pom);
 
-        assertEquals("multi-module-project", p.getName());
-        assertEquals(new Version("1.8"), p.getVersion());
+        assertEquals("lockstep-multi-module-project", p.getName());
+        assertEquals(ProjectVersioningModel.MULTIPLE_MODULE_LOCKSTEP, p.getVersioningModel());
+        assertEquals(new Version("88"), p.getVersion());
+    }
+
+    // project version - multiple modules, independent -----------------------------------------------------------------
+
+    @Test
+    public void getVersion_MultiModuleMavenProject_ReleaseModule_Independent() throws Exception {
+
+        File projectDirectory = Util.cp(
+                baseDirectory, "src/test/resources/data/maven/independent-multi-module-project", scratchDirectory);
+
+        File pom = new File(projectDirectory, "pom.xml");
+
+        //
+        // we currently don't support the independent version model, when we need to, we'll add the functionality
+        //
+
+        try {
+            new MavenProject(pom);
+            fail("should have thrown exception");
+        }
+        catch(RuntimeException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("NOT YET IMPLEMENTED - INDEPENDENT MODULE VERSION MODEL SUPPORT", msg);
+        }
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

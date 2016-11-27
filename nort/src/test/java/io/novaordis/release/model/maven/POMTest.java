@@ -163,19 +163,19 @@ public class POMTest {
     public void multiModuleProject_RootPOM() throws Exception {
 
         File pomFile = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/multi-module-project/pom.xml",
+                baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project/pom.xml",
                 scratchDirectory, "pom.xml");
 
         POM pom = new POM(pomFile);
 
-        assertEquals("multi-module-project", pom.getArtifactId());
+        assertEquals("lockstep-multi-module-project", pom.getArtifactId());
         assertEquals("io.test", pom.getGroupId());
 
         assertNull(pom.getArtifact());
         assertNull(pom.getArtifactType());
 
         Version v = pom.getVersion();
-        assertEquals(new Version("0"), v);
+        assertEquals(new Version("88"), v);
 
         assertNull(pom.getFinalName());
         assertNull(pom.getExtension());
@@ -236,7 +236,7 @@ public class POMTest {
     @Test
     public void pomPackaging_ReleaseModule_AssemblyDescriptorNotAccessible() throws Exception {
 
-        File dir = Util.cp(baseDirectory, "src/test/resources/data/maven/multi-module-project", scratchDirectory);
+        File dir = Util.cp(baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project", scratchDirectory);
 
         File pomFile = new File(dir, "release/pom.xml");
 
@@ -266,7 +266,7 @@ public class POMTest {
     @Test
     public void pomPackaging_ValidReleaseModule() throws Exception {
 
-        File dir = Util.cp(baseDirectory, "src/test/resources/data/maven/multi-module-project", scratchDirectory);
+        File dir = Util.cp(baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project", scratchDirectory);
         File pomFile = new File(dir, "release/pom.xml");
         MockPOM root = new MockPOM();
 

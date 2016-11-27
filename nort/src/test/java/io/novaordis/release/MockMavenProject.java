@@ -17,6 +17,7 @@
 package io.novaordis.release;
 
 import io.novaordis.release.model.maven.MavenProject;
+import io.novaordis.release.model.maven.POM;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -37,6 +38,11 @@ public class MockMavenProject extends MavenProject {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    public void setPOM(POM pom) {
+
+        super.setPOM(pom);
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

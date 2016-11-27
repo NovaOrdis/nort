@@ -97,14 +97,22 @@ public class MavenProject implements Project {
             return;
         }
 
+        //
+        // we have modules, for the time being we assume the lockstep versioning model; if, in the future, we need
+        // support for independent versions, we'll add it then.
+        //
+
+        this.versioningModel = ProjectVersioningModel.MULTIPLE_MODULE_LOCKSTEP;
+
         for(String moduleName: moduleNames) {
 
             File moduleDir = new File(rootPomFile.getParentFile(), moduleName);
-            if (!moduleDir.isDirectory()) {
 
+            if (!moduleDir.isDirectory()) {
                 throw new UserErrorException("no module directory " + moduleDir.getAbsolutePath());
             }
-            MavenModule m = new MavenModule(root, new File(moduleDir, "pom.xml"));
+
+            MavenModule m = new MavenModule(this, new File(moduleDir, "pom.xml"));
             addModule(m);
         }
 
@@ -255,6 +263,11 @@ public class MavenProject implements Project {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    public POM getPOM() {
+
+        return root;
+    }
+
     /**
      * @return may return null
      */
@@ -282,6 +295,11 @@ public class MavenProject implements Project {
     }
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    protected void setPOM(POM pom) {
+
+        this.root = pom;
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

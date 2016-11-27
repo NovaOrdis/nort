@@ -1,0 +1,32 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.test</groupId>
+        <artifactId>maven-root</artifactId>
+        <version>0</version>
+    </parent>
+
+    <artifactId>release</artifactId>
+    <packaging>pom</packaging>
+    <version>3.0</version>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <finalName>binary-release-A</finalName>
+                    <descriptors>
+                        <descriptor>src/assembly/release.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <!--
+                    executions go here
+                -->
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,14 @@
+<project>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.test</groupId>
+        <artifactId>maven-root</artifactId>
+        <version>88</version>
+    </parent>
+
+    <artifactId>module1-artifact</artifactId>
+    <packaging>jar</packaging>
+
+</project>

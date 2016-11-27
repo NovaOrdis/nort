@@ -16,16 +16,24 @@
 
 package io.novaordis.release.model.maven;
 
+import io.novaordis.release.MockMavenProject;
+import io.novaordis.release.Util;
 import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.model.MockArtifact;
 import io.novaordis.release.version.Version;
+import io.novaordis.utilities.Files;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -35,22 +43,91 @@ public class MavenModuleTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    private static final Logger log = LoggerFactory.getLogger(MavenModuleTest.class);
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private File scratchDirectory;
+    private File baseDirectory;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
+    // Public ----------------------------------------------------------------------------------------------------------
+
+    @Before
+    public void before() throws Exception {
+
+        String projectBaseDirName = System.getProperty("basedir");
+        scratchDirectory = new File(projectBaseDirName, "target/test-scratch");
+        assertTrue(scratchDirectory.isDirectory());
+
+        baseDirectory = new File(System.getProperty("basedir"));
+        assertTrue(baseDirectory.isDirectory());
+    }
+
+    @After
+    public void after() throws Exception {
+
+        //
+        // scratch directory cleanup
+        //
+
+        assertTrue(Files.rmdir(scratchDirectory, false));
+    }
+
     // Tests -----------------------------------------------------------------------------------------------------------
+
+    // constructor -----------------------------------------------------------------------------------------------------
+
+    @Test
+    public void constructor_NullProject() throws Exception {
+
+        try {
+
+            new MavenModule(null, new File(""));
+            fail("should throw exception");
+        }
+        catch(NullPointerException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+        }
+    }
+
+    @Test
+    public void constructor() throws Exception {
+
+        File f = Util.cp(
+                baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project/module1/pom.xml",
+                scratchDirectory);
+
+        MockMavenProject mp = new MockMavenProject();
+
+        MavenModule m = new MavenModule(mp, f);
+
+        fail("return here");
+
+        m.getArtifact();
+        m.getName();
+        m.getArtifactType();
+        m.getProject();
+        m.getVersion();
+    }
+
+    // getArtifactType() -----------------------------------------------------------------------------------------------
 
     @Test
     public void getArtifactType() throws Exception {
 
-        MockPOM mp = new MockPOM();
-        mp.setParent(new MockPOM());
-        mp.setArtifactType(ArtifactType.JAR_LIBRARY);
+        MockMavenProject mmp = new MockMavenProject();
+        mmp.setPOM(new MockPOM());
 
-        MavenModule m = new MavenModule(mp);
+        MockPOM mockModulePom = new MockPOM();
+        mockModulePom.setParent(mmp.getPOM());
+        mockModulePom.setArtifactType(ArtifactType.JAR_LIBRARY);
+
+        MavenModule m = new MavenModule(mmp, mockModulePom);
 
         assertEquals(ArtifactType.JAR_LIBRARY, m.getArtifactType());
     }
@@ -58,12 +135,17 @@ public class MavenModuleTest {
     @Test
     public void getArtifact() throws Exception {
 
-        MockPOM mp = new MockPOM();
-        mp.setParent(new MockPOM());
-        MockArtifact ma = new MockArtifact(null, null);
-        mp.setArtifact(ma);
+        MockMavenProject mmp = new MockMavenProject();
+        mmp.setPOM(new MockPOM());
 
-        MavenModule m = new MavenModule(mp);
+        MockPOM mockModulePom = new MockPOM();
+        mockModulePom.setParent(mmp.getPOM());
+
+        MockArtifact ma = new MockArtifact(null, null);
+        mockModulePom.setArtifact(ma);
+
+        MavenModule m = new MavenModule(mmp, mockModulePom);
+
         assertEquals(ma, m.getArtifact());
     }
 
@@ -72,12 +154,16 @@ public class MavenModuleTest {
     @Test
     public void getName() throws Exception {
 
-        String moduleName = "test-module";
+        MockMavenProject mmp = new MockMavenProject();
+        mmp.setPOM(new MockPOM());
 
-        MockPOM mockPOM = new MockPOM();
-        mockPOM.setFile(new File("some/thing/" + moduleName + "/pom.xml"));
-        mockPOM.setParent(new MockPOM());
-        MavenModule m = new MavenModule(mockPOM);
+        MockPOM mockModulePom = new MockPOM();
+        mockModulePom.setParent(mmp.getPOM());
+
+        String moduleName = "test-module";
+        mockModulePom.setFile(new File("some/thing/" + moduleName + "/pom.xml"));
+
+        MavenModule m = new MavenModule(mmp, mockModulePom);
 
         assertEquals("test-module", m.getName());
     }
@@ -87,9 +173,13 @@ public class MavenModuleTest {
     @Test
     public void setVersion() throws Exception {
 
-        MockPOM mockPOM = new MockPOM();
-        mockPOM.setParent(new MockPOM());
-        MavenModule m = new MavenModule(mockPOM);
+        MockMavenProject mmp = new MockMavenProject();
+        mmp.setPOM(new MockPOM());
+
+        MockPOM mockModulePom = new MockPOM();
+        mockModulePom.setParent(mmp.getPOM());
+
+        MavenModule m = new MavenModule(mmp, mockModulePom);
 
         Version v = m.getVersion();
         assertEquals(new Version("1"), v);
