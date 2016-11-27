@@ -144,6 +144,10 @@ public class POM {
         return pomEditor.getFile();
     }
 
+    public String getArtifactId() {
+        return artifactId;
+    }
+
     public String getGroupId() {
 
         return groupId;
@@ -151,7 +155,8 @@ public class POM {
 
     public Version getVersion() throws VersionFormatException {
 
-        return new Version(pomEditor.get("/project/version"));
+        String s = pomEditor.get("/project/version");
+        return new Version(s);
     }
 
     /**

@@ -22,11 +22,10 @@
     <parent>
         <groupId>io.novaordis.nort</groupId>
         <artifactId>NORT</artifactId>
-        <version>0</version>
+        <version>1.0.0-SNAPSHOT-4</version>
     </parent>
 
     <artifactId>nort</artifactId>
-    <version>${nort.version}</version>
     <packaging>jar</packaging>
 
     <properties>

@@ -55,6 +55,8 @@ public class MavenProject implements Project {
 
     private List<MavenModule> modules;
 
+    private ProjectVersioningModel versioningModel;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
@@ -77,6 +79,7 @@ public class MavenProject implements Project {
     public MavenProject(File rootPomFile) throws Exception {
 
         this.modules = new ArrayList<>();
+        this.versioningModel = ProjectVersioningModel.SINGLE_MODULE;
 
         if (rootPomFile == null) {
             return;
@@ -110,19 +113,24 @@ public class MavenProject implements Project {
 
     // Project implementation ------------------------------------------------------------------------------------------
 
+    @Override
+    public String getName() {
+
+        if (root == null) {
+
+            return null;
+        }
+
+        return root.getArtifactId();
+    }
+
     /**
-     * Returns the version value, as cached in memory.
-     *
      * @return null on an uninitialized instance
      */
     @Override
     public Version getVersion() throws VersionFormatException {
 
-        if (root == null) {
-            return null;
-        }
-
-        return root.getVersion();
+        return root != null ? root.getVersion() : null;
     }
 
     @Override
@@ -238,6 +246,13 @@ public class MavenProject implements Project {
         return result;
     }
 
+    @Override
+    public String toString() {
+
+        String s = getName();
+        return s == null ? "null" : s;
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
@@ -252,6 +267,11 @@ public class MavenProject implements Project {
         }
 
         return null;
+    }
+
+    public ProjectVersioningModel getVersioningModel() {
+
+        return versioningModel;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

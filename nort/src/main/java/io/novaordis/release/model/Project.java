@@ -41,6 +41,12 @@ public interface Project {
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
+     * @return the project's name. For a simple single-pom Maven project, is the artifact ID. Different projects
+     * may follow different conventions.
+     */
+    String getName();
+
+    /**
      * The file the project metadata comes from.
      *
      * TODO: what if there are more then one?
@@ -48,7 +54,8 @@ public interface Project {
     File getFile();
 
     /**
-     * The project's version.
+     * The project's version. Depending on the project type, the version may be read from different locations. For
+     * example, for a simple, single-module Maven project, the project version is the pom.xml version element.
      *
      * @exception VersionFormatException if the underlying project metadata storage contains an invalid version.
      */

@@ -25,14 +25,6 @@
 
     <includeBaseDirectory>true</includeBaseDirectory>
 
-    <moduleSets>
-        <moduleSet>
-            <binaries>
-                <outputDirectory>lib</outputDirectory>
-            </binaries>
-        </moduleSet>
-    </moduleSets>
-
     <files>
         <file>
             <source>./src/main/bash/nort</source>

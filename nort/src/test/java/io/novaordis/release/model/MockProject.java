@@ -57,6 +57,11 @@ public class MockProject implements Project {
     // Project implementation -------------------------------------------------------------------------------------
 
     @Override
+    public String getName() {
+        throw new RuntimeException("getName() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public File getFile() {
 
         return new File("MOCK-PROJECT-MODEL.txt");

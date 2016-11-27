@@ -113,12 +113,13 @@ public class MavenProjectTest extends ProjectTest {
     }
 
     @Test
-    public void accessors() throws Exception {
+    public void simpleOnePOMProject() throws Exception {
 
         File file = Util.cp(baseDirectory, "src/test/resources/data/maven/pom-sample.xml", scratchDirectory, "pom.xml");
 
         MavenProject p = new MavenProject(file);
 
+        assertEquals("example-artifact", p.getName());
         assertEquals(file, p.getFile());
         assertEquals(scratchDirectory, p.getBaseDirectory());
         assertEquals(new Version("1.2.3"), p.getVersion());
@@ -136,6 +137,8 @@ public class MavenProjectTest extends ProjectTest {
         // there is no binary
         //
         assertTrue(p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).isEmpty());
+
+        assertEquals(ProjectVersioningModel.SINGLE_MODULE, p.getVersioningModel());
     }
 
     @Test
@@ -308,7 +311,7 @@ public class MavenProjectTest extends ProjectTest {
         assertEquals(new File("io/test/release/77.77/binary-release-A-77.77.tar.gz"), a2.getRepositoryFile());
     }
 
-    // Module management -----------------------------------------------------------------------------------------------
+    // module management -----------------------------------------------------------------------------------------------
 
     @Test
     public void getModule() throws Exception {
@@ -325,6 +328,36 @@ public class MavenProjectTest extends ProjectTest {
         p.addModule(module);
 
         assertEquals(module, p.getModule("test"));
+    }
+
+    // project version -------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getVersion_SimpleSingleFileMavenProject() throws Exception {
+
+        File projectDirectory = Util.cp(
+                baseDirectory, "src/test/resources/data/maven/simple-project", scratchDirectory);
+
+        File pom = new File(projectDirectory, "pom.xml");
+
+        MavenProject p = new MavenProject(pom);
+
+        assertEquals("simple-project", p.getName());
+        assertEquals(new Version("1.7"), p.getVersion());
+    }
+
+    @Test
+    public void getVersion_MultiModuleMavenProject_ReleaseModule() throws Exception {
+
+        File projectDirectory = Util.cp(
+                baseDirectory, "src/test/resources/data/maven/multi-module-project", scratchDirectory);
+
+        File pom = new File(projectDirectory, "pom.xml");
+
+        MavenProject p = new MavenProject(pom);
+
+        assertEquals("multi-module-project", p.getName());
+        assertEquals(new Version("1.8"), p.getVersion());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

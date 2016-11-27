@@ -117,6 +117,8 @@ public class POMTest {
         POM pom = new POM(file);
 
         assertEquals(file, pom.getFile());
+        assertEquals("example-artifact", pom.getArtifactId());
+        assertEquals("io.novaordis.example-group", pom.getGroupId());
         assertEquals(new Version("1.2.3"), pom.getVersion());
         assertEquals(ArtifactType.JAR_LIBRARY, pom.getArtifactType());
 
@@ -165,6 +167,9 @@ public class POMTest {
                 scratchDirectory, "pom.xml");
 
         POM pom = new POM(pomFile);
+
+        assertEquals("multi-module-project", pom.getArtifactId());
+        assertEquals("io.test", pom.getGroupId());
 
         assertNull(pom.getArtifact());
         assertNull(pom.getArtifactType());

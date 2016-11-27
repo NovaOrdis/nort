@@ -212,11 +212,11 @@ public class ReleaseCommand extends CommandBase {
 
     // Private ---------------------------------------------------------------------------------------------------------
 
-    private void info(ReleaseApplicationRuntime r, Project m) throws UserErrorException {
+    private void info(ReleaseApplicationRuntime r, Project p) throws UserErrorException {
 
         try {
 
-            Version version = m.getVersion();
+            Version version = p.getVersion();
             r.info(version.getLiteral());
         }
         catch(VersionFormatException e) {
@@ -226,7 +226,7 @@ public class ReleaseCommand extends CommandBase {
 
     }
 
-    private void incrementRelease(Configuration c, ReleaseApplicationRuntime r, Project m, ReleaseMode rm)
+    private void incrementRelease(Configuration c, ReleaseApplicationRuntime r, Project p, ReleaseMode rm)
             throws Exception {
 
         //
@@ -240,14 +240,14 @@ public class ReleaseCommand extends CommandBase {
 
         try {
 
-            ctx = controller.execute(c, r, m);
+            ctx = controller.execute(c, r, p);
             successfulRelease = true;
         }
         finally {
 
             if (!successfulRelease) {
 
-                ctx = controller.undo(c, r, m);
+                ctx = controller.undo(c, r, p);
             }
 
             r.setLastExecutionContext(ctx);
