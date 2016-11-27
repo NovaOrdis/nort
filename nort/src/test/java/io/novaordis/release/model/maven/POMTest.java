@@ -22,6 +22,7 @@ import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.xml.editor.InLineXmlEditor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -184,6 +185,30 @@ public class POMTest {
         Version v = p.getVersion();
         assertEquals(new Version("77.77"), v);
         assertNull(p.getLocalVersion());
+    }
+
+    @Test
+    public void parentVersionChange() throws Exception {
+
+        File f = Util.cp(baseDirectory,
+                "src/test/resources/data/maven/lockstep-multi-module-project/module1/pom.xml", scratchDirectory);
+
+        POM p = new POM(f);
+
+        assertEquals(new Version("88"), p.getParentVersion());
+
+        String content = Files.read(f);
+
+        assertTrue(p.setParentVersion(new Version("99")));
+
+        String content2 = Files.read(f);
+
+        assertEquals(content, content2);
+
+        assertTrue(p.save());
+
+        String s = new InLineXmlEditor(f).get("/project/parent/version");
+        assertEquals("99", s);
     }
 
     // multiple modules ------------------------------------------------------------------------------------------------

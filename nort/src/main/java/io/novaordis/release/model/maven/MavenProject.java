@@ -36,6 +36,11 @@ import java.util.Set;
 /**
  * An in-memory representation of a Maven project, which may include one or multiple POM files.
  *
+ * Version upgrade operations must be applied to the project, not to individual modules (unless the project is
+ * in "independent" versioning model.
+ *
+ * @see Project#setVersion(Version)
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/8/16
  */
@@ -144,7 +149,18 @@ public class MavenProject implements Project {
     @Override
     public boolean setVersion(Version version) {
 
-        return root.setVersion(version);
+        boolean changed = false;
+
+        //noinspection ConstantConditions
+        changed |= root.setVersion(version);
+
+        for(MavenModule m: modules) {
+
+            POM pom = m.getPOM();
+            changed |= pom.setParentVersion(version);
+        }
+
+        return changed;
     }
 
     /**
@@ -173,17 +189,28 @@ public class MavenProject implements Project {
     /**
      * Also see:
      *
+     * @see MavenModule#save()
      * @see POM#save()
      * @see InLineXmlEditor#save()
      */
     @Override
     public boolean save() throws IOException {
 
+        boolean changed = false;
+
         if (root == null) {
             throw new IOException("attempt to save an uninitialized project instance");
         }
 
-        return root.save();
+        //noinspection ConstantConditions
+        changed |= root.save();
+
+        for(MavenModule m: modules) {
+
+            changed |= m.save();
+        }
+
+        return changed;
     }
 
     /**

@@ -21,8 +21,10 @@ import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.xml.editor.InLineXmlEditor;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * The metadata associated with a maven module. Each module has a POM.
@@ -84,25 +86,6 @@ public class MavenModule {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public ArtifactType getArtifactType() {
-
-        return pom.getArtifactType();
-    }
-
-    /**
-     * @return always a non-null instance
-     */
-    public Artifact getArtifact() {
-
-        Artifact a = pom.getArtifact();
-
-        if (a == null) {
-            throw new IllegalArgumentException("this module has no artifact");
-        }
-
-        return a;
-    }
-
     /**
      * @return the name of the module, which is the name of the directory that holds it - this is how it is referred
      * from the parent pom.
@@ -120,6 +103,33 @@ public class MavenModule {
         }
 
         return pomFile.getParentFile().getName();
+    }
+
+    /**
+     * @return the parent project.
+     */
+    public MavenProject getProject() {
+
+        return project;
+    }
+
+    public ArtifactType getArtifactType() {
+
+        return pom.getArtifactType();
+    }
+
+    /**
+     * @return always a non-null instance
+     */
+    public Artifact getArtifact() {
+
+        Artifact a = pom.getArtifact();
+
+        if (a == null) {
+            throw new IllegalArgumentException("this module has no artifact");
+        }
+
+        return a;
     }
 
     public Version getVersion() throws VersionFormatException {
@@ -140,12 +150,31 @@ public class MavenModule {
         return pom.setVersion(v);
     }
 
-    /**
-     * @return the parent project.
-     */
-    public MavenProject getProject() {
+    public POM getPOM() {
+        return pom;
+    }
 
-        return project;
+    /**
+     * Also see:
+     *
+     * @see MavenProject#save()
+     * @see POM#save()
+     */
+    public boolean save() throws IOException {
+
+        return pom != null && pom.save();
+    }
+
+    /**
+     * Also see:
+     *
+     * @see MavenProject#undo()
+     * @see POM#undo()
+     * @see InLineXmlEditor#undo()
+     */
+    public boolean undo() throws IOException {
+
+        return pom != null && pom.undo();
     }
 
     @Override

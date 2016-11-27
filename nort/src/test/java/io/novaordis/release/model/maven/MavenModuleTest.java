@@ -119,6 +119,9 @@ public class MavenModuleTest {
         assertEquals(mp, m.getProject());
         Version v = m.getVersion();
         assertEquals(new Version("3.3.3"), v);
+
+        POM pom = m.getPOM();
+        assertEquals(f, pom.getFile());
     }
 
     // getArtifactType() -----------------------------------------------------------------------------------------------

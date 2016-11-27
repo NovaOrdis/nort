@@ -221,6 +221,40 @@ public class POM {
         return changed;
     }
 
+    /**
+     * May return null.
+     */
+    public Version getParentVersion() throws VersionFormatException {
+
+        if (pomEditor == null) {
+
+            return null;
+        }
+
+        String s = pomEditor.get("/project/parent/version");
+
+        if (s == null) {
+
+            return null;
+        }
+
+        return new Version(s);
+    }
+
+    /**
+     * @see POM#setVersion(Version)
+     */
+    public boolean setParentVersion(Version version) {
+
+        boolean changed = pomEditor.set("/project/parent/version", version.getLiteral());
+
+        if (changed) {
+            log.debug("modified in-memory parent version to " + version);
+        }
+
+        return changed;
+    }
+
     public ArtifactType getArtifactType() {
 
         return artifactType;

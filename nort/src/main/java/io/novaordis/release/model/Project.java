@@ -62,7 +62,10 @@ public interface Project {
     Version getVersion() throws VersionFormatException;
 
     /**
-     * Modify the version information, as cached in memory. In order to write the modification on disk, call save().
+     * Modify the version information, as cached in memory. If multiple files must be modified to perform a
+     * consistent version upgrade, the implementation takes care of that.
+     *
+     * In order to write the modification on disk, call save() on the Project instance.
      *
      * @param v the instance is already syntactically correct, as it was parsed.
      *
