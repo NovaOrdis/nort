@@ -85,6 +85,21 @@ public class ArtifactTypeTest {
         }
     }
 
+    @Test
+    public void fromString_Null() throws Exception {
+
+        try {
+
+            ArtifactType.fromString(null);
+            fail("should throw exception");
+        }
+        catch(IllegalArgumentException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("null packaging", msg);
+        }
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------

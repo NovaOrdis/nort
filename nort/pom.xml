@@ -87,7 +87,7 @@
         <dependency>
             <groupId>io.novaordis.utilities</groupId>
             <artifactId>novaordis-utilities</artifactId>
-            <version>4.2.2-SNAPSHOT-19</version>
+            <version>4.2.2-SNAPSHOT-20</version>
         </dependency>
         <dependency>
             <groupId>io.novaordis.clad</groupId>

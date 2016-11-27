@@ -32,6 +32,7 @@ import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -81,45 +82,6 @@ public class POMTest {
     // Tests -----------------------------------------------------------------------------------------------------------
 
     @Test
-    public void constructor_NoGroupID() throws Exception {
-
-        File file = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/pom-no-group-id.xml", scratchDirectory, "pom.xml");
-
-        try {
-
-            new POM(file);
-            fail("should throw exception");
-        }
-        catch(UserErrorException e) {
-            String msg = e.getMessage();
-            log.info(msg);
-            assertEquals("missing groupId", msg);
-        }
-    }
-
-    @Test
-    public void constructor_NoGroupID2() throws Exception {
-
-        File file = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/pom-no-group-id.xml", scratchDirectory, "pom.xml");
-
-        MockPOM mockParent = new MockPOM();
-        assertNull(mockParent.getGroupId());
-
-        try {
-
-            new POM(mockParent, file);
-            fail("should throw exception");
-        }
-        catch(UserErrorException e) {
-            String msg = e.getMessage();
-            log.info(msg);
-            assertEquals("missing groupId", msg);
-        }
-    }
-
-    @Test
     public void constructorWithParent() throws Exception {
 
         File file = Util.cp(
@@ -136,7 +98,7 @@ public class POMTest {
     public void constructor_NoGroupId_ParentHasGroupId() throws Exception {
 
         File file = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/pom-no-group-id.xml", scratchDirectory, "pom.xml");
+                baseDirectory, "src/test/resources/data/maven/pom-parent-has-group-id.xml", scratchDirectory, "pom.xml");
 
         MockPOM mockParent = new MockPOM();
         mockParent.setGroupId("io.test.group");
@@ -147,26 +109,30 @@ public class POMTest {
     }
 
     @Test
-    public void accessors() throws Exception {
+    public void standardPOM() throws Exception {
 
         File file = new File(baseDirectory, "src/test/resources/data/maven/pom-sample.xml");
         assertTrue(file.isFile());
 
-        POM p = new POM(file);
+        POM pom = new POM(file);
 
-        assertEquals(file, p.getFile());
-        assertEquals(new Version("1.2.3"), p.getVersion());
-        assertEquals(ArtifactType.JAR_LIBRARY, p.getArtifactType());
+        assertEquals(file, pom.getFile());
+        assertEquals(new Version("1.2.3"), pom.getVersion());
+        assertEquals(ArtifactType.JAR_LIBRARY, pom.getArtifactType());
 
-        Artifact artifact = p.getArtifact();
+        Artifact artifact = pom.getArtifact();
 
         assertEquals(ArtifactType.JAR_LIBRARY, artifact.getType());
 
         File artifactFile = artifact.getRepositoryFile();
-        assertEquals(
-                new File("io/novaordis/example-group/example-artifact/1.2.3/example-artifact-1.2.3.jar"), artifactFile);
 
-        assertNull(p.getParent());
+        assertEquals(new File(
+                "io/novaordis/example-group/example-artifact/1.2.3/example-artifact-1.2.3.jar"), artifactFile);
+
+        assertNull(pom.getParent());
+
+        assertNull(pom.getFinalName());
+        assertEquals("jar", pom.getExtension());
     }
 
     @Test
@@ -189,8 +155,10 @@ public class POMTest {
                 a2.getRepositoryFile());
     }
 
+    // multiple modules ------------------------------------------------------------------------------------------------
+
     @Test
-    public void multiModulePom() throws Exception {
+    public void multiModuleProject_RootPOM() throws Exception {
 
         File pomFile = Util.cp(
                 baseDirectory, "src/test/resources/data/maven/multi-module-project/pom.xml",
@@ -204,6 +172,9 @@ public class POMTest {
         Version v = pom.getVersion();
         assertEquals(new Version("0"), v);
 
+        assertNull(pom.getFinalName());
+        assertNull(pom.getExtension());
+
         File f = pom.getFile();
         assertEquals(pomFile, f);
 
@@ -212,6 +183,94 @@ public class POMTest {
         assertEquals("module1", moduleNames.get(0));
         assertEquals("module2", moduleNames.get(1));
         assertEquals("release", moduleNames.get(2));
+    }
+
+    @Test
+    public void pomPackaging_NoModules_NoParent() throws Exception {
+
+        File pomFile = Util.
+                cp(baseDirectory, "src/test/resources/data/maven/invalid-poms/pom-no-modules-no-parent.xml",
+                        scratchDirectory, "pom-no-modules-no-parent.xml");
+
+        try {
+
+            new POM(pomFile);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+            assertTrue(msg.matches(
+                    "invalid 'pom' packaging POM file, no modules and no parent .*pom-no-modules-no-parent\\.xml"));
+        }
+    }
+
+    // release module --------------------------------------------------------------------------------------------------
+
+    @Test
+    public void pomPackaging_ReleaseModule_NoAssembly() throws Exception {
+
+        File pomFile = Util.
+                cp(baseDirectory, "src/test/resources/data/maven/invalid-poms/pom-release-no-assembly-plugin.xml",
+                        scratchDirectory);
+
+        MockPOM parent = new MockPOM();
+
+        try {
+
+            new POM(parent, pomFile);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+            assertTrue(msg.matches("the release module '.*' does not contain an assembly plugin"));
+        }
+    }
+
+    @Test
+    public void pomPackaging_ReleaseModule_AssemblyDescriptorNotAccessible() throws Exception {
+
+        File dir = Util.cp(baseDirectory, "src/test/resources/data/maven/multi-module-project", scratchDirectory);
+
+        File pomFile = new File(dir, "release/pom.xml");
+
+        //
+        // remove the assembly descriptor
+        //
+
+        File assemblyDescriptorFile = new File(dir, "release/src/assembly/release.xml");
+
+        assertTrue(assemblyDescriptorFile.delete());
+        assertFalse(assemblyDescriptorFile.isFile());
+
+        MockPOM root = new MockPOM();
+
+        try {
+            new POM(root, pomFile);
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertTrue(msg.matches("assembly descriptor .* not available or cannot be read"));
+        }
+    }
+
+    @Test
+    public void pomPackaging_ValidReleaseModule() throws Exception {
+
+        File dir = Util.cp(baseDirectory, "src/test/resources/data/maven/multi-module-project", scratchDirectory);
+        File pomFile = new File(dir, "release/pom.xml");
+        MockPOM root = new MockPOM();
+
+        POM pom = new POM(root, pomFile);
+
+        assertEquals(ArtifactType.BINARY_DISTRIBUTION, pom.getArtifactType());
+        Artifact a = pom.getArtifact();
+        assertEquals(ArtifactType.BINARY_DISTRIBUTION, a.getType());
+        assertEquals(new File("io/test/release/3.0/binary-release-A-3.0.tar.gz"), a.getRepositoryFile());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

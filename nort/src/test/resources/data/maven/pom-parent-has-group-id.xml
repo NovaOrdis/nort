@@ -2,6 +2,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>io.test.group</groupId>
+        <artifactId>maven-root</artifactId>
+        <version>0</version>
+    </parent>
+
     <artifactId>doesntmatter</artifactId>
     <version>0</version>
     <packaging>jar</packaging>

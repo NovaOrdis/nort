@@ -42,13 +42,23 @@ public class ArtifactImplTest extends ArtifactTest {
     @Test
     public void constructor() throws Exception {
 
-        ArtifactImpl a = new ArtifactImpl(
-                ArtifactType.JAR_LIBRARY, "io.test-group", "test-artifact", new Version("1.0"));
-
+        ArtifactImpl a = new ArtifactImpl(ArtifactType.JAR_LIBRARY,
+                "io.test-group", "test-artifact", new Version("1.0"));
 
         assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
         assertEquals(new File("io/test-group/test-artifact/1.0/test-artifact-1.0.jar"), a.getRepositoryFile());
     }
+
+    @Test
+    public void constructor_FinalNameSpecified() throws Exception {
+
+        ArtifactImpl a = new ArtifactImpl(ArtifactType.JAR_LIBRARY,
+                "io.test-group", "test-artifact", new Version("1.0"), "blah", null);
+
+        assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
+        assertEquals(new File("io/test-group/test-artifact/1.0/blah-1.0.jar"), a.getRepositoryFile());
+    }
+
 
     // equals() --------------------------------------------------------------------------------------------------------
 

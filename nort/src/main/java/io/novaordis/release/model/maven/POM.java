@@ -72,6 +72,10 @@ public class POM {
 
     private List<String> moduleNames;
 
+    private String finalName;
+
+    private String extension;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
@@ -99,6 +103,8 @@ public class POM {
      */
     public POM(POM parent, File pomFile) throws Exception {
 
+        this.moduleNames = Collections.emptyList();
+
         this.parent = parent;
 
         pomEditor = new InLineXmlEditor(pomFile);
@@ -107,42 +113,14 @@ public class POM {
         // cache the read-only information
         //
 
-        this.groupId = pomEditor.get("/project/groupId");
-
-        if (groupId == null) {
-
-            //
-            // get the groupId from the parent, if exists
-            //
-
-            if (parent != null) {
-                groupId = parent.getGroupId();
-            }
-        }
-
-        if (groupId == null) {
-            throw new UserErrorException("missing groupId");
-        }
-
+        this.groupId = resolveGroupId(pomEditor);
         this.artifactId = pomEditor.get("/project/artifactId");
         this.packaging = pomEditor.get("/project/packaging");
         this.artifactType = ArtifactType.fromString(packaging);
+        this.extension = artifactType == null ? null : artifactType.getExtension();
 
         if ("pom".equals(packaging)) {
-
-            //
-            // look for modules
-            //
-
-            moduleNames = pomEditor.getList("/project/modules/module");
-
-            if (moduleNames.isEmpty()) {
-                throw new RuntimeException("NOT YET IMPLEMENTED: we don't know what to do with 'pom' packaging and no modules");
-            }
-        }
-        else {
-
-            moduleNames = Collections.emptyList();
+            handlePomPackaging(parent, pomEditor);
         }
     }
 
@@ -212,10 +190,8 @@ public class POM {
      */
     public Artifact getArtifact() {
 
-        //
-        // "pom" packaging is module-less
-        //
         if (artifactType == null) {
+
             return null;
         }
 
@@ -223,22 +199,16 @@ public class POM {
         // we dynamically create the instance every time is requested, as the underlying version is bound to change
         //
 
-        Version v;
-
         try {
 
-            v = getVersion();
+            return new ArtifactImpl(artifactType, groupId, artifactId, getVersion(), getFinalName(), getExtension());
         }
-        catch (VersionFormatException e) {
+        catch(VersionFormatException e) {
 
-            //
             // we don't expect a format exception, but if it happens, we need to push it up
-            //
 
             throw new IllegalArgumentException("invalid version in the underlying POM file", e);
         }
-
-        return new ArtifactImpl(artifactType, groupId, artifactId, v);
     }
 
     /**
@@ -255,6 +225,27 @@ public class POM {
     public POM getParent() {
 
         return parent;
+    }
+
+    /**
+     * @return the string corresponding to the <finalName> element in declared in <build> (or the corresponding
+     * <finalName> declared in the assembly configuration of a release module. May return null, if the POM does
+     * not explicitly declare a <finalName>.
+     */
+    public String getFinalName() {
+
+        return finalName;
+    }
+
+    /**
+     * The extension for the artifacts corresponding to this POM. null if the POM does not produce artifacts. In
+     * most cases, it's the "packaging" value, but there are some situations where isn't: for example when the POM
+     * corresponds to a release module (packaging is "pom") which uses an assembly to build the artifact. In that case
+     * the extension is the assembly's <format>.
+     */
+    public String getExtension() {
+
+        return extension;
     }
 
     /**
@@ -290,6 +281,132 @@ public class POM {
     // Protected -------------------------------------------------------------------------------------------------------
 
     // Private ---------------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolves the groupId to a non-null string - from the current pom or the parent. If not able to find a groupId,
+     * throws a UserErrorException.
+     */
+    private String resolveGroupId(InLineXmlEditor editor) throws Exception {
+
+        String gid = editor.get("/project/groupId");
+
+        if (gid != null) {
+
+            return gid;
+
+        }
+
+        //
+        // attempt get the groupId from the parent, if exists
+        //
+
+        gid = editor.get("/project/parent/groupId");
+
+        if (gid != null) {
+            return gid;
+        }
+
+        throw new UserErrorException("missing groupId");
+    }
+
+    /**
+     * "pom" packaging requires special handling. A POM file that declares "pom" packaging is either a project root
+     * POM, and in this case declares a list of module, or a "release" module
+     * (https://kb.novaordis.com/index.php/Building_a_Maven_Complex_Release_Artifact#Dedicated_Release_Module), which
+     * builds a binary distribution.
+     */
+    private void handlePomPackaging(POM parentPom, InLineXmlEditor editor) throws Exception {
+
+        List<String> mns = editor.getList("/project/modules/module");
+
+        if (mns != null && !mns.isEmpty()) {
+
+            //
+            // we found modules, save them as part of the read-only state of this instance
+            //
+            this.moduleNames = mns;
+        }
+        else {
+
+            //
+            // we did not find module names, so the only option at this point is this is a "release" module
+            //
+
+            processReleaseModulePom(parentPom, editor);
+        }
+    }
+
+    /**
+     * Logic to execute when we established this is a release module POM - initializes specific state. For more
+     * details about release modules see
+     * https://kb.novaordis.com/index.php/Building_a_Maven_Complex_Release_Artifact#Dedicated_Release_Module.
+     * A release module builds a binary distribution.
+     */
+    private void processReleaseModulePom(POM parentPom, InLineXmlEditor editor) throws Exception {
+
+        if (parentPom == null) {
+
+            throw new UserErrorException(
+                    "invalid 'pom' packaging POM file, no modules and no parent " + editor.getFile().getAbsolutePath());
+        }
+
+        //
+        // we're a module, make sure we're a release module
+        //
+
+        String thisModuleName = getFile().getParentFile().getName();
+
+        this.artifactType = ArtifactType.BINARY_DISTRIBUTION;
+
+        //
+        // insure we have an assembly plugin
+        //
+
+        List<String> plugins = editor.getList("/project/build/plugins/plugin/artifactId");
+
+        if (!plugins.contains("maven-assembly-plugin")) {
+            throw new UserErrorException(
+                    "the release module '" + thisModuleName + "' does not contain an assembly plugin");
+        }
+
+        //
+        // resolve finalName
+        //
+
+        this.finalName = editor.get("/project/build/plugins/plugin/configuration/finalName");
+
+        //
+        // resolve extension - we read the assembly and extract the format from there
+        //
+
+        String assemblyFileRelativePath = editor.get(
+                "/project/build/plugins/plugin/configuration/descriptors/descriptor");
+        File assemblyFile = new File(getFile().getParentFile(), assemblyFileRelativePath);
+
+        if (!assemblyFile.isFile() || !assemblyFile.canRead()) {
+
+            throw new UserErrorException(
+                    "assembly descriptor " + assemblyFile.getAbsolutePath() + " not available or cannot be read");
+        }
+
+        InLineXmlEditor assemblyEditor = new InLineXmlEditor(assemblyFile);
+
+        List<String> formats = assemblyEditor.getList("/assembly/formats/format");
+
+        if (formats.size() > 1) {
+            throw new RuntimeException("NOT YET IMPLEMENTED: don't know how to handle more than one formats");
+        }
+
+        this.extension = formats.get(0);
+
+        //
+        // check conventions and issue warnings if we don't comply
+        //
+
+        if (!"release".equals(thisModuleName)) {
+            log.warn("a release module should be conventionally named 'release', but in this case it is named '" + thisModuleName + "'");
+        }
+    }
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 

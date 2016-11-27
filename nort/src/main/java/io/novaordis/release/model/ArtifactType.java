@@ -35,11 +35,16 @@ public enum ArtifactType {
 
     /**
      * @return the corresponding ArtifactType from the given string, which is usually the value of a pom.xml packaging
-     * ("jar", for example).
+     * ("jar", for example). Will return null, if the packaging is "pom" - no publishable artifact.
      *
-     * @exception IllegalArgumentException on a string that cannot be converted to an artifact type.
+     * @exception IllegalArgumentException on a null String or a string that cannot be converted to an artifact type.
      */
     public static ArtifactType fromString(String s) throws IllegalArgumentException {
+
+        if (s == null) {
+
+            throw new IllegalArgumentException("null packaging");
+        }
 
         //
         // "pom" is a special case, there's no corresponding artifact type

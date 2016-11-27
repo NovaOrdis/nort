@@ -37,7 +37,20 @@ public class ArtifactImpl implements Artifact {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
+    /**
+     * Assumes null final name and extension (in which case will be inferred based on ArtifactType instance)
+     */
     public ArtifactImpl(ArtifactType type, String groupId, String artifactId, Version version) {
+
+        this(type, groupId, artifactId, version, null, null);
+    }
+
+    /**
+     * @param extension if specified, takes priority. If null, the extension will be inferred based on the artifact
+     *                  type.
+     */
+    public ArtifactImpl(ArtifactType type, String groupId, String artifactId,
+                        Version version, String finalName, String extension) {
 
         this.type = type;
 
@@ -45,7 +58,11 @@ public class ArtifactImpl implements Artifact {
 
         String s = groupId.replace('.', '/');
 
-        s += '/' + artifactId + "/" + v + "/" + artifactId + "-" + v + "." + type.getExtension();
+        String effectiveExtension = extension != null ? extension : type.getExtension();
+
+        String artifactBaseName = finalName == null ? artifactId : finalName;
+
+        s += '/' + artifactId + "/" + v + "/" + artifactBaseName + "-" + v + "." + effectiveExtension;
 
         this.repositoryFile = new File(s);
     }

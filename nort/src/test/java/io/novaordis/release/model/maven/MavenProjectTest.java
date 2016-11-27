@@ -187,7 +187,7 @@ public class MavenProjectTest extends ProjectTest {
         Artifact a3 = artifacts.get(2);
         assertEquals(a3, p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0));
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, a3.getType());
-        assertEquals(new File("io/test/release-artifact/3.0/release-artifact-3.0.zip"), a3.getRepositoryFile());
+        assertEquals(new File("io/test/release/3.0/binary-release-A-3.0.tar.gz"), a3.getRepositoryFile());
     }
 
     @Test
@@ -300,12 +300,12 @@ public class MavenProjectTest extends ProjectTest {
         MavenProject p = new MavenProject(pf);
 
         Artifact a = p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0);
-        assertEquals(new File("io/test/release-artifact/3.0/release-artifact-3.0.zip"), a.getRepositoryFile());
+        assertEquals(new File("io/test/release/3.0/binary-release-A-3.0.tar.gz"), a.getRepositoryFile());
 
         assertTrue(p.getModule("release").setVersion(new Version("77.77")));
 
         Artifact a2 = p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0);
-        assertEquals(new File("io/test/release-artifact/77.77/release-artifact-77.77.zip"), a2.getRepositoryFile());
+        assertEquals(new File("io/test/release/77.77/binary-release-A-77.77.tar.gz"), a2.getRepositoryFile());
     }
 
     // Module management -----------------------------------------------------------------------------------------------
