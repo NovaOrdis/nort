@@ -67,8 +67,7 @@ public class InstallSequence implements Sequence {
         ApplicationRuntime runtime = c.getRuntime();
 
         //
-        // if we are a library, the publish sequence already published the artifacts in the repository, info and
-        // skip
+        // if we are a library, the publish sequence already published the artifacts in the repository, info and skip
         //
 
         Project p = c.getProject();
