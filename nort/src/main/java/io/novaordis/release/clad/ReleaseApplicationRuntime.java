@@ -113,10 +113,18 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         String s = System.getenv("M2");
         if (s == null) {
-            throw new UserErrorException("M2 environment variable not defined, configure the location of the local Maven repository in project's configuration file");
+            throw new UserErrorException("M2 environment variable not defined, configure the location of the local Maven repository in the project configuration file");
         }
 
         configuration.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, s);
+
+        s = System.getenv("RUNTIME_DIR");
+        if (s == null) {
+            throw new UserErrorException("RUNTIME_DIR environment variable not defined, configure the location of the runtime directory in the project configuration file");
+        }
+
+        configuration.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, s);
+
     }
 
     /**
