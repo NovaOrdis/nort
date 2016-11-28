@@ -17,7 +17,6 @@
 package io.novaordis.release.model.maven;
 
 import io.novaordis.release.model.Artifact;
-import io.novaordis.release.model.ArtifactImpl;
 import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
@@ -303,7 +302,7 @@ public class POM {
 
         try {
 
-            return new ArtifactImpl(artifactType, groupId, artifactId, getVersion(), getFinalName(), getExtension());
+            return new MavenArtifact(artifactType, groupId, artifactId, getVersion(), getFinalName(), getExtension());
         }
         catch(VersionFormatException e) {
 

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package io.novaordis.release.model;
+package io.novaordis.release.model.maven;
 
+import io.novaordis.release.model.ArtifactTest;
+import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 import org.junit.Test;
 
@@ -27,7 +29,7 @@ import static junit.framework.TestCase.assertEquals;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/24/16
  */
-public class ArtifactImplTest extends ArtifactTest {
+public class MavenArtifactTest extends ArtifactTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -42,7 +44,7 @@ public class ArtifactImplTest extends ArtifactTest {
     @Test
     public void constructor() throws Exception {
 
-        ArtifactImpl a = new ArtifactImpl(ArtifactType.JAR_LIBRARY,
+        MavenArtifact a = new MavenArtifact(ArtifactType.JAR_LIBRARY,
                 "io.test-group", "test-artifact", new Version("1.0"));
 
         assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
@@ -53,7 +55,7 @@ public class ArtifactImplTest extends ArtifactTest {
     @Test
     public void constructor_FinalNameSpecified_JAR() throws Exception {
 
-        ArtifactImpl a = new ArtifactImpl(ArtifactType.JAR_LIBRARY,
+        MavenArtifact a = new MavenArtifact(ArtifactType.JAR_LIBRARY,
                 "io.test-group", "test-artifact", new Version("1.0"), "blue", null);
 
         assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
@@ -70,7 +72,7 @@ public class ArtifactImplTest extends ArtifactTest {
     @Test
     public void constructor_FinalNameSpecified_BINARY_DISTRIBUTION() throws Exception {
 
-        ArtifactImpl a = new ArtifactImpl(ArtifactType.BINARY_DISTRIBUTION,
+        MavenArtifact a = new MavenArtifact(ArtifactType.BINARY_DISTRIBUTION,
                 "io.test-group", "release", new Version("1.0.0-SNAPSHOT-4"), "red", "zip");
 
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, a.getType());
@@ -91,8 +93,8 @@ public class ArtifactImplTest extends ArtifactTest {
     @Test
     public void equals() throws Exception {
 
-        ArtifactImpl a = new ArtifactImpl(ArtifactType.JAR_LIBRARY, "io.test", "test-artifact", new Version("1.0"));
-        ArtifactImpl a2 = new ArtifactImpl(ArtifactType.JAR_LIBRARY, "io.test", "test-artifact", new Version("1.0"));
+        MavenArtifact a = new MavenArtifact(ArtifactType.JAR_LIBRARY, "io.test", "test-artifact", new Version("1.0"));
+        MavenArtifact a2 = new MavenArtifact(ArtifactType.JAR_LIBRARY, "io.test", "test-artifact", new Version("1.0"));
 
         assertEquals(a, a2);
         assertEquals(a2, a);
@@ -101,9 +103,9 @@ public class ArtifactImplTest extends ArtifactTest {
     // Package protected -----------------------------------------------------------------------------------------------
 
     @Override
-    protected ArtifactImpl getArtifactToTest() throws Exception {
+    protected MavenArtifact getArtifactToTest() throws Exception {
 
-        return new ArtifactImpl(ArtifactType.JAR_LIBRARY, "test", "test", new Version("0"));
+        return new MavenArtifact(ArtifactType.JAR_LIBRARY, "test", "test", new Version("0"));
     }
 
     // Protected -------------------------------------------------------------------------------------------------------

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package io.novaordis.release.model;
+package io.novaordis.release.model.maven;
 
+import io.novaordis.release.model.Artifact;
+import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 
 import java.io.File;
@@ -24,7 +26,7 @@ import java.io.File;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/24/16
  */
-public class ArtifactImpl implements Artifact {
+public class MavenArtifact implements Artifact {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -44,7 +46,7 @@ public class ArtifactImpl implements Artifact {
     /**
      * Assumes null final name and extension (in which case will be inferred based on ArtifactType instance)
      */
-    public ArtifactImpl(ArtifactType type, String groupId, String artifactId, Version version) {
+    public MavenArtifact(ArtifactType type, String groupId, String artifactId, Version version) {
 
         this(type, groupId, artifactId, version, null, null);
     }
@@ -53,8 +55,8 @@ public class ArtifactImpl implements Artifact {
      * @param ext if specified, takes priority. If null, the extension will be inferred based on the artifact
      *                  type.
      */
-    public ArtifactImpl(ArtifactType type, String groupId, String artifactId,
-                        Version version, String finalName, String ext) {
+    public MavenArtifact(ArtifactType type, String groupId, String artifactId,
+                         Version version, String finalName, String ext) {
 
         this.type = type;
 
@@ -112,11 +114,11 @@ public class ArtifactImpl implements Artifact {
             return false;
         }
 
-        if (!(o instanceof ArtifactImpl)) {
+        if (!(o instanceof MavenArtifact)) {
             return false;
         }
 
-        ArtifactImpl that = (ArtifactImpl)o;
+        MavenArtifact that = (MavenArtifact)o;
 
         return type.equals(that.type) && repositoryFile.equals(that.repositoryFile);
     }
