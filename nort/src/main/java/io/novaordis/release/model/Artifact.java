@@ -16,6 +16,8 @@
 
 package io.novaordis.release.model;
 
+import io.novaordis.release.clad.ReleaseApplicationRuntime;
+
 import java.io.File;
 
 /**
@@ -44,8 +46,21 @@ public interface Artifact {
      * The root of the repository is not present in the path of the file. The file path is always relative.
      * After fully resolving it relative to the repository, the corresponding file may not exist on disk, depending
      * on whether the project built and published the artifact.
+     *
+     * Note that if <finalName> is used, it won't be reflected in the name of the repository file. See:
+     *
+     * https://kb.novaordis.com/index.php/Maven_pom.xml#.3CfinalName.3E
      */
     File getRepositoryFile();
+
+    /**
+     * @return the file path relative to the <tt>module root</tt>
+     *
+     * Note that if <finalName> is used, it will be reflected in the name of this file. See:
+     *
+     * @see ReleaseApplicationRuntime#getProjectHomeDirectory()
+     */
+    File getLocalFile();
 
     boolean equals(Object o);
 

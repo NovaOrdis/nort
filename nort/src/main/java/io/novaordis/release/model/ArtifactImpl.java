@@ -34,6 +34,7 @@ public class ArtifactImpl implements Artifact {
 
     private ArtifactType type;
     private File repositoryFile;
+    private File localFile;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -46,40 +47,32 @@ public class ArtifactImpl implements Artifact {
     }
 
     /**
-     * @param extension if specified, takes priority. If null, the extension will be inferred based on the artifact
+     * @param ext if specified, takes priority. If null, the extension will be inferred based on the artifact
      *                  type.
      */
     public ArtifactImpl(ArtifactType type, String groupId, String artifactId,
-                        Version version, String finalName, String extension) {
+                        Version version, String finalName, String ext) {
 
         this.type = type;
 
         String v = version.getLiteral();
 
-        String s = groupId.replace('.', '/');
+        String groupSection = groupId.replace('.', '/');
 
-        String effectiveExtension = extension != null ? extension : type.getExtension();
-
-        //
-        // finalName is ignored when it comes to install artifacts in the repository
-        //
-        //
-        // TODO find a solution to that
-        //
+        String extension = ext != null ? ext : type.getExtension();
 
         //
-        // String artifactBaseName = finalName != null ? finalName : artifactId + "-" + v;
+        // finalName is ignored when it comes to install artifacts in the repository; it is reflected though
+        // in the name of the local file.
         //
 
-        String artifactBaseName = artifactId + "-" + v;
+        String repositoryArtifactBaseName = artifactId + "-" + v;
+        String localArtifactBaseName = finalName != null ? finalName : artifactId + "-" + v;
 
-        //
-        //
-        //
+        this.repositoryFile = new File(
+                groupSection + '/' + artifactId + "/" + v + "/" + repositoryArtifactBaseName + "." + extension);
 
-        s += '/' + artifactId + "/" + v + "/" + artifactBaseName + "." + effectiveExtension;
-
-        this.repositoryFile = new File(s);
+        this.localFile = new File("target/" + localArtifactBaseName + "." + extension);
     }
 
     // Artifact implementation -----------------------------------------------------------------------------------------
@@ -94,6 +87,12 @@ public class ArtifactImpl implements Artifact {
     public File getRepositoryFile() {
 
         return repositoryFile;
+    }
+
+    @Override
+    public File getLocalFile() {
+
+        return localFile;
     }
 
     @Override

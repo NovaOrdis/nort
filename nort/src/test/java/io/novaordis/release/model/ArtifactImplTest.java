@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.io.File;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -47,13 +48,14 @@ public class ArtifactImplTest extends ArtifactTest {
 
         assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
         assertEquals(new File("io/test-group/test-artifact/1.0/test-artifact-1.0.jar"), a.getRepositoryFile());
+        assertEquals(new File("target/test-artifact-1.0.jar"), a.getLocalFile());
     }
 
     @Test
     public void constructor_FinalNameSpecified_JAR() throws Exception {
 
         ArtifactImpl a = new ArtifactImpl(ArtifactType.JAR_LIBRARY,
-                "io.test-group", "test-artifact", new Version("1.0"), "WILL-BE-IGNORED", null);
+                "io.test-group", "test-artifact", new Version("1.0"), "blue", null);
 
         assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
 
@@ -63,13 +65,14 @@ public class ArtifactImplTest extends ArtifactTest {
         //
 
         assertEquals(new File("io/test-group/test-artifact/1.0/test-artifact-1.0.jar"), a.getRepositoryFile());
+        assertEquals(new File("target/blue.jar"), a.getLocalFile());
     }
 
     @Test
     public void constructor_FinalNameSpecified_BINARY_DISTRIBUTION() throws Exception {
 
         ArtifactImpl a = new ArtifactImpl(ArtifactType.BINARY_DISTRIBUTION,
-                "io.test-group", "release", new Version("1.0.0-SNAPSHOT-4"), "WILL-BE-IGNORED", "zip");
+                "io.test-group", "release", new Version("1.0.0-SNAPSHOT-4"), "red", "zip");
 
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, a.getType());
 
@@ -80,6 +83,7 @@ public class ArtifactImplTest extends ArtifactTest {
 
         assertEquals(new File("io/test-group/release/1.0.0-SNAPSHOT-4/release-1.0.0-SNAPSHOT-4.zip"),
                 a.getRepositoryFile());
+        assertEquals(new File("target/red.zip"), a.getLocalFile());
     }
 
     // equals() --------------------------------------------------------------------------------------------------------

@@ -137,7 +137,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public File getProjectWorkAreaDirectory() {
+    public File getProjectHomeDirectory() {
 
         return new File(".");
     }

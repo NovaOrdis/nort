@@ -54,6 +54,11 @@ public class MockArtifact implements Artifact {
         return f;
     }
 
+    @Override
+    public File getLocalFile() {
+        throw new RuntimeException("getLocalFile() NOT YET IMPLEMENTED");
+    }
+
 
     // Public ----------------------------------------------------------------------------------------------------------
 
