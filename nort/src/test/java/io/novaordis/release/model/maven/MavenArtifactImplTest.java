@@ -16,62 +16,35 @@
 
 package io.novaordis.release.model.maven;
 
+import io.novaordis.release.model.ArtifactType;
+import io.novaordis.release.version.Version;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/28/16
  */
-public class MockMavenModule extends MavenModule {
+public class MavenArtifactImplTest extends MavenArtifactTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * @return a wired instance just enough to be functional
-     */
-    public static MockMavenModule getInstance(MockPOM mockPOM) throws Exception {
-
-        MockMavenProject mockProject = new MockMavenProject();
-
-        //
-        // common root POM
-        //
-
-        MockPOM root = new MockPOM();
-        mockProject.setPOM(root);
-        mockPOM.setParent(root);
-
-        return new MockMavenModule(mockProject, mockPOM);
-    }
-
     // Attributes ------------------------------------------------------------------------------------------------------
-
-    private String name;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    private MockMavenModule(MavenProject p, POM pom) throws Exception {
-
-        super(p, pom);
-    }
-
-    // Overrides -------------------------------------------------------------------------------------------------------
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setName(String name) {
-
-        this.name = name;
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected MavenArtifactImpl getArtifactToTest() throws Exception {
+
+        return new MavenArtifactImpl(
+                new MockPOM(), ArtifactType.JAR_LIBRARY, "test", "test", new Version("0"), null, null);
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

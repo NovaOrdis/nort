@@ -304,7 +304,7 @@ public class POM {
 
         try {
 
-            return new MavenArtifact(
+            return new MavenArtifactImpl(
                     this, artifactType, groupId, artifactId, getVersion(), getFinalName(), getExtension());
         }
         catch(VersionFormatException e) {

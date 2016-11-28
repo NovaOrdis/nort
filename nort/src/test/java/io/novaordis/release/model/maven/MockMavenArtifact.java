@@ -24,7 +24,7 @@ import java.io.File;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/24/16
  */
-public class MockMavenArtifact extends MavenArtifact {
+public class MockMavenArtifact implements MavenArtifact {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -40,7 +40,6 @@ public class MockMavenArtifact extends MavenArtifact {
 
     public MockMavenArtifact(ArtifactType t, File remoteFile, File localFile) {
 
-        super(null, null, null, null, null, null, null);
         this.t = t;
         this.remoteFile = remoteFile;
         this.localFile = localFile;
@@ -64,6 +63,11 @@ public class MockMavenArtifact extends MavenArtifact {
     public File getLocalFile() {
 
         return localFile;
+    }
+
+    @Override
+    public POM getPom() {
+        throw new RuntimeException("getPom() NOT YET IMPLEMENTED");
     }
 
 
