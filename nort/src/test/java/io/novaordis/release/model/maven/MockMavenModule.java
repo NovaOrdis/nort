@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package io.novaordis.release.model;
-
-import java.io.File;
+package io.novaordis.release.model.maven;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 11/24/16
+ * @since 11/28/16
  */
-public class MockArtifact implements Artifact {
+public class MockMavenModule extends MavenModule {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -30,40 +28,28 @@ public class MockArtifact implements Artifact {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private ArtifactType t;
-    private File remoteFile;
-    private File localFile;
+    private String name;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockArtifact(ArtifactType t, File remoteFile, File localFile) {
-        this.t = t;
-        this.remoteFile = remoteFile;
-        this.localFile = localFile;
+    public MockMavenModule(MavenProject p, POM pom) throws Exception {
+
+        super(p, pom);
     }
 
-    // Artifact implementation -----------------------------------------------------------------------------------------
+    // Overrides -------------------------------------------------------------------------------------------------------
 
     @Override
-    public ArtifactType getType() {
-
-        return t;
+    public String getName() {
+        return name;
     }
-
-    @Override
-    public File getRepositoryFile() {
-
-        return remoteFile;
-    }
-
-    @Override
-    public File getLocalFile() {
-
-        return localFile;
-    }
-
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    public void setName(String name) {
+
+        this.name = name;
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

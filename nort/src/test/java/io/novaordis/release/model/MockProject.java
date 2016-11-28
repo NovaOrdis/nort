@@ -16,6 +16,7 @@
 
 package io.novaordis.release.model;
 
+import io.novaordis.release.model.maven.MockMavenArtifact;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 
@@ -161,7 +162,7 @@ public class MockProject implements Project {
             artifacts.put(type, as);
         }
 
-        as.add(new MockArtifact(type, remoteFile, localFile));
+        as.add(new MockMavenArtifact(type, remoteFile, localFile));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

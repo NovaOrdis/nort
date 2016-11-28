@@ -125,7 +125,8 @@ public class POMTest {
         assertEquals(new Version("1.2.3"), pom.getLocalVersion());
         assertEquals(ArtifactType.JAR_LIBRARY, pom.getArtifactType());
 
-        Artifact artifact = pom.getArtifact();
+        MavenArtifact artifact = pom.getArtifact();
+        assertEquals(pom, artifact.getPom());
 
         assertEquals(ArtifactType.JAR_LIBRARY, artifact.getType());
 
@@ -215,11 +216,9 @@ public class POMTest {
     // multiple modules ------------------------------------------------------------------------------------------------
 
     @Test
-    public void multiModuleProject_RootPOM() throws Exception {
+    public void multiModuleProject() throws Exception {
 
-        File pomFile = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project/pom.xml",
-                scratchDirectory, "pom.xml");
+        File pomFile = Util.cp("maven/lockstep-multi-module-project/pom.xml", scratchDirectory);
 
         POM pom = new POM(pomFile);
 
@@ -321,7 +320,7 @@ public class POMTest {
     @Test
     public void pomPackaging_ValidReleaseModule() throws Exception {
 
-        File dir = Util.cp(baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project", scratchDirectory);
+        File dir = Util.cp("maven/lockstep-multi-module-project", scratchDirectory);
         File pomFile = new File(dir, "release/pom.xml");
         MockPOM root = new MockPOM();
         root.setVersion(new Version("33.33"));
@@ -329,7 +328,10 @@ public class POMTest {
         POM pom = new POM(root, pomFile);
 
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, pom.getArtifactType());
-        Artifact a = pom.getArtifact();
+
+        MavenArtifact a = pom.getArtifact();
+        assertEquals(pom, a.getPom());
+
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, a.getType());
         assertEquals(new File("io/test/release/33.33/release-33.33.tar.gz"), a.getRepositoryFile());
     }

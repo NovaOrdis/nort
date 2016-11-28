@@ -27,7 +27,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * The metadata associated with a maven module. Each module has a POM.
+ * The metadata associated with a maven module. Each module has a POM, and the POM maintains a reference to the module
+ * it belongs to.
  *
  * The name of the module is the name of the directory that holds it - this is how it is referred from the parent pom.
  *
@@ -61,6 +62,12 @@ public class MavenModule {
         this.pom = pom;
 
         //
+        // establish the bi-directional relationship between POM and module
+        //
+
+        pom.setModule(this);
+
+        //
         // consistency checks
         //
 
@@ -89,6 +96,9 @@ public class MavenModule {
     /**
      * @return the name of the module, which is the name of the directory that holds it - this is how it is referred
      * from the parent pom.
+     *
+     * TODO: currently we're using this information in relative paths. However, what if the module is several
+     * sub-directories down?
      */
     public String getName() {
 

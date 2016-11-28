@@ -19,7 +19,6 @@ package io.novaordis.release.model.maven;
 import io.novaordis.release.Util;
 import io.novaordis.release.model.Artifact;
 import io.novaordis.release.model.ArtifactType;
-import io.novaordis.release.model.MockArtifact;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import org.junit.After;
@@ -50,7 +49,6 @@ public class MavenModuleTest {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private File scratchDirectory;
-    private File baseDirectory;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -62,9 +60,6 @@ public class MavenModuleTest {
         String projectBaseDirName = System.getProperty("basedir");
         scratchDirectory = new File(projectBaseDirName, "target/test-scratch");
         assertTrue(scratchDirectory.isDirectory());
-
-        baseDirectory = new File(System.getProperty("basedir"));
-        assertTrue(baseDirectory.isDirectory());
     }
 
     @After
@@ -98,9 +93,7 @@ public class MavenModuleTest {
     @Test
     public void constructor() throws Exception {
 
-        File f = Util.cp(
-                baseDirectory, "src/test/resources/data/maven/lockstep-multi-module-project/module1/pom.xml",
-                scratchDirectory);
+        File f = Util.cp("maven/lockstep-multi-module-project/module1/pom.xml", scratchDirectory);
 
         MockMavenProject mp = new MockMavenProject();
         MockPOM rootPom = new MockPOM();
@@ -121,6 +114,10 @@ public class MavenModuleTest {
 
         POM pom = m.getPOM();
         assertEquals(f, pom.getFile());
+
+        // test bi-directional relationship
+        MavenModule m2 = pom.getModule();
+        assertEquals(m, m2);
     }
 
     // getArtifactType() -----------------------------------------------------------------------------------------------
@@ -143,16 +140,16 @@ public class MavenModuleTest {
     @Test
     public void getArtifact() throws Exception {
 
-        MockMavenProject mmp = new MockMavenProject();
-        mmp.setPOM(new MockPOM());
+        MockMavenProject mp = new MockMavenProject();
+        mp.setPOM(new MockPOM());
 
-        MockPOM mockModulePom = new MockPOM();
-        mockModulePom.setParent(mmp.getPOM());
+        MockPOM mpom = new MockPOM();
+        mpom.setParent(mp.getPOM());
 
-        MockArtifact ma = new MockArtifact(null, null, null);
-        mockModulePom.setArtifact(ma);
+        MockMavenArtifact ma = new MockMavenArtifact(null, null, null);
+        mpom.setArtifact(ma);
 
-        MavenModule m = new MavenModule(mmp, mockModulePom);
+        MavenModule m = new MavenModule(mp, mpom);
 
         assertEquals(ma, m.getArtifact());
     }

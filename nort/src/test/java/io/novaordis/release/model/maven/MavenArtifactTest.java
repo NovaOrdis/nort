@@ -24,6 +24,7 @@ import org.junit.Test;
 import java.io.File;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -44,18 +45,35 @@ public class MavenArtifactTest extends ArtifactTest {
     @Test
     public void constructor() throws Exception {
 
-        MavenArtifact a = new MavenArtifact(ArtifactType.JAR_LIBRARY,
-                "io.test-group", "test-artifact", new Version("1.0"));
+        MockPOM mp = new MockPOM();
+
+        MavenArtifact a = new MavenArtifact(mp, ArtifactType.JAR_LIBRARY,
+                "io.test-group", "test-artifact", new Version("1.0"), null, null);
 
         assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
         assertEquals(new File("io/test-group/test-artifact/1.0/test-artifact-1.0.jar"), a.getRepositoryFile());
+
+        //
+        // root POM
+        //
+        assertNull(mp.getModule());
         assertEquals(new File("target/test-artifact-1.0.jar"), a.getLocalFile());
+
+        //
+        // module POM
+        //
+        MockMavenModule mm = new MockMavenModule(null, mp);
+        mm.setName("blue");
+
+        assertEquals(new File("blue/target/test-artifact-1.0.jar"), a.getLocalFile());
     }
 
     @Test
     public void constructor_FinalNameSpecified_JAR() throws Exception {
 
-        MavenArtifact a = new MavenArtifact(ArtifactType.JAR_LIBRARY,
+        MockPOM mp = new MockPOM();
+
+        MavenArtifact a = new MavenArtifact(mp, ArtifactType.JAR_LIBRARY,
                 "io.test-group", "test-artifact", new Version("1.0"), "blue", null);
 
         assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
@@ -66,13 +84,28 @@ public class MavenArtifactTest extends ArtifactTest {
         //
 
         assertEquals(new File("io/test-group/test-artifact/1.0/test-artifact-1.0.jar"), a.getRepositoryFile());
+
+        //
+        // root POM
+        //
+        assertNull(mp.getModule());
         assertEquals(new File("target/blue.jar"), a.getLocalFile());
+
+        //
+        // module POM
+        //
+        MockMavenModule mm = new MockMavenModule(null, mp);
+        mm.setName("red");
+
+        assertEquals(new File("red/target/blue.jar"), a.getLocalFile());
     }
 
     @Test
     public void constructor_FinalNameSpecified_BINARY_DISTRIBUTION() throws Exception {
 
-        MavenArtifact a = new MavenArtifact(ArtifactType.BINARY_DISTRIBUTION,
+        MockPOM mp = new MockPOM();
+
+        MavenArtifact a = new MavenArtifact(mp, ArtifactType.BINARY_DISTRIBUTION,
                 "io.test-group", "release", new Version("1.0.0-SNAPSHOT-4"), "red", "zip");
 
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, a.getType());
@@ -84,7 +117,21 @@ public class MavenArtifactTest extends ArtifactTest {
 
         assertEquals(new File("io/test-group/release/1.0.0-SNAPSHOT-4/release-1.0.0-SNAPSHOT-4.zip"),
                 a.getRepositoryFile());
+
+        //
+        // root POM
+        //
+        assertNull(mp.getModule());
         assertEquals(new File("target/red.zip"), a.getLocalFile());
+
+        //
+        // module POM
+        //
+        MockMavenModule mm = new MockMavenModule(null, mp);
+        mm.setName("blue");
+
+        assertEquals(new File("blue/target/red.zip"), a.getLocalFile());
+
     }
 
 
@@ -93,8 +140,13 @@ public class MavenArtifactTest extends ArtifactTest {
     @Test
     public void equals() throws Exception {
 
-        MavenArtifact a = new MavenArtifact(ArtifactType.JAR_LIBRARY, "io.test", "test-artifact", new Version("1.0"));
-        MavenArtifact a2 = new MavenArtifact(ArtifactType.JAR_LIBRARY, "io.test", "test-artifact", new Version("1.0"));
+        MockPOM mp = new MockPOM();
+        MockPOM mp2 = new MockPOM();
+
+        MavenArtifact a = new MavenArtifact(mp, ArtifactType.JAR_LIBRARY, "io.test", "test-artifact",
+                new Version("1.0"), null, null);
+        MavenArtifact a2 = new MavenArtifact(mp2, ArtifactType.JAR_LIBRARY, "io.test", "test-artifact",
+                new Version("1.0"), null, null);
 
         assertEquals(a, a2);
         assertEquals(a2, a);
@@ -105,7 +157,7 @@ public class MavenArtifactTest extends ArtifactTest {
     @Override
     protected MavenArtifact getArtifactToTest() throws Exception {
 
-        return new MavenArtifact(ArtifactType.JAR_LIBRARY, "test", "test", new Version("0"));
+        return new MavenArtifact(new MockPOM(), ArtifactType.JAR_LIBRARY, "test", "test", new Version("0"), null, null);
     }
 
     // Protected -------------------------------------------------------------------------------------------------------

@@ -16,7 +16,6 @@
 
 package io.novaordis.release.model.maven;
 
-import io.novaordis.release.model.Artifact;
 import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
@@ -38,7 +37,7 @@ public class MockPOM extends POM {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private ArtifactType artifactType;
-    private Artifact artifact;
+    private MavenArtifact artifact;
     private File file;
     private String groupId;
     private POM parent;
@@ -102,7 +101,7 @@ public class MockPOM extends POM {
     }
 
     @Override
-    public Artifact getArtifact() {
+    public MavenArtifact getArtifact() {
 
         return artifact;
     }
@@ -146,7 +145,7 @@ public class MockPOM extends POM {
         this.artifactType = t;
     }
 
-    void setArtifact(Artifact a) {
+    void setArtifact(MavenArtifact a) {
 
         this.artifact = a;
     }

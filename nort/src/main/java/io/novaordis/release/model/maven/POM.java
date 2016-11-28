@@ -16,7 +16,6 @@
 
 package io.novaordis.release.model.maven;
 
-import io.novaordis.release.model.Artifact;
 import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
@@ -67,6 +66,9 @@ public class POM {
 
     // may be null
     private POM parent;
+
+    // may be null
+    private MavenModule module;
 
     //
     // read-only information - this information does not change during release
@@ -289,7 +291,7 @@ public class POM {
      *
      * @return an artifact or null. A root pom for a multi-module projects does not have an artifact.
      */
-    public Artifact getArtifact() {
+    public MavenArtifact getArtifact() {
 
         if (artifactType == null) {
 
@@ -302,7 +304,8 @@ public class POM {
 
         try {
 
-            return new MavenArtifact(artifactType, groupId, artifactId, getVersion(), getFinalName(), getExtension());
+            return new MavenArtifact(
+                    this, artifactType, groupId, artifactId, getVersion(), getFinalName(), getExtension());
         }
         catch(VersionFormatException e) {
 
@@ -357,6 +360,27 @@ public class POM {
     public String getExtension() {
 
         return extension;
+    }
+
+    /**
+     * Establishes the relationship with the module this POM is associated with. A POM can be associated with at most
+     * one module, and may be associated with zero modules, in case the POM corresponds to a single POM project or a
+     * project root.
+     */
+    public void setModule(MavenModule m) {
+
+        this.module = m;
+
+    }
+
+    /**
+     * @return  the module this POM is associated with. A POM can be associated with at most one module, and may be
+     * associated with zero modules, in case the POM corresponds to a single POM project or a project root. When
+     * there is no module association, the accessor returns null.
+     */
+    public MavenModule getModule() {
+
+        return module;
     }
 
     /**

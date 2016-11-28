@@ -41,23 +41,23 @@ public class MavenArtifact implements Artifact {
 
     private String extension;
 
+    // the pom this artifact is associated with. Never null.
+    private POM pom;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
-     * Assumes null final name and extension (in which case will be inferred based on ArtifactType instance)
+     * @param pom the POM this artifact is associated with. Must never be null.
+     * @param ext if specified, takes priority. If null, the extension will be inferred based on the artifact type.
      */
-    public MavenArtifact(ArtifactType type, String groupId, String artifactId, Version version) {
-
-        this(type, groupId, artifactId, version, null, null);
-    }
-
-    /**
-     * @param ext if specified, takes priority. If null, the extension will be inferred based on the artifact
-     *                  type.
-     */
-    public MavenArtifact(ArtifactType type, String groupId, String artifactId,
+    public MavenArtifact(POM pom, ArtifactType type, String groupId, String artifactId,
                          Version version, String finalName, String ext) {
 
+        if (pom == null) {
+            throw new IllegalArgumentException("null pom");
+        }
+
+        this.pom = pom;
         this.type = type;
 
         String v = version.getLiteral();
@@ -96,7 +96,15 @@ public class MavenArtifact implements Artifact {
     @Override
     public File getLocalFile() {
 
-        return new File("target/" + localArtifactBaseName + "." + extension);
+        String pathRelativeToProjectHome = "";
+
+        MavenModule m = pom.getModule();
+
+        if (m != null) {
+            pathRelativeToProjectHome = m.getName() + "/";
+        }
+
+        return new File(pathRelativeToProjectHome + "target/" + localArtifactBaseName + "." + extension);
     }
 
     @Override
@@ -135,6 +143,14 @@ public class MavenArtifact implements Artifact {
     public String toString() {
 
         return "" + type + ":" + getRepositoryFile();
+    }
+
+    /**
+     * @return the POM instance this artifact is associated with. Can never ve null.
+     */
+    public POM getPom() {
+
+        return pom;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
