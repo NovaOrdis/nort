@@ -229,7 +229,7 @@ public class InstallSequence implements Sequence {
             throw new UserErrorException("installation failed");
         }
 
-        log.info("installation ok");
+        runtime.info(c.getCurrentVersion() + " installation ok");
         this.executeChangedState = true;
         return true;
     }
