@@ -381,6 +381,28 @@ public class POMTest {
         assertEquals("blah-3.2.1", s);
     }
 
+    @Test
+    public void customVariableSupport_VariableChanges() throws Exception {
+
+        File f = Util.cp("maven/poms-with-variables/pom-with-variable-as-custom-property.xml", scratchDirectory);
+
+        POM p = new POM(f);
+
+        VariableProvider lvp = p.getLocalVariableProvider();
+
+        assertEquals("3.2.1", lvp.getVariableValue("my.version"));
+
+        String s = p.getFinalName();
+        assertEquals("blah-3.2.1", s);
+
+        lvp.setVariableValue("my.version", "4.3.2");
+        assertEquals("4.3.2", lvp.getVariableValue("my.version"));
+
+        String s2 = p.getFinalName();
+        assertEquals("blah-4.3.2", s2);
+    }
+
+
 
 //    @Test
 //    public void mavenVariableSupport() throws Exception {

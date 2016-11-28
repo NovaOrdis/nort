@@ -9,6 +9,7 @@
 
     <properties>
         <my.version>3.2.1</my.version>
+        <my.other.version>3.2.2</my.other.version>
     </properties>
 
     <build>

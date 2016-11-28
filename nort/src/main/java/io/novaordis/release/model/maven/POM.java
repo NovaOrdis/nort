@@ -28,6 +28,7 @@ import io.novaordis.utilities.variable.VariableProviderImpl;
 import io.novaordis.utilities.xml.editor.BasicInLineXmlEditor;
 import io.novaordis.utilities.xml.editor.InLineXmlEditor;
 import io.novaordis.utilities.xml.editor.InLineXmlEditorWithVariableSupport;
+import io.novaordis.utilities.xml.editor.XmlElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,9 +84,9 @@ public class POM {
 
     private List<String> moduleNames;
 
-    private String finalName;
-
     private String extension;
+
+    private String finalNamePath;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -143,13 +144,13 @@ public class POM {
         // associated XML file
         //
 
-        List<String> propertyNames = pomEditor.getElementNames("/project/properties");
+        List<XmlElement> propertyElements = pomEditor.getElements("/project/properties");
 
-        if (!propertyNames.isEmpty()) {
+        if (!propertyElements.isEmpty()) {
 
-            for(String pn: propertyNames) {
+            for(XmlElement p: propertyElements) {
 
-                throw new RuntimeException("READ PROPERTY VALUE and INSTALL IT AS VARIABLE");
+                localVariableProvider.setVariableValue(p.getName(), p.getValue());
             }
         }
 
@@ -162,6 +163,15 @@ public class POM {
         this.packaging = pomEditor.get("/project/packaging");
         this.artifactType = ArtifactType.fromString(packaging);
         this.extension = artifactType == null ? null : artifactType.getExtension();
+
+        //
+        // do NOT cache anything that may have variable references, such as finalName; read them from the editor
+        // every time they're needed, the variables will be resolved; in the case of "finalName" it can be read
+        // from different file locations, so record the path
+        //
+
+        this.finalNamePath = "/project/build/finalName";
+
 
         if ("pom".equals(packaging)) {
             handlePomPackaging(parent, pomEditor);
@@ -357,7 +367,17 @@ public class POM {
      */
     public String getFinalName() {
 
-        return finalName;
+        if (pomEditor == null) {
+            return null;
+        }
+
+        //
+        // get() will resolve variables, if any
+        //
+
+        //noinspection UnnecessaryLocalVariable
+        String s = pomEditor.get(finalNamePath);
+        return s;
     }
 
     /**
@@ -498,10 +518,11 @@ public class POM {
         }
 
         //
-        // resolve finalName
+        // record "finalName" path, do not cache the value itself, as it may contain variables and we want
+        // those variables resolved every time we read the value
         //
 
-        this.finalName = editor.get("/project/build/plugins/plugin/configuration/finalName");
+        this.finalNamePath = "/project/build/plugins/plugin/configuration/finalName";
 
         //
         // resolve extension - we read the assembly and extract the format from there
