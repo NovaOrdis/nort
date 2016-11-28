@@ -396,6 +396,7 @@ public class InstallSequenceTest extends SequenceTest {
         mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.setBinaryDistributionTopLevelDirectoryName(distributionFileName);
 
         MockOS mockOS = (MockOS) OS.getInstance();
         mockOS.allCommandsSucceedByDefault();
@@ -431,8 +432,6 @@ public class InstallSequenceTest extends SequenceTest {
     @Test
     public void execute_Success_RepositoryFile() throws Exception {
 
-
-
         InstallSequence is = new InstallSequence();
 
         String distributionFileName = "test-distribution-1.0";
@@ -455,6 +454,7 @@ public class InstallSequenceTest extends SequenceTest {
         mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.setBinaryDistributionTopLevelDirectoryName(distributionFileName);
 
         MockOS mockOS = (MockOS) OS.getInstance();
         mockOS.allCommandsSucceedByDefault();
@@ -516,6 +516,7 @@ public class InstallSequenceTest extends SequenceTest {
         mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.setBinaryDistributionTopLevelDirectoryName(distributionFileName);
 
         MockOS mockOS = (MockOS) OS.getInstance();
         mockOS.allCommandsSucceedByDefault();

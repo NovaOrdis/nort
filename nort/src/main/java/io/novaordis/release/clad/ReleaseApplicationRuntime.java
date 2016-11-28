@@ -19,8 +19,10 @@ package io.novaordis.release.clad;
 import io.novaordis.clad.application.ApplicationRuntimeBase;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.clad.option.Option;
+import io.novaordis.release.ZipHandler;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.zip.ZipUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,6 +150,14 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
     public File getProjectHomeDirectory() {
 
         return new File(".");
+    }
+
+    /**
+     * Pluggable logic that handles zips. It is pluggable to make tests portable.
+     */
+    public ZipHandler getZipHandler() {
+
+        return ZipUtil::getTopLevelDirectoryName;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

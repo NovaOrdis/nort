@@ -41,11 +41,14 @@ public class MockReleaseApplicationRuntime extends ReleaseApplicationRuntime {
 
     private String warningContent;
 
+    private String binaryDistributionTopLevelDirectoryName;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public MockReleaseApplicationRuntime() {
 
         this.warningContent = "";
+        this.binaryDistributionTopLevelDirectoryName = "mock-top-level-directory";
     }
 
     // ReleaseApplicationRuntime overrides -----------------------------------------------------------------------------
@@ -133,6 +136,12 @@ public class MockReleaseApplicationRuntime extends ReleaseApplicationRuntime {
         super.setLastExecutionContext(c);
     }
 
+    @Override
+    public ZipHandler getZipHandler() {
+
+        return file -> binaryDistributionTopLevelDirectoryName;
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     public void setCurrentDirectory(File d) {
@@ -141,6 +150,10 @@ public class MockReleaseApplicationRuntime extends ReleaseApplicationRuntime {
 
     public String getWarningContent() {
         return warningContent;
+    }
+
+    public void setBinaryDistributionTopLevelDirectoryName(String s) {
+        this.binaryDistributionTopLevelDirectoryName = s;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -20,10 +20,10 @@ import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.OutputUtil;
 import io.novaordis.release.clad.ConfigurationLabels;
+import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.model.Artifact;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.model.ArtifactType;
-import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
@@ -64,7 +64,7 @@ public class InstallSequence implements Sequence {
 
         log.debug("executing the install sequence ...");
 
-        ApplicationRuntime runtime = c.getRuntime();
+        ReleaseApplicationRuntime runtime = c.getRuntime();
 
         //
         // if we are a library, the publish sequence already published the artifacts in the repository, info and skip
@@ -198,11 +198,17 @@ public class InstallSequence implements Sequence {
         }
 
         //
-        // execute the "install" script embedded with the release - we assume the directory created by extracting the
-        // binary distribution has the same name as the binary distribution zip, without the extension
+        // execute the "install" script embedded with the release. Because the binary distribution files are built
+        // to contain one top-level directory (see https://kb.novaordis.com/index.php/nort_Concepts#Binary_Distributions),
+        // we can read that value from the zip file
         //
 
-        String name = Files.basename(f, ".zip");
+        String name = runtime.getZipHandler().getTopLevelDirectoryName(f);
+
+        if (name == null) {
+            throw new UserErrorException(
+                    "invalid binary distribution, it does not have a top level directory: " + f.getAbsolutePath());
+        }
 
         File installationScript = new File(rd, name + "/bin/.install");
 

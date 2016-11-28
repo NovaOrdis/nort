@@ -372,6 +372,7 @@ public class ReleaseCommandTest {
     public void execute_Success_Snapshot() throws Exception {
 
         MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
+        r.setBinaryDistributionTopLevelDirectoryName("mock-artifact");
         MockConfiguration conf = new MockConfiguration();
         r.init(conf);
 
@@ -477,6 +478,8 @@ public class ReleaseCommandTest {
     public void execute_Success_Dot() throws Exception {
 
         MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
+        r.setBinaryDistributionTopLevelDirectoryName("mock-artifact");
+
         MockConfiguration conf = new MockConfiguration();
         r.init(conf);
 
