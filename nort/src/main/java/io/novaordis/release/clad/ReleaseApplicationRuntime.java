@@ -123,7 +123,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
             throw new UserErrorException("RUNTIME_DIR environment variable not defined, configure the location of the runtime directory in the project configuration file");
         }
 
-        configuration.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, s);
+        configuration.set(ConfigurationLabels.RUNTIME_DIRECTORY, s);
 
     }
 
