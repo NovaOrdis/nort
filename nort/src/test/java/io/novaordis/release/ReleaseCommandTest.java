@@ -383,7 +383,7 @@ public class ReleaseCommandTest {
         // simulate a binary installation - the artifact must be a real file
         //
 
-        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("mock-artifact.zip"));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("mock-artifact.zip"), null);
 
         //
         // we need that artifact to "exist"
@@ -488,7 +488,7 @@ public class ReleaseCommandTest {
         // simulate a binary installation - the artifact must be a real file
         //
 
-        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("mock-artifact.zip"));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("mock-artifact.zip"), null);
 
         //
         // we need that artifact to "exist"

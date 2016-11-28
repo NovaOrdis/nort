@@ -152,7 +152,14 @@ public class InstallSequence implements Sequence {
 
         if (!f.isFile()) {
 
-            throw new UserErrorException("binary distribution artifact " + f + " not found in the local artifact repository - was the artifact published?");
+            runtime.warn("binary distribution artifact " + f + " not found in the local artifact repository - was the artifact published? Attempting to use the local copy ...");
+
+            f = binaryDistribution.getLocalFile();
+
+            if (!f.isFile()) {
+
+                throw new UserErrorException("binary distribution artifact not found in the artifact repository, nor in the local work area");
+            }
         }
 
         //

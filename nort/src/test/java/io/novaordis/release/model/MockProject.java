@@ -151,7 +151,7 @@ public class MockProject implements Project {
         return savedVersionHistory;
     }
 
-    public void addArtifact(ArtifactType type, File f) {
+    public void addArtifact(ArtifactType type, File remoteFile, File localFile) {
 
         List<Artifact> as = artifacts.get(type);
 
@@ -161,7 +161,7 @@ public class MockProject implements Project {
             artifacts.put(type, as);
         }
 
-        as.add(new MockArtifact(type, f));
+        as.add(new MockArtifact(type, remoteFile, localFile));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

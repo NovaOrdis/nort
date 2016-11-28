@@ -149,7 +149,7 @@ public class MavenModuleTest {
         MockPOM mockModulePom = new MockPOM();
         mockModulePom.setParent(mmp.getPOM());
 
-        MockArtifact ma = new MockArtifact(null, null);
+        MockArtifact ma = new MockArtifact(null, null, null);
         mockModulePom.setArtifact(ma);
 
         MavenModule m = new MavenModule(mmp, mockModulePom);

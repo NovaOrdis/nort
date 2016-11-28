@@ -31,13 +31,15 @@ public class MockArtifact implements Artifact {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private ArtifactType t;
-    private File f;
+    private File remoteFile;
+    private File localFile;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockArtifact(ArtifactType t, File f) {
+    public MockArtifact(ArtifactType t, File remoteFile, File localFile) {
         this.t = t;
-        this.f = f;
+        this.remoteFile = remoteFile;
+        this.localFile = localFile;
     }
 
     // Artifact implementation -----------------------------------------------------------------------------------------
@@ -51,12 +53,13 @@ public class MockArtifact implements Artifact {
     @Override
     public File getRepositoryFile() {
 
-        return f;
+        return remoteFile;
     }
 
     @Override
     public File getLocalFile() {
-        throw new RuntimeException("getLocalFile() NOT YET IMPLEMENTED");
+
+        return localFile;
     }
 
 
