@@ -81,9 +81,7 @@ public class InstallSequence implements Sequence {
             if (ArtifactType.JAR_LIBRARY.equals(a.getType())) {
 
                 File f = a.getRepositoryFile();
-                runtime.info(f.getName() + " " + a.getType().getLabel() +
-                        " already published to the Maven artifact repository");
-
+                log.debug(f.getName() + " " + a.getType().getLabel() + " already published to the Maven artifact repository");
                 i.remove();
             }
         }
