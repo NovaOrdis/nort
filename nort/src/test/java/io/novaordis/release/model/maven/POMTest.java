@@ -402,8 +402,6 @@ public class POMTest {
         assertEquals("blah-4.3.2", s2);
     }
 
-
-
 //    @Test
 //    public void mavenVariableSupport() throws Exception {
 //
@@ -417,7 +415,6 @@ public class POMTest {
 //
 //        assertEquals("blah-8888", s);
 //    }
-//
 
     // Package protected -----------------------------------------------------------------------------------------------
 
