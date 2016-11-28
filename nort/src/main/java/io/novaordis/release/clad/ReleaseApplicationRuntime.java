@@ -24,6 +24,7 @@ import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Set;
 
@@ -135,6 +136,11 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    public File getProjectWorkAreaDirectory() {
+
+        return new File(".");
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

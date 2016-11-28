@@ -160,6 +160,8 @@ public class InstallSequenceTest extends SequenceTest {
         // the local artifact repository root must be configured and exist
         //
         MockConfiguration mc = new MockConfiguration();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
         File localArtifactRepositoryRoot = new File(scratchDirectory, "mock-artifact-repository");
         assertTrue(localArtifactRepositoryRoot.mkdir());
         mc.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, localArtifactRepositoryRoot.getAbsolutePath());
@@ -167,7 +169,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0");
         mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("I/am/sure/there/is/no/such/file/in/repository.zip"));
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
 
         try {
             
@@ -178,7 +180,7 @@ public class InstallSequenceTest extends SequenceTest {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertTrue(msg.matches("binary distribution artifact .* not found in the local artifact repository - was the artifact published\\?"));
+            assertTrue(msg.matches("binary distribution artifact .* not found in the local artifact repository, nor in the local target directory .*"));
         }
     }
 

@@ -20,6 +20,7 @@ import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.OutputUtil;
 import io.novaordis.release.clad.ConfigurationLabels;
+import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.model.Artifact;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.model.ArtifactType;
@@ -64,7 +65,7 @@ public class InstallSequence implements Sequence {
 
         log.debug("executing the install sequence ...");
 
-        ApplicationRuntime runtime = c.getRuntime();
+        ReleaseApplicationRuntime runtime = c.getRuntime();
 
         //
         // if we are a library, the publish sequence already published the artifacts in the repository, info and skip
@@ -142,17 +143,32 @@ public class InstallSequence implements Sequence {
         }
 
         Artifact binaryDistribution = binaryDistributions.get(0);
-        File f = binaryDistribution.getRepositoryFile();
+        File binaryDistributionRelativeFile = binaryDistribution.getRepositoryFile();
 
         //
         // resolve the file relative to the local artifact repository root
         //
 
-        f = new File(artifactRepositoryRoot, f.getPath());
+        File f = new File(artifactRepositoryRoot, binaryDistributionRelativeFile.getPath());
 
         if (!f.isFile()) {
 
-            throw new UserErrorException("binary distribution artifact " + f + " not found in the local artifact repository - was the artifact published?");
+            log.warn("binary distribution artifact " + f + " not found in the local artifact repository - was the artifact published?");
+
+            //
+            // for binary distributions, also try the local target repository, as an assembly is not
+            // published in the artifact repository by default
+            //
+
+            String fileName = binaryDistributionRelativeFile.getName();
+            f =  new File(runtime.getProjectWorkAreaDirectory(), fileName);
+
+            if (!f.isFile()) {
+
+                throw new UserErrorException(
+                        "binary distribution artifact " + f.getName() + " not found in the local artifact repository, nor in the local target directory " +
+                                f.getParentFile().getAbsolutePath());
+            }
         }
 
         //
