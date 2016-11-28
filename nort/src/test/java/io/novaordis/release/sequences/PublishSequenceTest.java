@@ -342,7 +342,7 @@ public class PublishSequenceTest extends SequenceTest {
 
         try {
 
-            PublishSequence.pushToRemoteCodeRepository(mr, mc);
+            PublishSequence.pushToRemoteCodeRepository(mr, mc, new Version("0"));
             fail("should throw exception");
         }
         catch(UserErrorException e) {
@@ -366,7 +366,7 @@ public class PublishSequenceTest extends SequenceTest {
 
         try {
 
-            PublishSequence.pushToRemoteCodeRepository(mr, mc);
+            PublishSequence.pushToRemoteCodeRepository(mr, mc, new Version("0"));
             fail("should throw exception");
         }
         catch(UserErrorException e) {
@@ -388,7 +388,7 @@ public class PublishSequenceTest extends SequenceTest {
         MockOS mockOS = (MockOS)OS.getInstance();
         mockOS.allCommandsSucceedByDefault();
 
-        assertTrue(PublishSequence.pushToRemoteCodeRepository(mr, mc));
+        assertTrue(PublishSequence.pushToRemoteCodeRepository(mr, mc, new Version("0")));
 
         List<String> executedCommands = mockOS.getHistory();
         assertEquals(1, executedCommands.size());

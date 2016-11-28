@@ -62,7 +62,7 @@ public class PublishSequence implements Sequence {
 
         if (er.isFailure()) { throw new UserErrorException("local publishing failed"); }
 
-        r.info(currentVersion + " artifacts published in the local repository ok");
+        r.info(currentVersion + " local publishing ok");
 
         return true;
     }
@@ -92,7 +92,7 @@ public class PublishSequence implements Sequence {
             return stateChanged;
         }
 
-        stateChanged |= pushToRemoteCodeRepository(r, c);
+        stateChanged |= pushToRemoteCodeRepository(r, c, currentVersion);
         return stateChanged;
     }
 
@@ -133,7 +133,7 @@ public class PublishSequence implements Sequence {
         }
         else {
 
-            r.info("source commit ok");
+            r.info(currentVersion + " source commit ok");
         }
 
         return true;
@@ -173,12 +173,13 @@ public class PublishSequence implements Sequence {
             throw new UserErrorException("failed to tag the local source repository");
         }
 
-        r.info("tag ok");
+        r.info(currentVersion + " source tag ok");
 
         return true;
     }
 
-    static boolean pushToRemoteCodeRepository(ApplicationRuntime r, Configuration c) throws Exception {
+    static boolean pushToRemoteCodeRepository(ApplicationRuntime r, Configuration c, Version currentVersion)
+            throws Exception {
 
         log.debug("pushing to the remote code repository ...");
 
@@ -195,7 +196,7 @@ public class PublishSequence implements Sequence {
             throw new UserErrorException("failed to push to remote source repository");
         }
 
-        r.info("source push ok");
+        r.info(currentVersion + " source push ok");
 
         return true;
     }
