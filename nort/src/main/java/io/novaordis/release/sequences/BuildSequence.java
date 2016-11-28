@@ -86,7 +86,7 @@ public class BuildSequence implements Sequence {
 
         Version currentVersion = m.getVersion();
 
-        r.info("building artifacts for release " + currentVersion + " ...");
+        log.debug("building artifacts for release " + currentVersion + " ...");
 
         log.debug("building with \"" + osBuildCommand + "\" ...");
 

@@ -100,7 +100,7 @@ public class QualificationSequence implements Sequence {
 
         context.setCurrentVersion(currentVersion);
 
-        r.info("running tests for release " + currentVersion + " ...");
+        log.debug("running tests for release " + currentVersion + " ...");
 
         //
         // make sure we have the command required to run all tests

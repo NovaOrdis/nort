@@ -45,7 +45,7 @@ public class PublishSequence implements Sequence {
     /**
      *  Install the artifacts into the local repository, fail if the local artifacts are not available
      */
-    static boolean publishArtifacts(ApplicationRuntime r, Configuration c) throws Exception {
+    static boolean publishArtifacts(ApplicationRuntime r, Configuration c, Version currentVersion) throws Exception {
 
         String localPublishingCommand = c.get(
                 ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY);
@@ -55,16 +55,14 @@ public class PublishSequence implements Sequence {
                     "the OS command to use to publish project artifacts into the local repository was not configured for this project");
         }
 
-        r.info("publishing artifacts into local repository ...");
-
-        log.debug("publishing locally with \"" + localPublishingCommand + "\" ...");
+        log.debug("publishing artifacts into local repository with \"" + localPublishingCommand + "\" ...");
 
         NativeExecutionResult er = OutputUtil.
                 handleNativeCommandOutput(OS.getInstance().execute(localPublishingCommand), r, c);
 
         if (er.isFailure()) { throw new UserErrorException("local publishing failed"); }
 
-        r.info("artifact publishing ok");
+        r.info(currentVersion + " artifacts published in the local repository ok");
 
         return true;
     }
@@ -226,7 +224,7 @@ public class PublishSequence implements Sequence {
         boolean noPush = c.isNoPush();
 
         //noinspection ConstantConditions
-        stateChanged |= publishArtifacts(r, conf);
+        stateChanged |= publishArtifacts(r, conf, currentVersion);
         stateChanged |= publishCodeChanges(r, conf, currentVersion, noPush);
 
         this.executeChangedState = stateChanged;
