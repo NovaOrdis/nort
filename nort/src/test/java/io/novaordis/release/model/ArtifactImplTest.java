@@ -22,7 +22,6 @@ import org.junit.Test;
 import java.io.File;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -85,6 +84,7 @@ public class ArtifactImplTest extends ArtifactTest {
                 a.getRepositoryFile());
         assertEquals(new File("target/red.zip"), a.getLocalFile());
     }
+
 
     // equals() --------------------------------------------------------------------------------------------------------
 

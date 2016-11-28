@@ -62,6 +62,8 @@ public interface Artifact {
      */
     File getLocalFile();
 
+
+
     boolean equals(Object o);
 
     int hashCode();

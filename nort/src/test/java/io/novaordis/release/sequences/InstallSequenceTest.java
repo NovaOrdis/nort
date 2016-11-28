@@ -54,6 +54,7 @@ public class InstallSequenceTest extends SequenceTest {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private File scratchDirectory;
+    @SuppressWarnings("FieldCanBeLocal")
     private File baseDirectory;
 
     // Constructors ----------------------------------------------------------------------------------------------------
@@ -428,7 +429,9 @@ public class InstallSequenceTest extends SequenceTest {
     }
 
     @Test
-    public void execute_Success() throws Exception {
+    public void execute_Success_RepositoryFile() throws Exception {
+
+
 
         InstallSequence is = new InstallSequence();
 
@@ -440,11 +443,73 @@ public class InstallSequenceTest extends SequenceTest {
         MockConfiguration mc = new MockConfiguration();
         File localArtifactRepositoryRoot = new File(scratchDirectory, "mock-artifact-repository");
         assertTrue(localArtifactRepositoryRoot.mkdir());
+
         mc.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, localArtifactRepositoryRoot.getAbsolutePath());
         MockProject mp = new MockProject("1.0");
         File distributionFile = new File(localArtifactRepositoryRoot, distributionFileName + ".zip");
         assertTrue(Files.write(distributionFile, "..."));
         mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()), null);
+
+        File rd = new File(scratchDirectory, "test-runtime-dir");
+        assertTrue(rd.mkdir());
+        mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        MockOS mockOS = (MockOS) OS.getInstance();
+        mockOS.allCommandsSucceedByDefault();
+
+        //
+        // successful execution
+        //
+        mockOS.allCommandsSucceedByDefault();
+
+        //
+        // make sure the script is "found" as unzip is jut mock
+        //
+
+        File installationScript = new File(rd, distributionFileName + "/bin/.install");
+        assertTrue(Files.write(installationScript, "#/bin/bash\n\necho ."));
+        assertTrue(Files.chmod(installationScript, "r-xr--r--"));
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+
+        assertTrue(is.execute(c));
+
+        List<String> commands = mockOS.getHistory();
+        assertEquals(2, commands.size());
+
+        String command = commands.get(0);
+        assertTrue(command.startsWith("unzip"));
+
+        String command2 = commands.get(1);
+        assertEquals(".install", command2);
+    }
+
+    @Test
+    public void execute_Success_LocalFile() throws Exception {
+
+        InstallSequence is = new InstallSequence();
+
+        String distributionFileName = "test-distribution-1.0";
+
+        //
+        // the local artifact repository root must be configured and exist
+        //
+        MockConfiguration mc = new MockConfiguration();
+
+        File localArtifactRepositoryRoot = new File(scratchDirectory, "mock-artifact-repository");
+        assertTrue(localArtifactRepositoryRoot.mkdir());
+        mc.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, localArtifactRepositoryRoot.getAbsolutePath());
+
+        File targetDirSimulation = new File(scratchDirectory, "project/release/target");
+        assertTrue(targetDirSimulation.mkdirs());
+
+        MockProject mp = new MockProject("1.0");
+
+        File distributionFile = new File(targetDirSimulation, distributionFileName + ".zip");
+        assertTrue(Files.write(distributionFile, "..."));
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("does-not-matter.zip"), distributionFile);
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
