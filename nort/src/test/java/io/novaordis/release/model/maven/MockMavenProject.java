@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.novaordis.release;
+package io.novaordis.release.model.maven;
 
 import io.novaordis.release.model.maven.MavenProject;
 import io.novaordis.release.model.maven.POM;

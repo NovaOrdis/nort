@@ -23,12 +23,9 @@ import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.variable.VariableProvider;
-import io.novaordis.utilities.variable.VariableProviderImpl;
 import io.novaordis.utilities.xml.editor.BasicInLineXmlEditor;
 import io.novaordis.utilities.xml.editor.InLineXmlEditor;
 import io.novaordis.utilities.xml.editor.InLineXmlEditorWithVariableSupport;
-import io.novaordis.utilities.xml.editor.XmlElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,11 +58,11 @@ public class POM {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     //
-    // the variable provider that gets initialized with properties declared this POM instance's XML file. It handles
-    // these properties as variables. It has access to the variables (properties) declared by its parent (if any) and
-    // the runtime, but locally declared variables supersede those declared by the above layers
+    // the variable provider that does not maintain its own local variable cache, but acts as a facade and and delegates
+    // variable resolution to the pom itself. It has access to the properties declared by the pom and by its parent, and
+    // handle these properties as variables.
 
-    private VariableProvider localVariableProvider;
+    private POMVariableProvider pomVariableProvider;
 
     private InLineXmlEditorWithVariableSupport pomEditor;
 
@@ -116,43 +113,15 @@ public class POM {
     public POM(POM parent, File pomFile) throws Exception {
 
         this.moduleNames = Collections.emptyList();
-
-        this.localVariableProvider = new VariableProviderImpl();
-
         this.parent = parent;
-
-        //
-        // install the local variable provider in POM-owned variable providers: the local variable provider should
-        // be the child of the parent POM's variable provider.
-        //
-
-        if (parent != null) {
-
-            this.localVariableProvider.setVariableProviderParent(parent.getLocalVariableProvider());
-        }
-
         this.pomEditor = new InLineXmlEditorWithVariableSupport(pomFile);
+        this.pomVariableProvider = new POMVariableProvider(this, pomEditor);
 
         //
         // install the local variable provider
         //
 
-        pomEditor.setVariableProvider(localVariableProvider);
-
-        //
-        // populate the local variable provider with the variables corresponding to the properties declared in the
-        // associated XML file
-        //
-
-        List<XmlElement> propertyElements = pomEditor.getElements("/project/properties");
-
-        if (!propertyElements.isEmpty()) {
-
-            for(XmlElement p: propertyElements) {
-
-                localVariableProvider.setVariableValue(p.getName(), p.getValue());
-            }
-        }
+        pomEditor.setVariableProvider(pomVariableProvider);
 
         //
         // cache the read-only information
@@ -421,9 +390,13 @@ public class POM {
 
     // Package protected -----------------------------------------------------------------------------------------------
 
-    VariableProvider getLocalVariableProvider() {
+    /**
+     * Even we prefer we would  not expose the provider, instead of doing that and adding the variable access API to
+     * the POM interface, we prefer exposing the provider.
+     */
+    POMVariableProvider getVariableProvider() {
 
-        return localVariableProvider;
+        return pomVariableProvider;
     }
 
     // Protected -------------------------------------------------------------------------------------------------------

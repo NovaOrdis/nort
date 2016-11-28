@@ -16,7 +16,6 @@
 
 package io.novaordis.release.model.maven;
 
-import io.novaordis.release.MockMavenProject;
 import io.novaordis.release.Util;
 import io.novaordis.release.model.Artifact;
 import io.novaordis.release.model.ArtifactType;

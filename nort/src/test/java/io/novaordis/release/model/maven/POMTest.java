@@ -23,7 +23,6 @@ import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.variable.VariableProvider;
-import io.novaordis.utilities.variable.VariableProviderImpl;
 import io.novaordis.utilities.xml.editor.BasicInLineXmlEditor;
 import org.junit.After;
 import org.junit.Before;
@@ -340,24 +339,22 @@ public class POMTest {
     @Test
     public void parentChildRelationship() throws Exception {
 
-        VariableProvider parentVariableProvider = new VariableProviderImpl();
+        File f = Util.cp("maven/poms-with-variables/pom-with-variable-1.xml", scratchDirectory);
+        POM parent = new POM(f);
+        POMVariableProvider parentVp = parent.getVariableProvider();
 
-        MockPOM parent = new MockPOM();
-        parent.setLocalVariableProvider(parentVariableProvider);
+        assertEquals("A", parentVp.getVariableValue("custom.property.1"));
 
-        File f = Util.cp("maven/pom-sample.xml", scratchDirectory);
-
-        POM child = new POM(parent, f);
+        File f2 = Util.cp("maven/poms-with-variables/pom-with-variable-2.xml", scratchDirectory);
+        POM child = new POM(parent, f2);
+        POMVariableProvider childVp = child.getVariableProvider();
 
         //
-        // verify that the variable provider relationship is established
+        // verify that the variable provider relationship is established, in that we can read parent's properties
         //
 
-        VariableProvider childVariableProvider = child.getLocalVariableProvider();
-
-        VariableProvider parentVariableProvider2 = childVariableProvider.getVariableProviderParent();
-
-        assertEquals(parentVariableProvider, parentVariableProvider2);
+        assertEquals("B", childVp.getVariableValue("custom.property.2"));
+        assertEquals("A", childVp.getVariableValue("custom.property.1"));
     }
 
     // variable support ------------------------------------------------------------------------------------------------
@@ -369,10 +366,9 @@ public class POMTest {
 
         POM p = new POM(f);
 
-        VariableProvider lvp = p.getLocalVariableProvider();
-        assertNull(lvp.getVariableProviderParent());
+        VariableProvider provider = p.getVariableProvider();
 
-        String v = lvp.getVariableValue("my.version");
+        String v = provider.getVariableValue("my.version");
 
         assertEquals("3.2.1", v);
 
@@ -382,39 +378,37 @@ public class POMTest {
     }
 
     @Test
-    public void customVariableSupport_VariableChanges() throws Exception {
+    public void mavenVariableSupport_Version() throws Exception {
 
-        File f = Util.cp("maven/poms-with-variables/pom-with-variable-as-custom-property.xml", scratchDirectory);
+        File f = Util.cp(baseDirectory,
+                "src/test/resources/data/maven/poms-with-variables/pom-with-variable-as-maven-property.xml",
+                scratchDirectory);
 
         POM p = new POM(f);
 
-        VariableProvider lvp = p.getLocalVariableProvider();
-
-        assertEquals("3.2.1", lvp.getVariableValue("my.version"));
+        assertEquals("8888", p.getVersion().getLiteral());
 
         String s = p.getFinalName();
-        assertEquals("blah-3.2.1", s);
 
-        lvp.setVariableValue("my.version", "4.3.2");
-        assertEquals("4.3.2", lvp.getVariableValue("my.version"));
-
-        String s2 = p.getFinalName();
-        assertEquals("blah-4.3.2", s2);
+        assertEquals("blah-8888", s);
     }
 
-//    @Test
-//    public void mavenVariableSupport() throws Exception {
-//
-//        File f = Util.cp(baseDirectory,
-//                "src/test/resources/data/maven/poms-with-variables/pom-with-variable-as-maven-property.xml",
-//                scratchDirectory);
-//
-//        POM p = new POM(f);
-//
-//        String s = p.getFinalName();
-//
-//        assertEquals("blah-8888", s);
-//    }
+    @Test
+    public void mavenVariableSupport_ProjectVersion() throws Exception {
+
+        File f = Util.cp(baseDirectory,
+                "src/test/resources/data/maven/poms-with-variables/pom-with-variable-as-maven-property-2.xml",
+                scratchDirectory);
+
+        POM p = new POM(f);
+
+        assertEquals("9999", p.getVersion().getLiteral());
+
+        String s = p.getFinalName();
+
+        assertEquals("blah-9999", s);
+    }
+
 
     // Package protected -----------------------------------------------------------------------------------------------
 

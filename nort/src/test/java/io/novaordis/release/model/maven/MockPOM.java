@@ -20,7 +20,6 @@ import io.novaordis.release.model.Artifact;
 import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
-import io.novaordis.utilities.variable.VariableProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +43,7 @@ public class MockPOM extends POM {
     private String groupId;
     private POM parent;
     private Version version;
-    private VariableProvider variableProvider;
+    private POMVariableProvider variableProvider;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -133,7 +132,7 @@ public class MockPOM extends POM {
     }
 
     @Override
-    public VariableProvider getLocalVariableProvider() {
+    public POMVariableProvider getVariableProvider() {
 
         return variableProvider;
     }
@@ -167,7 +166,7 @@ public class MockPOM extends POM {
         this.parent = parent;
     }
 
-    void setLocalVariableProvider(VariableProvider vp) {
+    void setVariableProvider(POMVariableProvider vp) {
 
         this.variableProvider = vp;
     }

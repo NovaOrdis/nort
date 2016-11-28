@@ -17,7 +17,7 @@
 package io.novaordis.release.sequences;
 
 import io.novaordis.release.MockConfiguration;
-import io.novaordis.release.MockMavenProject;
+import io.novaordis.release.model.maven.MockMavenProject;
 import io.novaordis.release.MockOS;
 import io.novaordis.release.MockReleaseApplicationRuntime;
 import io.novaordis.release.clad.ConfigurationLabels;
