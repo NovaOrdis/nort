@@ -331,7 +331,7 @@ public class POMTest {
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, pom.getArtifactType());
         Artifact a = pom.getArtifact();
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, a.getType());
-        assertEquals(new File("io/test/release/33.33/binary-release-A-33.33.tar.gz"), a.getRepositoryFile());
+        assertEquals(new File("io/test/release/33.33/release-33.33.tar.gz"), a.getRepositoryFile());
     }
 
     // POM hierarchy ---------------------------------------------------------------------------------------------------

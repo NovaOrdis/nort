@@ -60,9 +60,24 @@ public class ArtifactImpl implements Artifact {
 
         String effectiveExtension = extension != null ? extension : type.getExtension();
 
-        String artifactBaseName = finalName == null ? artifactId : finalName;
+        //
+        // finalName is ignored when it comes to install artifacts in the repository
+        //
+        //
+        // TODO find a solution to that
+        //
 
-        s += '/' + artifactId + "/" + v + "/" + artifactBaseName + "-" + v + "." + effectiveExtension;
+        //
+        // String artifactBaseName = finalName != null ? finalName : artifactId + "-" + v;
+        //
+
+        String artifactBaseName = artifactId + "-" + v;
+
+        //
+        //
+        //
+
+        s += '/' + artifactId + "/" + v + "/" + artifactBaseName + "." + effectiveExtension;
 
         this.repositoryFile = new File(s);
     }

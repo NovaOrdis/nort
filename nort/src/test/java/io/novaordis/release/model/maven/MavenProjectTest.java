@@ -255,12 +255,12 @@ public class MavenProjectTest extends ProjectTest {
         MavenProject p = new MavenProject(pf);
 
         Artifact a = p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0);
-        assertEquals(new File("io/test/release/88/binary-release-A-88.tar.gz"), a.getRepositoryFile());
+        assertEquals(new File("io/test/release/88/release-88.tar.gz"), a.getRepositoryFile());
 
         assertTrue(p.setVersion(new Version("77.77")));
 
         Artifact a2 = p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0);
-        assertEquals(new File("io/test/release/77.77/binary-release-A-77.77.tar.gz"), a2.getRepositoryFile());
+        assertEquals(new File("io/test/release/77.77/release-77.77.tar.gz"), a2.getRepositoryFile());
     }
 
     // module management -----------------------------------------------------------------------------------------------
@@ -314,7 +314,7 @@ public class MavenProjectTest extends ProjectTest {
         Artifact a3 = artifacts.get(2);
         assertEquals(a3, p.getArtifacts(ArtifactType.BINARY_DISTRIBUTION).get(0));
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, a3.getType());
-        assertEquals(new File("io/test/release/88/binary-release-A-88.tar.gz"), a3.getRepositoryFile());
+        assertEquals(new File("io/test/release/88/release-88.tar.gz"), a3.getRepositoryFile());
     }
 
     @Test

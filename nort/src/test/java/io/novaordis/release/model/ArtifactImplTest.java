@@ -50,15 +50,37 @@ public class ArtifactImplTest extends ArtifactTest {
     }
 
     @Test
-    public void constructor_FinalNameSpecified() throws Exception {
+    public void constructor_FinalNameSpecified_JAR() throws Exception {
 
         ArtifactImpl a = new ArtifactImpl(ArtifactType.JAR_LIBRARY,
-                "io.test-group", "test-artifact", new Version("1.0"), "blah", null);
+                "io.test-group", "test-artifact", new Version("1.0"), "WILL-BE-IGNORED", null);
 
         assertEquals(ArtifactType.JAR_LIBRARY, a.getType());
-        assertEquals(new File("io/test-group/test-artifact/1.0/blah-1.0.jar"), a.getRepositoryFile());
+
+        //
+        // finalName is ignored when building files to be installed in repository
+        // https://kb.novaordis.com/index.php/Maven_pom.xml#.3CfinalName.3E
+        //
+
+        assertEquals(new File("io/test-group/test-artifact/1.0/test-artifact-1.0.jar"), a.getRepositoryFile());
     }
 
+    @Test
+    public void constructor_FinalNameSpecified_BINARY_DISTRIBUTION() throws Exception {
+
+        ArtifactImpl a = new ArtifactImpl(ArtifactType.BINARY_DISTRIBUTION,
+                "io.test-group", "release", new Version("1.0.0-SNAPSHOT-4"), "WILL-BE-IGNORED", "zip");
+
+        assertEquals(ArtifactType.BINARY_DISTRIBUTION, a.getType());
+
+        //
+        // finalName is ignored when building files to be installed in repository
+        // https://kb.novaordis.com/index.php/Maven_pom.xml#.3CfinalName.3E
+        //
+
+        assertEquals(new File("io/test-group/release/1.0.0-SNAPSHOT-4/release-1.0.0-SNAPSHOT-4.zip"),
+                a.getRepositoryFile());
+    }
 
     // equals() --------------------------------------------------------------------------------------------------------
 
