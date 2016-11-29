@@ -143,7 +143,7 @@ public class MavenArtifactImpl implements MavenArtifact {
      * @return the POM instance this artifact is associated with. Can never ve null.
      */
     @Override
-    public POM getPom() {
+    public POM getPOM() {
 
         return pom;
     }

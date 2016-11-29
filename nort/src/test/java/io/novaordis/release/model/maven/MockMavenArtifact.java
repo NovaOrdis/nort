@@ -66,8 +66,8 @@ public class MockMavenArtifact implements MavenArtifact {
     }
 
     @Override
-    public POM getPom() {
-        throw new RuntimeException("getPom() NOT YET IMPLEMENTED");
+    public POM getPOM() {
+        throw new RuntimeException("getPOM() NOT YET IMPLEMENTED");
     }
 
 

@@ -126,7 +126,7 @@ public class POMTest {
         assertEquals(ArtifactType.JAR_LIBRARY, pom.getArtifactType());
 
         MavenArtifact artifact = pom.getArtifact();
-        assertEquals(pom, artifact.getPom());
+        assertEquals(pom, artifact.getPOM());
 
         assertEquals(ArtifactType.JAR_LIBRARY, artifact.getType());
 
@@ -330,7 +330,7 @@ public class POMTest {
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, pom.getArtifactType());
 
         MavenArtifact a = pom.getArtifact();
-        assertEquals(pom, a.getPom());
+        assertEquals(pom, a.getPOM());
 
         assertEquals(ArtifactType.BINARY_DISTRIBUTION, a.getType());
         assertEquals(new File("io/test/release/33.33/release-33.33.tar.gz"), a.getRepositoryFile());

@@ -30,6 +30,6 @@ public interface MavenArtifact extends Artifact {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    POM getPom();
+    POM getPOM();
 
 }
