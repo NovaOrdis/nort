@@ -21,7 +21,7 @@ import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.xml.editor.InLineXmlEditor;
+import io.novaordis.utilities.xml.editor.InLineXMLEditor;
 
 import java.io.File;
 import java.io.IOException;
@@ -180,7 +180,7 @@ public class MavenModule {
      *
      * @see MavenProject#undo()
      * @see POM#undo()
-     * @see InLineXmlEditor#undo()
+     * @see InLineXMLEditor#undo()
      */
     public boolean undo() throws IOException {
 

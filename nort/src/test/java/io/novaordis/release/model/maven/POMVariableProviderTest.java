@@ -18,7 +18,7 @@ package io.novaordis.release.model.maven;
 
 import io.novaordis.release.model.MockInLineXmlEditor;
 import io.novaordis.release.version.Version;
-import io.novaordis.utilities.xml.editor.XmlElement;
+import io.novaordis.utilities.xml.editor.XMLElement;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,7 +140,7 @@ public class POMVariableProviderTest {
 
         MockPOM mockPom = new MockPOM();
         MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
-        mockEditor.setElements("/project/properties", new XmlElement("declared.property", "something-123"));
+        mockEditor.setElements("/project/properties", new XMLElement("declared.property", "something-123"));
 
         POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
 
@@ -153,7 +153,7 @@ public class POMVariableProviderTest {
 
         MockPOM mockParentPom = new MockPOM();
         MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
-        mockEditor.setElements("/project/properties", new XmlElement("declared.property", "something-345"));
+        mockEditor.setElements("/project/properties", new XMLElement("declared.property", "something-345"));
         POMVariableProvider parentProvider = new POMVariableProvider(mockParentPom, mockEditor);
         mockParentPom.setVariableProvider(parentProvider);
 
@@ -173,7 +173,7 @@ public class POMVariableProviderTest {
 
         MockPOM mockParentPom = new MockPOM();
         MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
-        mockEditor.setElements("/project/properties", new XmlElement("declared.property", "something-345"));
+        mockEditor.setElements("/project/properties", new XMLElement("declared.property", "something-345"));
         POMVariableProvider parentProvider = new POMVariableProvider(mockParentPom, mockEditor);
         mockParentPom.setVariableProvider(parentProvider);
 

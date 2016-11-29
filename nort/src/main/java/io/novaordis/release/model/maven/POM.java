@@ -21,9 +21,9 @@ import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.xml.editor.BasicInLineXmlEditor;
-import io.novaordis.utilities.xml.editor.InLineXmlEditor;
-import io.novaordis.utilities.xml.editor.InLineXmlEditorWithVariableSupport;
+import io.novaordis.utilities.xml.editor.BasicInLineXMLEditor;
+import io.novaordis.utilities.xml.editor.InLineXMLEditor;
+import io.novaordis.utilities.xml.editor.VariableAwareInLineXMLEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,7 @@ public class POM {
 
     private POMVariableProvider pomVariableProvider;
 
-    private InLineXmlEditorWithVariableSupport pomEditor;
+    private VariableAwareInLineXMLEditor pomEditor;
 
     // may be null
     private POM parent;
@@ -115,7 +115,7 @@ public class POM {
 
         this.moduleNames = Collections.emptyList();
         this.parent = parent;
-        this.pomEditor = new InLineXmlEditorWithVariableSupport(pomFile);
+        this.pomEditor = new VariableAwareInLineXMLEditor(pomFile);
         this.pomVariableProvider = new POMVariableProvider(this, pomEditor);
 
         //
@@ -229,7 +229,7 @@ public class POM {
      * @param version the instance is syntactically correct, as it was already parsed.
      *
      * @see Project#save()
-     * @see InLineXmlEditor#save()
+     * @see InLineXMLEditor#save()
      *
      * @return true if the version information was changed in memory as result of the call, false otherwise, which
      * happens when the cached version is the same as the version passed as argument.
@@ -384,7 +384,7 @@ public class POM {
     }
 
     /**
-     * @see InLineXmlEditor#save()
+     * @see InLineXMLEditor#save()
      */
     public boolean save() throws IOException {
 
@@ -392,7 +392,7 @@ public class POM {
     }
 
     /**
-     * @see InLineXmlEditor#undo()
+     * @see InLineXMLEditor#undo()
      */
     public boolean undo() throws IOException {
 
@@ -430,7 +430,7 @@ public class POM {
      * Resolves the groupId to a non-null string - from the current pom or the parent. If not able to find a groupId,
      * throws a UserErrorException.
      */
-    private String resolveGroupId(InLineXmlEditor editor) throws Exception {
+    private String resolveGroupId(InLineXMLEditor editor) throws Exception {
 
         String gid = editor.get("/project/groupId");
 
@@ -459,7 +459,7 @@ public class POM {
      * (https://kb.novaordis.com/index.php/Building_a_Maven_Complex_Release_Artifact#Dedicated_Release_Module), which
      * builds a binary distribution.
      */
-    private void handlePomPackaging(POM parentPom, InLineXmlEditor editor) throws Exception {
+    private void handlePomPackaging(POM parentPom, InLineXMLEditor editor) throws Exception {
 
         List<String> mns = editor.getList("/project/modules/module");
 
@@ -486,7 +486,7 @@ public class POM {
      * https://kb.novaordis.com/index.php/Building_a_Maven_Complex_Release_Artifact#Dedicated_Release_Module.
      * A release module builds a binary distribution.
      */
-    private void processReleaseModulePom(POM parentPom, InLineXmlEditor editor) throws Exception {
+    private void processReleaseModulePom(POM parentPom, InLineXMLEditor editor) throws Exception {
 
         if (parentPom == null) {
 
@@ -534,7 +534,7 @@ public class POM {
                     "assembly descriptor " + assemblyFile.getAbsolutePath() + " not available or cannot be read");
         }
 
-        InLineXmlEditor assemblyEditor = new BasicInLineXmlEditor(assemblyFile);
+        InLineXMLEditor assemblyEditor = new BasicInLineXMLEditor(assemblyFile);
 
         List<String> formats = assemblyEditor.getList("/assembly/formats/format");
 

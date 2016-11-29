@@ -23,7 +23,7 @@ import io.novaordis.release.model.ProjectTest;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.xml.editor.BasicInLineXmlEditor;
+import io.novaordis.utilities.xml.editor.BasicInLineXMLEditor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -477,10 +477,10 @@ public class MavenProjectTest extends ProjectTest {
         assertNotEquals(module2PomContent, module2PomContent3);
         assertNotEquals(releasePomContent, releasePomContent3);
 
-        assertEquals("99", new BasicInLineXmlEditor(rootPom).get("/project/version"));
-        assertEquals("99", new BasicInLineXmlEditor(module1Pom).get("/project/parent/version"));
-        assertEquals("99", new BasicInLineXmlEditor(module2Pom).get("/project/parent/version"));
-        assertEquals("99", new BasicInLineXmlEditor(releasePom).get("/project/parent/version"));
+        assertEquals("99", new BasicInLineXMLEditor(rootPom).get("/project/version"));
+        assertEquals("99", new BasicInLineXMLEditor(module1Pom).get("/project/parent/version"));
+        assertEquals("99", new BasicInLineXMLEditor(module2Pom).get("/project/parent/version"));
+        assertEquals("99", new BasicInLineXMLEditor(releasePom).get("/project/parent/version"));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

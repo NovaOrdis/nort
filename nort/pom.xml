@@ -32,6 +32,9 @@
         <test.scratch.directory>target/test-scratch</test.scratch.directory>
         <maven.build.timestamp.format>MM/dd/yy</maven.build.timestamp.format>
         <release_date>${maven.build.timestamp}</release_date>
+
+        <novaordis.utilities.version>4.3.0-SNAPSHOT-1</novaordis.utilities.version>
+        <clad.version>3.3.3-SNAPSHOT-1</clad.version>
     </properties>
 
     <build>
@@ -86,12 +89,12 @@
         <dependency>
             <groupId>io.novaordis.utilities</groupId>
             <artifactId>novaordis-utilities</artifactId>
-            <version>4.2.3-SNAPSHOT-1</version>
+            <version>${novaordis.utilities.version}</version>
         </dependency>
         <dependency>
             <groupId>io.novaordis.clad</groupId>
             <artifactId>novaordis-clad</artifactId>
-            <version>3.3.2-SNAPSHOT-7</version>
+            <version>${clad.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

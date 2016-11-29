@@ -22,7 +22,7 @@ import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.xml.editor.InLineXmlEditor;
+import io.novaordis.utilities.xml.editor.InLineXMLEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -191,7 +191,7 @@ public class MavenProject implements Project {
      *
      * @see MavenModule#save()
      * @see POM#save()
-     * @see InLineXmlEditor#save()
+     * @see InLineXMLEditor#save()
      */
     @Override
     public boolean save() throws IOException {
@@ -217,7 +217,7 @@ public class MavenProject implements Project {
      * Also see:
      *
      * @see POM#undo()
-     * @see InLineXmlEditor#undo()
+     * @see InLineXMLEditor#undo()
      */
     @Override
     public boolean undo() throws IOException {

@@ -23,7 +23,7 @@ import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.variable.VariableProvider;
-import io.novaordis.utilities.xml.editor.BasicInLineXmlEditor;
+import io.novaordis.utilities.xml.editor.BasicInLineXMLEditor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -209,7 +209,7 @@ public class POMTest {
 
         assertTrue(p.save());
 
-        String s = new BasicInLineXmlEditor(f).get("/project/parent/version");
+        String s = new BasicInLineXMLEditor(f).get("/project/parent/version");
         assertEquals("99", s);
     }
 

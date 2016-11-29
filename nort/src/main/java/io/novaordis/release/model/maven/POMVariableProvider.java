@@ -19,8 +19,8 @@ package io.novaordis.release.model.maven;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.variable.VariableProvider;
-import io.novaordis.utilities.xml.editor.InLineXmlEditor;
-import io.novaordis.utilities.xml.editor.XmlElement;
+import io.novaordis.utilities.xml.editor.InLineXMLEditor;
+import io.novaordis.utilities.xml.editor.XMLElement;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +54,7 @@ public class POMVariableProvider implements VariableProvider {
     /**
      * @param pom can never be null
      */
-    public POMVariableProvider(POM pom, InLineXmlEditor pomEditor) {
+    public POMVariableProvider(POM pom, InLineXMLEditor pomEditor) {
 
         if (pom == null) {
 
@@ -76,11 +76,11 @@ public class POMVariableProvider implements VariableProvider {
 
         this.cachedPomProperties = new HashMap<>();
 
-        List<XmlElement> propertyElements = pomEditor.getElements("/project/properties");
+        List<XMLElement> propertyElements = pomEditor.getElements("/project/properties");
 
         if (!propertyElements.isEmpty()) {
 
-            for(XmlElement p: propertyElements) {
+            for(XMLElement p: propertyElements) {
 
                 cachedPomProperties.put(p.getName(), p.getValue());
             }

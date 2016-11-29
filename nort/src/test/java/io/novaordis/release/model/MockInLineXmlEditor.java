@@ -16,8 +16,8 @@
 
 package io.novaordis.release.model;
 
-import io.novaordis.utilities.xml.editor.InLineXmlEditor;
-import io.novaordis.utilities.xml.editor.XmlElement;
+import io.novaordis.utilities.xml.editor.InLineXMLEditor;
+import io.novaordis.utilities.xml.editor.XMLElement;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,7 @@ import java.util.Map;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/28/16
  */
-public class MockInLineXmlEditor implements InLineXmlEditor {
+public class MockInLineXmlEditor implements InLineXMLEditor {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ public class MockInLineXmlEditor implements InLineXmlEditor {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Map<String, List<XmlElement>> paths;
+    private Map<String, List<XMLElement>> paths;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -81,9 +81,9 @@ public class MockInLineXmlEditor implements InLineXmlEditor {
     }
 
     @Override
-    public List<XmlElement> getElements(String path) {
+    public List<XMLElement> getElements(String path) {
 
-        List<XmlElement> elements = paths.get(path);
+        List<XMLElement> elements = paths.get(path);
 
         if (elements == null) {
             return Collections.emptyList();
@@ -109,13 +109,13 @@ public class MockInLineXmlEditor implements InLineXmlEditor {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void setElements(String path, XmlElement... elements) {
+    public void setElements(String path, XMLElement... elements) {
 
         if (elements == null) {
             return;
         }
 
-        List<XmlElement> storage = paths.get(path);
+        List<XMLElement> storage = paths.get(path);
 
         if (storage == null) {
 
