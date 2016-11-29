@@ -31,7 +31,7 @@ import java.util.Map;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/28/16
  */
-public class MockInLineXmlEditor implements InLineXMLEditor {
+public class MockInLineXMLEditor implements InLineXMLEditor {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -43,12 +43,12 @@ public class MockInLineXmlEditor implements InLineXMLEditor {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockInLineXmlEditor() {
+    public MockInLineXMLEditor() {
 
         this.paths = new HashMap<>();
     }
 
-    // InLineXmlEditor implementation ----------------------------------------------------------------------------------
+    // InLineXMLEditor implementation ----------------------------------------------------------------------------------
 
     @Override
     public File getFile() {

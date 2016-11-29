@@ -16,7 +16,7 @@
 
 package io.novaordis.release.model.maven;
 
-import io.novaordis.release.model.MockInLineXmlEditor;
+import io.novaordis.release.model.MockInLineXMLEditor;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.xml.editor.XMLElement;
 import org.junit.Test;
@@ -79,7 +79,7 @@ public class POMVariableProviderTest {
     public void constructor() throws Exception {
 
         MockPOM mockPom = new MockPOM();
-        MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
+        MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
 
         POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
 
@@ -92,7 +92,7 @@ public class POMVariableProviderTest {
     public void setVariableValue() throws Exception {
 
         MockPOM mockPom = new MockPOM();
-        MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
+        MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
         POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
 
         try {
@@ -113,7 +113,7 @@ public class POMVariableProviderTest {
     public void getVariableValue_Version() throws Exception {
 
         MockPOM mockPom = new MockPOM();
-        MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
+        MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
         POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
 
         mockPom.setVersion(new Version("5678"));
@@ -126,7 +126,7 @@ public class POMVariableProviderTest {
     public void getVariableValue_ProjectVersion() throws Exception {
 
         MockPOM mockPom = new MockPOM();
-        MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
+        MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
         POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
 
         mockPom.setVersion(new Version("6789"));
@@ -139,7 +139,7 @@ public class POMVariableProviderTest {
     public void getVariableValue_DeclaredProperty() throws Exception {
 
         MockPOM mockPom = new MockPOM();
-        MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
+        MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
         mockEditor.setElements("/project/properties", new XMLElement("declared.property", "something-123"));
 
         POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
@@ -152,13 +152,13 @@ public class POMVariableProviderTest {
     public void getVariableValue_DeclaredPropertyInParent() throws Exception {
 
         MockPOM mockParentPom = new MockPOM();
-        MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
+        MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
         mockEditor.setElements("/project/properties", new XMLElement("declared.property", "something-345"));
         POMVariableProvider parentProvider = new POMVariableProvider(mockParentPom, mockEditor);
         mockParentPom.setVariableProvider(parentProvider);
 
         MockPOM pom = new MockPOM();
-        MockInLineXmlEditor mockEditor2 = new MockInLineXmlEditor();
+        MockInLineXMLEditor mockEditor2 = new MockInLineXMLEditor();
         POMVariableProvider provider = new POMVariableProvider(pom, mockEditor2);
         pom.setVariableProvider(provider);
 
@@ -172,13 +172,13 @@ public class POMVariableProviderTest {
     public void getVariableValue_NoSuchVariable() throws Exception {
 
         MockPOM mockParentPom = new MockPOM();
-        MockInLineXmlEditor mockEditor = new MockInLineXmlEditor();
+        MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
         mockEditor.setElements("/project/properties", new XMLElement("declared.property", "something-345"));
         POMVariableProvider parentProvider = new POMVariableProvider(mockParentPom, mockEditor);
         mockParentPom.setVariableProvider(parentProvider);
 
         MockPOM pom = new MockPOM();
-        MockInLineXmlEditor mockEditor2 = new MockInLineXmlEditor();
+        MockInLineXMLEditor mockEditor2 = new MockInLineXMLEditor();
         POMVariableProvider provider = new POMVariableProvider(pom, mockEditor2);
         pom.setVariableProvider(provider);
 
