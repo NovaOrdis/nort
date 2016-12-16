@@ -57,25 +57,13 @@ public class QualificationSequence implements Sequence {
 
         log.debug("executing the qualification sequence ...");
 
-        Project p = context.getProject();
-
-        ReleaseMode rm = context.getReleaseMode();
-        log.debug("release mode: " + rm);
-
-        insureCurrentVersionIsSnapshot(p);
-        Version currentVersion = incrementCurrentVersionIfNecessary(p, rm);
-
-        //
-        // set the current version for subsequent sequences
-        //
-
-        context.setCurrentVersion(currentVersion);
-
+        insureCurrentVersionIsSnapshot(context);
+        incrementCurrentVersionIfNecessary(context);
         boolean testsPassed = executeTests(context);
 
         if (testsPassed) {
 
-            context.getRuntime().info(currentVersion + " tests ok");
+            context.getRuntime().info(context.getCurrentVersion() + " tests ok");
         }
         else {
 
@@ -104,11 +92,11 @@ public class QualificationSequence implements Sequence {
 
     // Package protected -----------------------------------------------------------------------------------------------
 
-    void insureCurrentVersionIsSnapshot(Project p) throws Exception {
+    void insureCurrentVersionIsSnapshot(SequenceExecutionContext context) throws Exception {
 
         log.debug("insuring the current version is a snapshot version ...");
 
-        Version v = p.getVersion();
+        Version v = context.getCurrentVersion();
 
         log.debug("current version " + v);
 
@@ -125,13 +113,18 @@ public class QualificationSequence implements Sequence {
      *
      * A noop if the release is a snapshot release, as the state is already appropriate.
      *
-     * @return the current version (which may be incremented)
+     * The method will also update the context with the current version (which may be incremented).
      *
      * @exception IllegalArgumentException if we attempt to update to a custom version that is older then the current.
      */
-    Version incrementCurrentVersionIfNecessary(Project p, ReleaseMode rm) throws Exception {
+    void incrementCurrentVersionIfNecessary(SequenceExecutionContext context) throws Exception {
 
-        Version currentVersion = p.getVersion();
+        ReleaseMode rm = context.getReleaseMode();
+
+        log.debug("attempt to increment the current version, if necessary, release mode " + rm);
+
+        Project p = context.getProject();
+        Version currentVersion = context.getCurrentVersion();
         Version nextVersion = null;
 
         if (rm.isDot()) {
@@ -152,13 +145,12 @@ public class QualificationSequence implements Sequence {
             nextVersion = rm.getCustomVersion();
         }
 
-        if (nextVersion == null) {
+        if (nextVersion == null || nextVersion.equals(currentVersion)) {
 
             //
-            // noop
+            // no version change, noop
             //
-
-            return currentVersion;
+            return;
         }
 
         //
@@ -182,7 +174,12 @@ public class QualificationSequence implements Sequence {
         // we need the version change on disk, so the tests can be executed in top of the changed version
         //
         executeChangedState = p.save() || executeChangedState;
-        return nextVersion;
+
+        //
+        // version change, place the new version in the context
+        //
+
+        context.setCurrentVersion(nextVersion);
     }
 
     /**
@@ -195,7 +192,7 @@ public class QualificationSequence implements Sequence {
      */
     boolean executeTests(SequenceExecutionContext context) throws Exception {
 
-        boolean testsExecutedSuccessfully = false;
+        boolean testsExecutedSuccessfully;
 
         Version currentVersion = context.getCurrentVersion();
 

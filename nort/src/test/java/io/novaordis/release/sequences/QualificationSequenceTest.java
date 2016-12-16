@@ -328,7 +328,11 @@ public class QualificationSequenceTest extends SequenceTest {
         Version v = new Version("1.0.0-SNAPSHOT-1");
         MockProject mp = new MockProject(v);
 
-        Version v2 = s.incrementCurrentVersionIfNecessary(mp, ReleaseMode.snapshot);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, mp, ReleaseMode.snapshot, true, null);
+
+        s.incrementCurrentVersionIfNecessary(c);
+
+        Version v2 = c.getCurrentVersion();
         assertEquals(v, v2);
 
         assertFalse(s.didExecuteChangeState());
@@ -343,8 +347,11 @@ public class QualificationSequenceTest extends SequenceTest {
         Version v = new Version("1.0.0-SNAPSHOT-1");
         MockProject mp = new MockProject(v);
 
-        Version v2 = s.incrementCurrentVersionIfNecessary(mp, ReleaseMode.patch);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, mp, ReleaseMode.patch, true, null);
 
+        s.incrementCurrentVersionIfNecessary(c);
+
+        Version v2 = c.getCurrentVersion();
         assertEquals(new Version("1.0.0"), v2);
 
         assertTrue(s.didExecuteChangeState());
@@ -364,8 +371,10 @@ public class QualificationSequenceTest extends SequenceTest {
         ReleaseMode custom = ReleaseMode.custom;
         custom.setCustomLabel("1.9.9");
 
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, mp, custom, true, null);
+
         try {
-            s.incrementCurrentVersionIfNecessary(mp, custom);
+            s.incrementCurrentVersionIfNecessary(c);
             fail("should throw exception");
         }
         catch(IllegalArgumentException e) {
@@ -390,8 +399,10 @@ public class QualificationSequenceTest extends SequenceTest {
         ReleaseMode custom = ReleaseMode.custom;
         custom.setCustomLabel("2.0.0-SNAPSHOT-1");
 
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, mp, custom, true, null);
+
         try {
-            s.incrementCurrentVersionIfNecessary(mp, custom);
+            s.incrementCurrentVersionIfNecessary(c);
             fail("should throw exception");
         }
         catch(IllegalArgumentException e) {
@@ -416,7 +427,11 @@ public class QualificationSequenceTest extends SequenceTest {
         ReleaseMode custom = ReleaseMode.custom;
         custom.setCustomLabel("1.0.0-SNAPSHOT-1");
 
-        Version v2 = s.incrementCurrentVersionIfNecessary(mp, ReleaseMode.snapshot);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, mp, custom, true, null);
+
+        s.incrementCurrentVersionIfNecessary(c);
+
+        Version v2 = c.getCurrentVersion();
         assertEquals(v, v2);
 
         assertFalse(s.didExecuteChangeState());
@@ -434,7 +449,11 @@ public class QualificationSequenceTest extends SequenceTest {
         ReleaseMode custom = ReleaseMode.custom;
         custom.setCustomLabel("2");
 
-        Version v2 = s.incrementCurrentVersionIfNecessary(mp, custom);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, mp, custom, true, null);
+
+        s.incrementCurrentVersionIfNecessary(c);
+
+        Version v2 = c.getCurrentVersion();
         assertEquals(new Version("2"), v2);
 
         assertTrue(s.didExecuteChangeState());

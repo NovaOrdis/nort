@@ -21,6 +21,7 @@ import io.novaordis.release.ReleaseMode;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
+import io.novaordis.release.version.VersionFormatException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,8 @@ import java.util.Map;
  * It exposes typed state and a generic untyped map that can be used by sequence as they wish. It also offers typed
  * access for a small number of essential state elements (whether tests were executed or not, currentVersion, etc).
  * Internally, we're using the generic map for storage, but the API adds the convenience of typing.
+ *
+ * Upon construction, the initial state is correctly initialized with current version extracted from Project, etc.
  *
  * Contexts are created for SequenceController.execute() or SequenceController.undo() operations.
  *
@@ -70,16 +73,34 @@ public class SequenceExecutionContext {
     /**
      * @param h the controller's operation history. The context has access to it for reading, but it won't maintain
      *          it, it is the controller who maintains the history.
+     *
+     * @throws IllegalStateException on invalid project state
      */
     public SequenceExecutionContext(
             Configuration c, ReleaseApplicationRuntime r, Project m,
             ReleaseMode rm, boolean noPush, ExecutionHistory h) {
 
+        this.state = new HashMap<>();
+
         this.configuration = c;
         this.runtime = r;
         this.project = m;
+
+        if (project != null) {
+
+            //
+            // initialize current version
+            //
+            try {
+
+                setCurrentVersion(project.getVersion());
+            }
+            catch(VersionFormatException e) {
+
+                throw new IllegalStateException(e);
+            }
+        }
         this.history = h;
-        this.state = new HashMap<>();
 
         if (rm == null) {
 

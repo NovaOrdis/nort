@@ -16,6 +16,7 @@
 
 package io.novaordis.release.sequences;
 
+import io.novaordis.release.model.MockProject;
 import io.novaordis.release.version.Version;
 import org.junit.Test;
 
@@ -58,6 +59,19 @@ public class SequenceExecutionContextTest {
 
         c.set("something", "somethingelse");
         assertEquals("somethingelse", c.get("something"));
+    }
+
+    // current version -------------------------------------------------------------------------------------------------
+
+    @Test
+    public void insureCurrentVersionIsInitializedOnConstruction() throws Exception {
+
+        MockProject mp = new MockProject("1.2.3-SNAPSHOT-4");
+
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, mp, null, false, null);
+
+        Version v = c.getCurrentVersion();
+        assertEquals(new Version("1.2.3-SNAPSHOT-4"), v);
     }
 
     // typed access - tests were executed ------------------------------------------------------------------------------
