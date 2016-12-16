@@ -19,13 +19,15 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Nova Ordis Release Tool (NORT)</name>
+
     <groupId>io.novaordis.nort</groupId>
     <artifactId>NORT</artifactId>
     <version>1.0.1-SNAPSHOT-3</version>
     <packaging>pom</packaging>
 
     <modules>
-        <module>nort</module>
+        <module>main</module>
         <module>release</module>    
     </modules>
 
