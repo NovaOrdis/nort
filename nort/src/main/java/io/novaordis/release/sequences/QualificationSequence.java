@@ -16,13 +16,11 @@
 
 package io.novaordis.release.sequences;
 
-import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.ReleaseMode;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
-import io.novaordis.utilities.NotYetImplementedException;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
@@ -59,9 +57,6 @@ public class QualificationSequence implements Sequence {
 
         log.debug("executing the qualification sequence ...");
 
-        Configuration c = context.getConfiguration();
-
-        ApplicationRuntime r = context.getRuntime();
         Project p = context.getProject();
 
         ReleaseMode rm = context.getReleaseMode();
@@ -70,49 +65,22 @@ public class QualificationSequence implements Sequence {
         insureCurrentVersionIsSnapshot(p);
         Version currentVersion = incrementCurrentVersionIfNecessary(p, rm);
 
-
-
-
         //
         // set the current version for subsequent sequences
         //
 
         context.setCurrentVersion(currentVersion);
 
-        log.debug("running tests for release " + currentVersion + " ...");
+        boolean testsPassed = executeTests(context);
 
-        //
-        // make sure we have the command required to run all tests
-        //
+        if (testsPassed) {
 
-        String osCommandToExecuteAllTests = c.get(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS);
-
-        if (osCommandToExecuteAllTests == null) {
-            throw new UserErrorException(
-                    "the OS command to use to execute all tests was not configured for this project");
+            context.getRuntime().info(currentVersion + " tests ok");
         }
-
-        log.debug("executing all tests with \"" + osCommandToExecuteAllTests + "\" ...");
-
-        NativeExecutionResult executionResult = OS.getInstance().execute(osCommandToExecuteAllTests);
-
-        //
-        // the tests were executed, so let the subsequent sequences know; tests do not need to pass in order to set
-        // this flag
-        //
-
-        context.setTestsExecuted(true);
-
-        if (!executionResult.isSuccess()) {
+        else {
 
             throw new UserErrorException("tests failed");
         }
-
-        if (c.isVerbose()) {
-            r.info(executionResult.getStdout());
-        }
-
-        r.info(currentVersion + " tests ok");
 
         return executeChangedState;
     }
@@ -136,9 +104,6 @@ public class QualificationSequence implements Sequence {
 
     // Package protected -----------------------------------------------------------------------------------------------
 
-    /**
-     * @return the current (valid) version
-     */
     void insureCurrentVersionIsSnapshot(Project p) throws Exception {
 
         log.debug("insuring the current version is a snapshot version ...");
@@ -218,6 +183,55 @@ public class QualificationSequence implements Sequence {
         //
         executeChangedState = p.save() || executeChangedState;
         return nextVersion;
+    }
+
+    /**
+     * Execute tests. The current version (possibly changed by the previous steps) is available in the context.
+     *
+     * @return true if all test executed successfully, false otherwise
+     *
+     * @exception UserErrorException on configuration errors
+     * @exception Exception on native execution exceptions
+     */
+    boolean executeTests(SequenceExecutionContext context) throws Exception {
+
+        boolean testsExecutedSuccessfully = false;
+
+        Version currentVersion = context.getCurrentVersion();
+
+        log.debug("running tests for release " + currentVersion + " ...");
+
+        //
+        // make sure we have the command required to run all tests
+        //
+
+        Configuration c = context.getConfiguration();
+
+        String osCommandToExecuteAllTests = c.get(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS);
+
+        if (osCommandToExecuteAllTests == null) {
+            throw new UserErrorException(
+                    "the OS command to use to execute all tests was not configured for this project");
+        }
+
+        log.debug("executing all tests with \"" + osCommandToExecuteAllTests + "\" ...");
+
+        NativeExecutionResult executionResult = OS.getInstance().execute(osCommandToExecuteAllTests);
+
+        //
+        // the tests were executed, so let the subsequent sequences know; tests do not need to pass in order to set
+        // this flag
+        //
+
+        context.setTestsExecuted(true);
+
+        testsExecutedSuccessfully = executionResult.isSuccess();
+
+        if (c.isVerbose()) {
+            context.getRuntime().info(executionResult.getStdout());
+        }
+
+        return testsExecutedSuccessfully;
     }
 
     // Protected -------------------------------------------------------------------------------------------------------

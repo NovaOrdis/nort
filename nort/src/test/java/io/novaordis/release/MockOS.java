@@ -28,6 +28,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Usage example:
+ *
+ * MockOS mos
+ *
+ * try {
+ *
+ *   mos = (MockOS)OS.getInstance();
+ *   mos.allCommandsSucceedByDefault();
+ *
+ * }
+ * finally {
+ *
+ *     mos.reset();
+ * }
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/16/16
  */
@@ -154,6 +169,22 @@ public class MockOS implements OS {
         this.allCommandsSucceedByDefault = true;
     }
 
+    /**
+     * Usage:
+     *
+     * MockOS mos
+     *
+     * try {
+     *
+     *   mos = (MockOS)OS.getInstance();
+     *   mos.allCommandsFail();
+     *
+     * }
+     * finally {
+     *
+     *     mos.reset();
+     * }
+     */
     public void allCommandsFail() {
 
         this.allCommandsFail = true;

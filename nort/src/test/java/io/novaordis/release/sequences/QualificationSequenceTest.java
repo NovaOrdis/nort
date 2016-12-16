@@ -443,6 +443,26 @@ public class QualificationSequenceTest extends SequenceTest {
         assertEquals(new Version("2"), saved.get(0));
     }
 
+    // incrementCurrentVersionIfNecessary() ----------------------------------------------------------------------------
+
+    @Test
+    public void executeTests() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS, "mock successful command");
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, true, null);
+
+        ((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
+
+        QualificationSequence s = new QualificationSequence();
+
+        boolean result = s.executeTests(c);
+
+        assertTrue(result);
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
