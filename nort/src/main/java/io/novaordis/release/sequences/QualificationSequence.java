@@ -83,6 +83,7 @@ public class QualificationSequence implements Sequence {
         return false;
     }
 
+    @Override
     public boolean didExecuteChangeState() {
 
         return executeChangedState;

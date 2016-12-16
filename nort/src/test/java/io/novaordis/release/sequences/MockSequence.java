@@ -16,6 +16,7 @@
 
 package io.novaordis.release.sequences;
 
+import io.novaordis.utilities.NotYetImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +85,12 @@ public class MockSequence implements Sequence {
 
             return false;
         }
+    }
+
+    @Override
+    public boolean didExecuteChangeState() {
+
+        throw new NotYetImplementedException("didExecuteChangeState()");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

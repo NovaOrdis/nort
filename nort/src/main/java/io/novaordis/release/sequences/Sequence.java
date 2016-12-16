@@ -57,4 +57,9 @@ public interface Sequence {
      */
     boolean undo(SequenceExecutionContext executionContext);
 
+    /**
+     * True if the execute() changed state.
+     */
+    boolean didExecuteChangeState();
+
 }

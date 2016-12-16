@@ -244,6 +244,12 @@ public class PublishSequence implements Sequence {
         throw new RuntimeException("undo() NOT YET IMPLEMENTED");
     }
 
+    @Override
+    public boolean didExecuteChangeState() {
+
+        return executeChangedState;
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
