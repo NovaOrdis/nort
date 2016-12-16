@@ -21,6 +21,7 @@ import io.novaordis.release.MockOS;
 import io.novaordis.release.MockReleaseApplicationRuntime;
 import io.novaordis.release.ReleaseMode;
 import io.novaordis.release.clad.ConfigurationLabels;
+import io.novaordis.release.model.MockProject;
 import io.novaordis.release.model.maven.MavenProject;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
@@ -33,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -314,6 +316,131 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MavenProject mp2 = new MavenProject(testPom);
         assertEquals(new Version("1.2.3"), mp2.getVersion());
+    }
+
+    // incrementCurrentVersionIfNecessary() ----------------------------------------------------------------------------
+
+    @Test
+    public void incrementCurrentVersionIfNecessary_NotNecessary() throws Exception {
+
+        QualificationSequence s = new QualificationSequence();
+
+        Version v = new Version("1.0.0-SNAPSHOT-1");
+        MockProject mp = new MockProject(v);
+
+        Version v2 = s.incrementCurrentVersionIfNecessary(mp, ReleaseMode.snapshot);
+        assertEquals(v, v2);
+
+        assertFalse(s.didExecuteChangeState());
+        assertTrue(mp.getSavedVersionHistory().isEmpty());
+    }
+
+    @Test
+    public void incrementCurrentVersionIfNecessary_DotRelease() throws Exception {
+
+        QualificationSequence s = new QualificationSequence();
+
+        Version v = new Version("1.0.0-SNAPSHOT-1");
+        MockProject mp = new MockProject(v);
+
+        Version v2 = s.incrementCurrentVersionIfNecessary(mp, ReleaseMode.patch);
+
+        assertEquals(new Version("1.0.0"), v2);
+
+        assertTrue(s.didExecuteChangeState());
+        List<Version> saved = mp.getSavedVersionHistory();
+        assertEquals(1, saved.size());
+        assertEquals(new Version("1.0.0"), saved.get(0));
+    }
+
+    @Test
+    public void incrementCurrentVersionIfNecessary_CustomDotRelease_OlderThanCurrent() throws Exception {
+
+        QualificationSequence s = new QualificationSequence();
+
+        Version v = new Version("2.0.0-SNAPSHOT-1");
+        MockProject mp = new MockProject(v);
+
+        ReleaseMode custom = ReleaseMode.custom;
+        custom.setCustomLabel("1.9.9");
+
+        try {
+            s.incrementCurrentVersionIfNecessary(mp, custom);
+            fail("should throw exception");
+        }
+        catch(IllegalArgumentException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("2.0.0-SNAPSHOT-1 cannot be changed to preceding 1.9.9", msg);
+        }
+
+        assertFalse(s.didExecuteChangeState());
+        assertTrue(mp.getSavedVersionHistory().isEmpty());
+    }
+
+    @Test
+    public void incrementCurrentVersionIfNecessary_CustomSnapshotRelease_OlderThanCurrent() throws Exception {
+
+        QualificationSequence s = new QualificationSequence();
+
+        Version v = new Version("2.0.0-SNAPSHOT-2");
+        MockProject mp = new MockProject(v);
+
+        ReleaseMode custom = ReleaseMode.custom;
+        custom.setCustomLabel("2.0.0-SNAPSHOT-1");
+
+        try {
+            s.incrementCurrentVersionIfNecessary(mp, custom);
+            fail("should throw exception");
+        }
+        catch(IllegalArgumentException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("2.0.0-SNAPSHOT-2 cannot be changed to preceding 2.0.0-SNAPSHOT-1", msg);
+        }
+
+        assertFalse(s.didExecuteChangeState());
+        assertTrue(mp.getSavedVersionHistory().isEmpty());
+    }
+
+    @Test
+    public void incrementCurrentVersionIfNecessary_CustomRelease_SameAsCurrent() throws Exception {
+
+        QualificationSequence s = new QualificationSequence();
+
+        Version v = new Version("1.0.0-SNAPSHOT-1");
+        MockProject mp = new MockProject(v);
+
+        ReleaseMode custom = ReleaseMode.custom;
+        custom.setCustomLabel("1.0.0-SNAPSHOT-1");
+
+        Version v2 = s.incrementCurrentVersionIfNecessary(mp, ReleaseMode.snapshot);
+        assertEquals(v, v2);
+
+        assertFalse(s.didExecuteChangeState());
+        assertTrue(mp.getSavedVersionHistory().isEmpty());
+    }
+
+    @Test
+    public void incrementCurrentVersionIfNecessary_CustomRelease_NewerThanCurrent() throws Exception {
+
+        QualificationSequence s = new QualificationSequence();
+
+        Version v = new Version("1.0.0-SNAPSHOT-1");
+        MockProject mp = new MockProject(v);
+
+        ReleaseMode custom = ReleaseMode.custom;
+        custom.setCustomLabel("2");
+
+        Version v2 = s.incrementCurrentVersionIfNecessary(mp, custom);
+        assertEquals(new Version("2"), v2);
+
+        assertTrue(s.didExecuteChangeState());
+        List<Version> saved = mp.getSavedVersionHistory();
+        assertEquals(1, saved.size());
+        assertEquals(new Version("2"), saved.get(0));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

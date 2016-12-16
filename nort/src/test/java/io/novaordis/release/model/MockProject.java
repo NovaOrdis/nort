@@ -40,7 +40,7 @@ public class MockProject implements Project {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Version version;
+    private Version currentVersion;
 
     private List<Version> savedVersionHistory;
 
@@ -48,9 +48,20 @@ public class MockProject implements Project {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockProject(String version) throws VersionFormatException {
+    /**
+     * @param currentVersion the project's current version.
+     */
+    public MockProject(String currentVersion) throws VersionFormatException {
 
-        setVersion(new Version(version));
+        this(new Version(currentVersion));
+    }
+
+    /**
+     * @param currentVersion the project's current version.
+     */
+    public MockProject(Version currentVersion) throws VersionFormatException {
+
+        setVersion(currentVersion);
         this.savedVersionHistory = new ArrayList<>();
         this.artifacts = new HashMap<>();
     }
@@ -71,16 +82,16 @@ public class MockProject implements Project {
     @Override
     public Version getVersion() {
 
-        return version;
+        return currentVersion;
     }
 
     @Override
     public boolean setVersion(Version v) {
 
         boolean changed =
-                (version != null && !version.equals(v)) || (version == null && v != null);
+                (currentVersion != null && !currentVersion.equals(v)) || (currentVersion == null && v != null);
 
-        this.version = v;
+        this.currentVersion = v;
 
         return changed;
     }
@@ -96,10 +107,10 @@ public class MockProject implements Project {
 
         Version lastSavedVersion = getLastSavedVersion();
 
-        boolean stateChanged = lastSavedVersion == null || !version.equals(lastSavedVersion);
+        boolean stateChanged = lastSavedVersion == null || !currentVersion.equals(lastSavedVersion);
 
         if (stateChanged) {
-            savedVersionHistory.add(version);
+            savedVersionHistory.add(currentVersion);
         }
 
         return stateChanged;

@@ -54,8 +54,12 @@ public interface Project {
     File getFile();
 
     /**
-     * The project's version. Depending on the project type, the version may be read from different locations. For
-     * example, for a simple, single-module Maven project, the project version is the pom.xml version element.
+     * The project's current version.
+     *
+     * See @{linktourl https://kb.novaordis.com/index.php/Nort_Concepts#Current_Version}
+     *
+     * Depending on the project type, the version may be read from different locations. For example, for a simple,
+     * single-module Maven project, the project version is the pom.xml version element.
      *
      * @exception VersionFormatException if the underlying project metadata storage contains an invalid version.
      */

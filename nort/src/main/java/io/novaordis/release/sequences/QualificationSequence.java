@@ -22,6 +22,7 @@ import io.novaordis.release.ReleaseMode;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
+import io.novaordis.utilities.NotYetImplementedException;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
@@ -59,40 +60,18 @@ public class QualificationSequence implements Sequence {
         log.debug("executing the qualification sequence ...");
 
         Configuration c = context.getConfiguration();
+
         ApplicationRuntime r = context.getRuntime();
         Project p = context.getProject();
 
         ReleaseMode rm = context.getReleaseMode();
         log.debug("release mode: " + rm);
 
-        //
-        // make sure the current version is a snapshot
-        //
+        insureCurrentVersionIsSnapshot(p);
+        Version currentVersion = incrementCurrentVersionIfNecessary(p, rm);
 
-        Version currentVersion = p.getVersion();
 
-        log.debug("current version " + currentVersion);
 
-        if (!currentVersion.isSnapshot()) {
-            throw new UserErrorException(
-                    "the current version (" + currentVersion + ") is not a snapshot version, cannot start the release sequence");
-        }
-
-        if (rm.isDot()) {
-
-            //
-            // if we're in a dot release mode, increment the release metadata before anything else, so we can run
-            // relevant tests
-            //
-
-            Version nextVersion = Version.nextVersion(currentVersion, rm);
-            p.setVersion(nextVersion);
-            //
-            // we need the version change on disk, so the tests can be executed in top of the changed version
-            //
-            executeChangedState = p.save() || executeChangedState;
-            currentVersion = nextVersion;
-        }
 
         //
         // set the current version for subsequent sequences
@@ -148,9 +127,98 @@ public class QualificationSequence implements Sequence {
         return false;
     }
 
+    public boolean didExecuteChangeState() {
+
+        return executeChangedState;
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
+
+    /**
+     * @return the current (valid) version
+     */
+    void insureCurrentVersionIsSnapshot(Project p) throws Exception {
+
+        log.debug("insuring the current version is a snapshot version ...");
+
+        Version v = p.getVersion();
+
+        log.debug("current version " + v);
+
+        if (!v.isSnapshot()) {
+            throw new UserErrorException(
+                    "the current version (" + v + ") is not a snapshot version, cannot start the release sequence");
+        }
+    }
+
+    /**
+     * If the release is a dot release, or it is a custom release and the release string is different than the current
+     * one, we increment/update version appropriately and we update it on the file system metadata, so tests can be run
+     * with the correct version.
+     *
+     * A noop if the release is a snapshot release, as the state is already appropriate.
+     *
+     * @return the current version (which may be incremented)
+     *
+     * @exception IllegalArgumentException if we attempt to update to a custom version that is older then the current.
+     */
+    Version incrementCurrentVersionIfNecessary(Project p, ReleaseMode rm) throws Exception {
+
+        Version currentVersion = p.getVersion();
+        Version nextVersion = null;
+
+        if (rm.isDot()) {
+
+            //
+            // if we're in a dot release mode, increment the release metadata before anything else, so we can run
+            // relevant tests
+            //
+
+            //
+            // this will fail if we're a custom dot patch that is older than the current
+            //
+
+            nextVersion = Version.nextVersion(currentVersion, rm);
+        }
+        else if (ReleaseMode.custom.equals(rm)) {
+
+            nextVersion = rm.getCustomVersion();
+        }
+
+        if (nextVersion == null) {
+
+            //
+            // noop
+            //
+
+            return currentVersion;
+        }
+
+        //
+        // different versions
+        //
+
+        if (nextVersion.compareTo(currentVersion) < 0) {
+
+            //
+            // fail if we devolve
+            //
+
+            throw new IllegalArgumentException(currentVersion + " cannot be changed to preceding " + nextVersion);
+        }
+
+        log.debug("updating current version to " + nextVersion);
+
+        p.setVersion(nextVersion);
+
+        //
+        // we need the version change on disk, so the tests can be executed in top of the changed version
+        //
+        executeChangedState = p.save() || executeChangedState;
+        return nextVersion;
+    }
 
     // Protected -------------------------------------------------------------------------------------------------------
 

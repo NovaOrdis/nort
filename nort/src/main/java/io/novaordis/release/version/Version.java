@@ -17,6 +17,7 @@
 package io.novaordis.release.version;
 
 import io.novaordis.release.ReleaseMode;
+import io.novaordis.utilities.NotYetImplementedException;
 
 /**
  * Correctly implements equals() and hashCode()
@@ -66,7 +67,8 @@ public class Version implements Comparable<Version> {
             }
         }
         else if (ReleaseMode.minor.equals(releaseMode)) {
-            throw new RuntimeException("NOT YET IMPLEMENTED");
+
+            throw new NotYetImplementedException();
         }
         else if (ReleaseMode.patch.equals(releaseMode)) {
 
