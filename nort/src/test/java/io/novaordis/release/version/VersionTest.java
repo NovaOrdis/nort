@@ -784,6 +784,16 @@ public class VersionTest {
         assertTrue(v.compareTo(that) == 0);
     }
 
+    @Test
+    public void compare_TheSnapshotIsOlderThanTheCorrespondingDotVersion() throws Exception {
+
+        Version snapshot = new Version("1.2.3-SNAPSHOT-4");
+        Version dot = new Version("1.2.3");
+
+        assertTrue(snapshot.compareTo(dot) < 0);
+        assertTrue(dot.compareTo(snapshot) > 0);
+    }
+
     // equals() and hashCode() -----------------------------------------------------------------------------------------
 
     @Test

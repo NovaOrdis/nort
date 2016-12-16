@@ -203,10 +203,12 @@ public class Version implements Comparable<Version> {
     public int compareTo(Version o) {
 
         if (o == null) {
+
             throw new NullPointerException("null version"); // as per javadoc
         }
 
         if (this == o) {
+
             return 0;
         }
 
@@ -251,8 +253,37 @@ public class Version implements Comparable<Version> {
         // same patches
         //
 
+        //
+        // a snapshot is considered to be older than the corresponding dot version
+        //
+        // https://kb.novaordis.com/index.php/Nort_Concepts#Snapshot_Version
+        //
 
-        diff = (snapshot == null ? 0 : snapshot) - (thatSnapshot == null ? 0 : thatSnapshot);
+        if (snapshot == null) {
+
+            if (thatSnapshot != null) {
+
+                diff = 1;
+            }
+            else {
+
+                diff = 0;
+            }
+        }
+        else {
+
+            if (thatSnapshot == null) {
+
+                diff = -1;
+            }
+            else {
+
+                //
+                // fall back to compare snapshots as we otherwise would
+                //
+                diff = snapshot - thatSnapshot;
+            }
+        }
 
         return diff;
     }
