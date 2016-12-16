@@ -16,7 +16,6 @@
 
 package io.novaordis.release.version;
 
-import io.novaordis.utilities.NotYetImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +43,6 @@ public class VersionUtil {
         // attempt various heuristics
         //
 
-        Version version = null;
-
         try {
 
             return fromCanonicalString(multiLineString);
@@ -56,10 +53,23 @@ public class VersionUtil {
             // no match
             //
 
-            log.debug(e.getMessage());
+            log.debug("not a canonical version: " + e.getMessage());
         }
 
-        throw new VersionFormatException("");
+        try {
+
+            return fromVersionCommandOutput(multiLineString);
+        }
+        catch (VersionFormatException e) {
+
+            //
+            // no match
+            //
+
+            log.debug("not a valid version command output: " + e.getMessage());
+        }
+
+        throw new VersionFormatException("invalid version content: " + multiLineString);
     }
 
     /**
@@ -79,6 +89,48 @@ public class VersionUtil {
 
         return new Version(ts);
     }
+
+    /**
+     * Interprets standard version command output similar to:
+     *
+     * version 1.0.1-SNAPSHOT-3
+     * release date 12/05/16
+     *
+     * @throws VersionFormatException if the string cannot be converted into a version instance.
+     * @throws IllegalArgumentException on null argument
+     */
+    public static Version fromVersionCommandOutput(String s) throws VersionFormatException {
+
+        if (s == null) {
+
+            throw new IllegalArgumentException("null argument");
+        }
+
+        // throw away everything that follows after the first new line
+
+        String s2 = s;
+
+        int i = s2.indexOf('\n');
+
+        if (i != -1) {
+
+            s2 = s2.substring(0, i);
+        }
+
+        s2 = s2.trim();
+
+        String prefix = "version ";
+
+        if (!s.startsWith(prefix)) {
+
+            throw new VersionFormatException("not a version command output");
+        }
+
+        s2 = s2.substring(prefix.length());
+
+        return new Version(s2);
+    }
+
 
     // Attributes ------------------------------------------------------------------------------------------------------
 

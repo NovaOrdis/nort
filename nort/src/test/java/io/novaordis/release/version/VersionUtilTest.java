@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -91,8 +92,29 @@ public class VersionUtilTest {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("null argument", msg);
+            assertTrue(msg.matches(".*invalid.*not a version.*"));
         }
+    }
+
+    // fromVersionCommandOutput() --------------------------------------------------------------------------------------
+
+    @Test
+    public void fromVersionCommandOutput_regularVersionCommandOutput() throws Exception {
+
+        String s = "version 1.0.1-SNAPSHOT-3\n" +
+                "release date 12/05/16";
+
+        Version v = VersionUtil.fromVersionCommandOutput(s);
+        assertEquals(new Version("1.0.1-SNAPSHOT-3"), v);
+    }
+
+    @Test
+    public void fromVersionCommandOutput_firstLine() throws Exception {
+
+        String s = "version 1.0.1-SNAPSHOT-3";
+
+        Version v = VersionUtil.fromCommandStdout(s);
+        assertEquals(new Version("1.0.1-SNAPSHOT-3"), v);
     }
 
     // fromCommandStdout() ---------------------------------------------------------------------------------------------
@@ -109,6 +131,43 @@ public class VersionUtilTest {
             String msg = e.getMessage();
             log.info(msg);
             assertEquals("null argument", msg);
+        }
+    }
+
+    @Test
+    public void fromCommandStdout_canonical() throws Exception {
+
+        String s = "1.2.3";
+
+        Version v = VersionUtil.fromCommandStdout(s);
+        assertEquals(new Version("1.2.3"), v);
+    }
+
+    @Test
+    public void fromCommandStdout_regularVersionCommandOutput() throws Exception {
+
+        String s = "version 1.0.1-SNAPSHOT-3\n" +
+                "release date 12/05/16";
+
+        Version v = VersionUtil.fromCommandStdout(s);
+        assertEquals(new Version("1.0.1-SNAPSHOT-3"), v);
+    }
+
+    @Test
+    public void fromCommandStdout_InvalidVersion() throws Exception {
+
+        String s = "something";
+
+        try {
+
+            VersionUtil.fromCommandStdout(s);
+            fail("should throw exception");
+        }
+        catch(VersionFormatException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("invalid version content: something", msg);
         }
     }
 
