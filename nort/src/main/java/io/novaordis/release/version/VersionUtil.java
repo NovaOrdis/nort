@@ -14,37 +14,78 @@
  * limitations under the License.
  */
 
-package io.novaordis.release.clad;
+package io.novaordis.release.version;
+
+import io.novaordis.utilities.NotYetImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * A collection of static version utilities.
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 11/16/16
+ * @since 12/16/16
  */
-public class ConfigurationLabels {
+public class VersionUtil {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    private static final Logger log = LoggerFactory.getLogger(VersionUtil.class);
+
     // Static ----------------------------------------------------------------------------------------------------------
 
-    public static final String OS_COMMAND_TO_EXECUTE_ALL_TESTS = "os.command.to.execute.all.tests";
-    public static final String OS_COMMAND_TO_BUILD_WITH_TESTS = "os.command.to.build.with.tests";
-    public static final String OS_COMMAND_TO_BUILD_WITHOUT_TESTS = "os.command.to.build.without.tests";
-    public static final String OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY = "os.command.to.publish.into.local.repository";
 
-    public static final String OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY = "os.command.to.add.to.local.source.repository";
-    public static final String OS_COMMAND_TO_COMMIT_TO_LOCAL_SOURCE_REPOSITORY = "os.command.to.commit.to.local.source.repository";
+    /**
+     * A collection of heuristics for extracting version information from various commands output.
+     */
+    public static Version fromCommandStdout(String multiLineString) throws VersionFormatException {
 
-    public static final String OS_COMMAND_TO_TAG_LOCAL_SOURCE_REPOSITORY = "os.command.to.tag.local.source.repository";
-    public static final String OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY = "os.command.to.push.to.remote.source.repository";
+        //
+        // attempt various heuristics
+        //
 
-    public static final String RUNTIME_DIRECTORY = "runtime.directory";
-    public static final String LOCAL_ARTIFACT_REPOSITORY_ROOT = "local.artifact.repository.root";
+        Version version = null;
 
-    public static final String OS_COMMAND_TO_GET_INSTALLED_VERSION = "os.command.to.get.installed.version";
+        try {
+
+            return fromCanonicalString(multiLineString);
+        }
+        catch (VersionFormatException e) {
+
+            //
+            // no match
+            //
+
+            log.debug(e.getMessage());
+        }
+
+        throw new VersionFormatException("");
+    }
+
+    /**
+     * Attempts to trim the given string and directly convert it into a Version instance.
+     *
+     * @throws VersionFormatException if the string cannot be converted into a version instance.
+     * @throws IllegalArgumentException on null argument
+     */
+    public static Version fromCanonicalString(String s) throws VersionFormatException {
+
+        if (s == null) {
+
+            throw new IllegalArgumentException("null argument");
+        }
+
+        String ts = s.trim();
+
+        return new Version(ts);
+    }
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    private VersionUtil() {
+    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 

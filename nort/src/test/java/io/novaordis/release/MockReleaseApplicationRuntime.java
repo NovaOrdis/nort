@@ -20,6 +20,7 @@ import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.clad.option.Option;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.sequences.SequenceExecutionContext;
+import io.novaordis.utilities.NotYetImplementedException;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -110,12 +111,13 @@ public class MockReleaseApplicationRuntime extends ReleaseApplicationRuntime {
     @Override
     public void warn(String s) {
 
-        warningContent += s;
+        warningContent += s + "\n";
     }
 
     @Override
     public void error(String s) {
-        throw new RuntimeException("error() NOT YET IMPLEMENTED");
+
+        throw new NotYetImplementedException("error()");
     }
 
     @Override

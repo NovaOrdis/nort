@@ -16,11 +16,14 @@
 
 package io.novaordis.release.sequences;
 
+import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.ReleaseMode;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
+import io.novaordis.release.version.VersionUtil;
+import io.novaordis.utilities.NotYetImplementedException;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
@@ -59,6 +62,8 @@ public class QualificationSequence implements Sequence {
 
         insureCurrentVersionIsSnapshot(context);
         incrementCurrentVersionIfNecessary(context);
+        failIfInstalledVersionIsEqualOrNewer(context);
+
         boolean testsPassed = executeTests(context);
 
         if (testsPassed) {
@@ -230,6 +235,94 @@ public class QualificationSequence implements Sequence {
         }
 
         return testsExecutedSuccessfully;
+    }
+
+    /**
+     * This method encapsulates the logic that attempts to get the version that is already installed, and fails
+     * if we're releasing same or older version.
+     *
+     * @throws UserErrorException if we established we're releasing the same or an older version
+     */
+    void failIfInstalledVersionIsEqualOrNewer(SequenceExecutionContext context) throws Exception {
+
+        Configuration c = context.getConfiguration();
+        ApplicationRuntime r = context.getRuntime();
+
+        String command = c.get(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION);
+
+        if (command == null) {
+
+            //
+            // we won't perform the test, but warn
+            //
+
+            r.warn("command to get the version of the already installed release not configured");
+            return;
+        }
+
+        NativeExecutionResult executionResult = OS.getInstance().execute(command);
+
+        if (executionResult.isFailure()) {
+
+            //
+            // we won't perform the test, but warn
+            //
+
+            r.warn(
+                    "failed to execute the command that gets the version of the already installed release (" +
+                            command + ")");
+            r.warn(executionResult.getStdout());
+            r.warn(executionResult.getStderr());
+            return;
+        }
+
+        String stdoutContent = executionResult.getStdout();
+
+        log.debug("'" + command + "' output: \n" + stdoutContent);
+
+        Version installedVersion = null;
+
+        try {
+
+            installedVersion = VersionUtil.fromCommandStdout(stdoutContent);
+        }
+        catch(Exception e) {
+
+            //
+            // don't fail, but warn
+            //
+
+            r.warn("invalid '" + command + "' output:");
+            r.warn(e.getMessage());
+            return;
+        }
+
+        if (installedVersion == null) {
+
+            return;
+        }
+
+        Version versionBeingReleased = context.getCurrentVersion();
+
+        if (installedVersion.compareTo(versionBeingReleased) > 0) {
+
+            throw new UserErrorException(
+                    "installed version " + installedVersion + " is newer than the version being released ("  +
+                            versionBeingReleased + ")");
+        }
+        else if (installedVersion.equals(versionBeingReleased)) {
+
+            throw new UserErrorException(
+                    "installed version is identical to the version being released ("  +
+                            versionBeingReleased + ")");
+        }
+
+        //
+        // we're good
+        //
+
+        log.debug("installed version " + installedVersion + " is older than the version being released (" +
+                versionBeingReleased + ")");
     }
 
     // Protected -------------------------------------------------------------------------------------------------------

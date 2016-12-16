@@ -462,7 +462,7 @@ public class QualificationSequenceTest extends SequenceTest {
         assertEquals(new Version("2"), saved.get(0));
     }
 
-    // incrementCurrentVersionIfNecessary() ----------------------------------------------------------------------------
+    // executeTests() --------------------------------------------------------------------------------------------------
 
     @Test
     public void executeTests() throws Exception {
@@ -480,6 +480,171 @@ public class QualificationSequenceTest extends SequenceTest {
         boolean result = s.executeTests(c);
 
         assertTrue(result);
+    }
+
+    // failIfInstalledVersionIsEqualOrNewer() --------------------------------------------------------------------------------------------------
+
+    @Test
+    public void failIfInstalledVersionIsEqualOrNewer_CommandToCheckNotConfigured() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        assertNull(mc.get(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION));
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, true, null);
+
+        QualificationSequence s = new QualificationSequence();
+
+        s.failIfInstalledVersionIsEqualOrNewer(c);
+
+        //
+        // should be noop, but a warning should be issued
+        //
+
+        String warning = mr.getWarningContent();
+        assertEquals("command to get the version of the already installed release not configured\n", warning);
+
+        //((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
+        //mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock successful command");
+    }
+
+    @Test
+    public void failIfInstalledVersionIsEqualOrNewer_CommandFails() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+        MockOS mos = (MockOS) OS.getInstance();
+        mos.addToCommandsThatFail("mock-release-version-command", "mock stdout content", "mock stderr content");
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, true, null);
+
+        QualificationSequence s = new QualificationSequence();
+
+        s.failIfInstalledVersionIsEqualOrNewer(c);
+
+        //
+        // should be noop, but a warning should be issued
+        //
+
+        String warning = mr.getWarningContent();
+        assertEquals(
+                "failed to execute the command that gets the version of the already installed release (mock-release-version-command)\n" +
+                        "mock stdout content\n" +
+                        "mock stderr content\n", warning);
+    }
+
+    @Test
+    public void failIfInstalledVersionIsEqualOrNewer_CommandProducesInvalidOutput() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+        MockOS mos = (MockOS) OS.getInstance();
+        mos.addToCommandsThatSucceed("mock-release-version-command", "this can't be a version", "mock stderr content");
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, true, null);
+
+        QualificationSequence s = new QualificationSequence();
+
+        s.failIfInstalledVersionIsEqualOrNewer(c);
+
+        //
+        // should be noop, but a warning should be issued
+        //
+
+        String warning = mr.getWarningContent();
+        assertTrue(warning.startsWith("invalid 'mock-release-version-command' output:"));
+    }
+
+    @Test
+    public void failIfInstalledVersionIsEqualOrNewer_InstalledVersionIsNewer() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+        MockOS mos = (MockOS) OS.getInstance();
+        mos.addToCommandsThatSucceed("mock-release-version-command", "2.0.0", "mock stderr content");
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        MockProject mp = new MockProject("1.0.0");
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, true, null);
+
+        QualificationSequence s = new QualificationSequence();
+
+        try {
+            s.failIfInstalledVersionIsEqualOrNewer(c);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("installed version 2.0.0 is newer than the version being released (1.0.0)", msg);
+        }
+    }
+
+    @Test
+    public void failIfInstalledVersionIsEqualOrNewer_InstalledVersionIsTheSame() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+        MockOS mos = (MockOS) OS.getInstance();
+        mos.addToCommandsThatSucceed("mock-release-version-command", "2.0.0", "mock stderr content");
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        MockProject mp = new MockProject("2.0.0");
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, true, null);
+
+        QualificationSequence s = new QualificationSequence();
+
+        try {
+            s.failIfInstalledVersionIsEqualOrNewer(c);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("installed version is identical to the version being released (2.0.0)", msg);
+        }
+    }
+
+    @Test
+    public void failIfInstalledVersionIsEqualOrNewer_InstalledVersionIsOlder() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+        MockOS mos = (MockOS) OS.getInstance();
+        mos.addToCommandsThatSucceed("mock-release-version-command", "1.0.0-SNAPSHOT-1", "mock stderr content");
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        MockProject mp = new MockProject("1.0.0");
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, true, null);
+
+        QualificationSequence s = new QualificationSequence();
+
+        //
+        // should be a noop with no warnings
+        //
+        s.failIfInstalledVersionIsEqualOrNewer(c);
+
+        String warning = mr.getWarningContent();
+        log.info(warning);
+        assertTrue(warning.isEmpty());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
