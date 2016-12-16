@@ -23,7 +23,6 @@ import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionUtil;
-import io.novaordis.utilities.NotYetImplementedException;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
@@ -265,7 +264,7 @@ public class QualificationSequence implements Sequence {
         if (executionResult.isFailure()) {
 
             //
-            // we won't perform the test, but warn
+            // we won't perform the test, but warn instead
             //
 
             r.warn(
@@ -289,7 +288,7 @@ public class QualificationSequence implements Sequence {
         catch(Exception e) {
 
             //
-            // don't fail, but warn
+            // don't fail, just warn
             //
 
             r.warn("invalid '" + command + "' output:");

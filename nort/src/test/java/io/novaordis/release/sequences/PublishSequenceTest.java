@@ -219,7 +219,7 @@ public class PublishSequenceTest extends SequenceTest {
         // we should get a warning
         //
 
-        String warning = mr.getWarningContent();
+        String warning = mr.getWarningContent().trim();
         assertEquals("commit did not succeed, maybe because there was nothing to commit", warning);
 
         List<String> executedCommands = mockOS.getHistory();

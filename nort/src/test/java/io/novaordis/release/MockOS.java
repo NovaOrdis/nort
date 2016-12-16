@@ -112,17 +112,17 @@ public class MockOS implements OS {
             }
         }
 
-        if (allCommandsSucceedByDefault) {
-
-            return new NativeExecutionResult(0, "mock \"" + command + "\" stdout", "mock \"" + command + "\" stderr");
-        }
-
         for(CommandAndOutput c: commandsThatSucceed) {
 
             if (c.command.equals(command)) {
 
                 return new NativeExecutionResult(0, c.stdout, c.stderr);
             }
+        }
+
+        if (allCommandsSucceedByDefault) {
+
+            return new NativeExecutionResult(0, "mock \"" + command + "\" stdout", "mock \"" + command + "\" stderr");
         }
 
         throw new RuntimeException("WE DON'T KNOW HOW TO HANDLE " + command);

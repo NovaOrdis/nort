@@ -571,7 +571,9 @@ public class QualificationSequenceTest extends SequenceTest {
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
         MockOS mos = (MockOS) OS.getInstance();
-        mos.addToCommandsThatSucceed("mock-release-version-command", "2.0.0", "mock stderr content");
+        mos.addToCommandsThatSucceed("mock-release-version-command",
+                "version 2.0.0\nrelease date 12/05/16\n",
+                "mock stderr content");
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
 
@@ -599,6 +601,10 @@ public class QualificationSequenceTest extends SequenceTest {
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
         MockOS mos = (MockOS) OS.getInstance();
+
+        //
+        // we simulate canonical version (simple "2.0.0")
+        //
         mos.addToCommandsThatSucceed("mock-release-version-command", "2.0.0", "mock stderr content");
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
@@ -627,7 +633,8 @@ public class QualificationSequenceTest extends SequenceTest {
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
         MockOS mos = (MockOS) OS.getInstance();
-        mos.addToCommandsThatSucceed("mock-release-version-command", "1.0.0-SNAPSHOT-1", "mock stderr content");
+        mos.addToCommandsThatSucceed("mock-release-version-command",
+                "version 1.0.0-SNAPSHOT-1\ndate some date\n", "mock stderr content");
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
 
