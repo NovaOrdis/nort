@@ -35,6 +35,7 @@ import io.novaordis.release.sequences.SequenceController;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
+import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,6 +194,8 @@ public class ReleaseCommand extends CommandBase {
         ReleaseApplicationRuntime r = (ReleaseApplicationRuntime)runtime;
         Project p = projectBuilder.build(r.getCurrentDirectory());
 
+        insureInRightDirectory(p);
+
         if (ReleaseMode.info.equals(mode)) {
 
             info(r, p);
@@ -272,6 +275,21 @@ public class ReleaseCommand extends CommandBase {
         }
     }
 
+    /**
+     * We look at the project and detect conditions like nort being executed from a sub-module, etc. Throw an
+     * UserErrorException with a descriptive message.
+     */
+    private void insureInRightDirectory(Project p) throws UserErrorException, VersionFormatException {
+
+        Version v = p.getVersion();
+
+        if (v == null) {
+
+
+            throw new UserErrorException(Files.normalizePath(p.getBaseDirectory().getAbsolutePath()) +
+                    " does not seem to contain a valid POM. Make sure the release process is started from the project directory.");
+        }
+    }
     // Inner classes ---------------------------------------------------------------------------------------------------
 
 }
