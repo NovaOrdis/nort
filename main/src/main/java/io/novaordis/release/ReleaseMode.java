@@ -84,6 +84,7 @@ public enum ReleaseMode {
             this.customLabel = null;
         }
         else {
+
             this.customLabel = new Version(s);
         }
 
@@ -103,6 +104,14 @@ public enum ReleaseMode {
         }
 
         return customLabel;
+    }
+
+    /**
+     * Resets the custom label. It only makes sense for "custom" release mode.
+     */
+    public void reset() {
+
+        this.customLabel = null;
     }
 
     public boolean isSnapshot() {

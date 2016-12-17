@@ -16,7 +16,9 @@
 
 package io.novaordis.release;
 
+import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
+import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,14 @@ public class ReleaseModeTest {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    @After
+    public void cleanup() {
+
+        ReleaseMode.custom.reset();
+    }
+
+    // Tests -----------------------------------------------------------------------------------------------------------
 
     @Test
     public void isIncrement() throws Exception {
@@ -151,6 +161,19 @@ public class ReleaseModeTest {
         assertNull(ReleaseMode.minor.getCustomVersion());
         assertNull(ReleaseMode.patch.getCustomVersion());
         assertNull(ReleaseMode.snapshot.getCustomVersion());
+        assertNull(ReleaseMode.custom.getCustomVersion());
+    }
+
+    // reset() ---------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void reset() throws Exception {
+
+        assertNull(ReleaseMode.custom.getCustomVersion());
+        ReleaseMode.custom.setCustomLabel("1.2.3");
+        assertEquals(new Version("1.2.3"), ReleaseMode.custom.getCustomVersion());
+
+        ReleaseMode.custom.reset();
         assertNull(ReleaseMode.custom.getCustomVersion());
     }
 

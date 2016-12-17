@@ -32,6 +32,7 @@ import io.novaordis.release.sequences.Sequence;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.release.sequences.SequenceOperation;
 import io.novaordis.release.version.Version;
+import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.OS;
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static junit.framework.TestCase.assertNull;
@@ -87,6 +89,8 @@ public class ReleaseCommandTest {
 
         ((MockOS)OS.getInstance()).reset();
 
+        ReleaseMode.custom.reset();
+
         System.clearProperty("os.class");
 
         //
@@ -108,7 +112,6 @@ public class ReleaseCommandTest {
         c.configure(0, args);
 
         assertEquals(ReleaseMode.info, c.getMode());
-        assertNull(c.getReleaseLabel());
 
         assertEquals(1, args.size());
         assertEquals("something", args.get(0));
@@ -124,14 +127,59 @@ public class ReleaseCommandTest {
         c.configure(0, args);
 
         assertEquals(ReleaseMode.snapshot, c.getMode());
-        assertNull(c.getReleaseLabel());
 
         assertEquals(1, args.size());
         assertEquals("something", args.get(0));
     }
 
     @Test
-    public void configure_CustomReleaseString() throws Exception {
+    public void configure_CustomReleaseString_ExplicitCustomQualifier_ValidReleaseLabel() throws Exception {
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        //
+        // the argument is interpreted as a literal custom version
+        //
+
+        List<String> args = new ArrayList<>(Arrays.asList("custom", "1.0.0", "something"));
+
+        c.configure(0, args);
+
+        ReleaseMode rm = c.getMode();
+        assertEquals(ReleaseMode.custom, rm);
+        assertEquals(new Version("1.0.0"), rm.getCustomVersion());
+
+        assertEquals(1, args.size());
+        assertEquals("something", args.get(0));
+    }
+
+    @Test
+    public void configure_CustomReleaseString_ExplicitCustomQualifier_MissingReleaseLabel() throws Exception {
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        //
+        // the argument is interpreted as a literal custom version
+        //
+
+        List<String> args = new ArrayList<>(Collections.singletonList("custom"));
+
+        try {
+
+            c.configure(0, args);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("missing custom release version", msg);
+
+        }
+    }
+
+    @Test
+    public void configure_CustomReleaseString_ExplicitCustomQualifier_InvalidReleaseLabel() throws Exception {
 
         ReleaseCommand c = new ReleaseCommand();
 
@@ -141,17 +189,22 @@ public class ReleaseCommandTest {
 
         List<String> args = new ArrayList<>(Arrays.asList("custom", "something"));
 
-        c.configure(0, args);
+        try {
 
-        assertEquals(ReleaseMode.custom, c.getMode());
-        assertEquals("custom", c.getReleaseLabel());
+            c.configure(0, args);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
 
-        assertEquals(1, args.size());
-        assertEquals("something", args.get(0));
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("invalid custom release label \"something\"", msg);
+
+        }
     }
 
     @Test
-    public void configure_CustomReleaseString2() throws Exception {
+    public void configure_CustomRelease_FirstArgumentAnInvalidVersionLabel() throws Exception {
 
         ReleaseCommand c = new ReleaseCommand();
 
@@ -161,10 +214,43 @@ public class ReleaseCommandTest {
 
         List<String> args = new ArrayList<>(Arrays.asList("something", "else"));
 
+        //
+        // the first argument is interpreted as a custom (invalid) release label
+        //
+
+        try {
+
+            c.configure(0, args);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("invalid custom release label \"something\"", msg);
+
+            VersionFormatException e2 = (VersionFormatException)e.getCause();
+            String msg2 = e2.getMessage();
+            log.info(msg2);
+        }
+    }
+
+    @Test
+    public void configure_FirstArgumentVersionLabel() throws Exception {
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        //
+        // the first argument is interpreted as a literal custom version
+        //
+
+        List<String> args = new ArrayList<>(Arrays.asList("1.2.3", "else"));
+
         c.configure(0, args);
 
-        assertEquals(ReleaseMode.custom, c.getMode());
-        assertEquals("something", c.getReleaseLabel());
+        ReleaseMode mode = c.getMode();
+        assertEquals(ReleaseMode.custom, mode);
+        assertEquals(new Version("1.2.3"), mode.getCustomVersion());
 
         assertEquals(1, args.size());
         assertEquals("else", args.get(0));
@@ -518,6 +604,114 @@ public class ReleaseCommandTest {
         c.setProjectBuilder(mb);
 
         c.setMode(ReleaseMode.major);
+
+        //
+        // we're executing into a mock OS, tell it execute successfully *all* commands
+        //
+
+        ((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
+
+        //
+        // execution must be successful
+        //
+
+        c.execute(conf, r);
+
+        //
+        // make sure all sequences have been executed in order and are successful
+        //
+
+        SequenceExecutionContext ctx = r.getLastExecutionContext();
+        ExecutionHistory history = ctx.getHistory();
+
+        List<Class<? extends Sequence>> types = ReleaseCommand.getSequenceTypes();
+        assertEquals(history.length(), types.size());
+
+        for(int i = 0; i < history.length(); i++) {
+
+            SequenceOperation so = history.getOperation(i);
+
+            assertEquals("execute", so.getMethodName());
+
+            Class<? extends Sequence> type = types.get(i);
+            assertEquals(type, so.getTarget().getClass());
+            assertTrue(so.wasSuccess());
+
+            if (type.equals(QualificationSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else if (type.equals(BuildSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else if (type.equals(PublishSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else if (type.equals(InstallSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else if (type.equals(CompletionSequence.class)) {
+                assertTrue(so.didChangeState());
+            }
+            else {
+                fail("unknown sequence type " + type);
+            }
+        }
+
+        //
+        // the "saved" version should be 1-SNAPSHOT-2
+        //
+
+        Version v = mp.getVersion();
+        assertEquals(new Version("1.0.1-SNAPSHOT-1"), v);
+        Version sv = mp.getLastSavedVersion();
+        assertEquals(new Version("1.0.1-SNAPSHOT-1"), sv);
+    }
+
+    @Test
+    public void execute_Success_Custom() throws Exception {
+
+        MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
+        r.setBinaryDistributionTopLevelDirectoryName("mock-artifact");
+
+        MockConfiguration conf = new MockConfiguration();
+        r.init(conf);
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        MockProject mp = new MockProject("1-SNAPSHOT-1");
+
+        //
+        // simulate a binary installation - the artifact must be a real file
+        //
+
+        mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("mock-artifact.zip"), null);
+
+        //
+        // we need that artifact to "exist"
+        //
+        assertTrue(Files.write(new File(scratchDirectory, "mock-artifact.zip"), "MOCK ZIP FILE"));
+
+        //
+        // overwrite whatever is available in the mock configuration as
+        // ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT with the scratch directory
+        //
+        conf.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, scratchDirectory.getAbsolutePath());
+
+        //
+        // create a "runtime directory" and the files we expect to find there
+        //
+        File runtimeDir = new File(scratchDirectory, "mock-runtime-dir");
+        assertTrue(runtimeDir.mkdir());
+        conf.set(ConfigurationLabels.RUNTIME_DIRECTORY, runtimeDir.getAbsolutePath());
+        File installationFile = new File(runtimeDir, "mock-artifact/bin/.install");
+        assertTrue(Files.write(installationFile, "MOCK INSTALLATION FILE"));
+        assertTrue(Files.chmod(installationFile, "r-xr--r--"));
+
+        MockProjectBuilder mb = new MockProjectBuilder(mp);
+        c.setProjectBuilder(mb);
+
+        ReleaseMode rm = ReleaseMode.custom;
+        c.setMode(rm);
 
         //
         // we're executing into a mock OS, tell it execute successfully *all* commands

@@ -79,7 +79,6 @@ public class ReleaseCommand extends CommandBase {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private ProjectBuilder projectBuilder;
-    private String releaseLabel;
     private ReleaseMode mode;
     private boolean noPush;
 
@@ -154,9 +153,30 @@ public class ReleaseCommand extends CommandBase {
             // "custom" release string
             //
 
-            setMode(ReleaseMode.custom);
+            ReleaseMode mode = ReleaseMode.custom;
+
+            if (ReleaseMode.custom.name().equals(crt)) {
+
+                //
+                // redundant specification of the "custom" mode, use the next argument as the version label
+                //
+
+                if (i == commandLineArguments.size() - 1) {
+
+                    throw new UserErrorException("missing custom release version");
+                }
+            }
+
+            try {
+
+                mode.setCustomLabel(crt);
+            }
+            catch(VersionFormatException e) {
+
+                throw new UserErrorException("invalid custom release label \"" + crt + "\"", e);
+            }
+            setMode(mode);
             commandLineArguments.remove(i);
-            this.releaseLabel = crt;
         }
     }
 
@@ -170,30 +190,21 @@ public class ReleaseCommand extends CommandBase {
 
             info(r, p);
         }
-        else if (mode.isIncrement()) {
-
-            incrementRelease(c, r, p, mode);
-        }
         else {
-            throw new RuntimeException("NOT YET IMPLEMENTED: release " + mode);
+
+            executeReleaseSequence(c, r, p, mode);
         }
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    /**
+     * In case of custom release, the valid release label can be retrieved as mode.getCustomVersion().
+     */
     public ReleaseMode getMode() {
 
         return mode;
-    }
 
-    /**
-     * The value explicitly specified as a "custom" release label.
-     *
-     * May return null.
-     */
-    public String getReleaseLabel() {
-
-        return releaseLabel;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
@@ -226,7 +237,7 @@ public class ReleaseCommand extends CommandBase {
 
     }
 
-    private void incrementRelease(Configuration c, ReleaseApplicationRuntime r, Project p, ReleaseMode rm)
+    private void executeReleaseSequence(Configuration c, ReleaseApplicationRuntime r, Project p, ReleaseMode rm)
             throws Exception {
 
         //
