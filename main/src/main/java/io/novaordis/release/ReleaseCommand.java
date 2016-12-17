@@ -165,6 +165,13 @@ public class ReleaseCommand extends CommandBase {
 
                     throw new UserErrorException("missing custom release version");
                 }
+
+                //
+                // the label is the next in line
+                //
+
+                commandLineArguments.remove(i);
+                crt = commandLineArguments.get(i);
             }
 
             try {
