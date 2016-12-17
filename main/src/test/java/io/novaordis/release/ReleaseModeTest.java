@@ -108,6 +108,35 @@ public class ReleaseModeTest {
         assertEquals(mode, mode2);
     }
 
+    // isSnapshot() ----------------------------------------------------------------------------------------------------
+
+    @Test
+    public void isSnapshot() throws Exception {
+
+        assertFalse(ReleaseMode.major.isSnapshot());
+        assertFalse(ReleaseMode.minor.isSnapshot());
+        assertFalse(ReleaseMode.patch.isSnapshot());
+        assertTrue(ReleaseMode.snapshot.isSnapshot());
+
+        ReleaseMode.custom.setCustomLabel("1.2.3");
+        assertFalse(ReleaseMode.custom.isSnapshot());
+
+        ReleaseMode.custom.setCustomLabel("1.2.3-SNAPSHOT-1");
+        assertTrue(ReleaseMode.custom.isSnapshot());
+    }
+
+    // isCustom() ------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void isCustom() throws Exception {
+
+        assertFalse(ReleaseMode.major.isCustom());
+        assertFalse(ReleaseMode.minor.isCustom());
+        assertFalse(ReleaseMode.patch.isCustom());
+        assertFalse(ReleaseMode.snapshot.isCustom());
+        assertTrue(ReleaseMode.custom.isCustom());
+    }
+
     // setCustomLabel() ------------------------------------------------------------------------------------------------
 
     @Test
@@ -177,22 +206,6 @@ public class ReleaseModeTest {
         assertNull(ReleaseMode.custom.getCustomVersion());
     }
 
-    // isSnapshot() ----------------------------------------------------------------------------------------------------
-
-    @Test
-    public void isSnapshot() throws Exception {
-
-        assertFalse(ReleaseMode.major.isSnapshot());
-        assertFalse(ReleaseMode.minor.isSnapshot());
-        assertFalse(ReleaseMode.patch.isSnapshot());
-        assertTrue(ReleaseMode.snapshot.isSnapshot());
-
-        ReleaseMode.custom.setCustomLabel("1.2.3");
-        assertFalse(ReleaseMode.custom.isSnapshot());
-
-        ReleaseMode.custom.setCustomLabel("1.2.3-SNAPSHOT-1");
-        assertTrue(ReleaseMode.custom.isSnapshot());
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

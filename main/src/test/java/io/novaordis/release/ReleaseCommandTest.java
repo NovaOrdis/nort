@@ -711,7 +711,9 @@ public class ReleaseCommandTest {
         c.setProjectBuilder(mb);
 
         ReleaseMode rm = ReleaseMode.custom;
+        rm.setCustomLabel("1-SNAPSHOT-2");
         c.setMode(rm);
+
 
         //
         // we're executing into a mock OS, tell it execute successfully *all* commands
@@ -770,9 +772,9 @@ public class ReleaseCommandTest {
         //
 
         Version v = mp.getVersion();
-        assertEquals(new Version("1.0.1-SNAPSHOT-1"), v);
+        assertEquals(new Version("1-SNAPSHOT-3"), v);
         Version sv = mp.getLastSavedVersion();
-        assertEquals(new Version("1.0.1-SNAPSHOT-1"), sv);
+        assertEquals(new Version("1-SNAPSHOT-3"), sv);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

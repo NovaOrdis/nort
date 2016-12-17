@@ -60,6 +60,7 @@ public class QualificationSequence implements Sequence {
         log.debug("executing the qualification sequence ...");
 
         insureCurrentVersionIsSnapshot(context);
+        insureCustomReleaseHasCustomVersionLabel(context);
         incrementCurrentVersionIfNecessary(context);
         failIfInstalledVersionIsEqualOrNewer(context);
 
@@ -95,6 +96,12 @@ public class QualificationSequence implements Sequence {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    @Override
+    public String toString() {
+
+        return "qualification sequence";
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     void insureCurrentVersionIsSnapshot(SequenceExecutionContext context) throws Exception {
@@ -108,6 +115,23 @@ public class QualificationSequence implements Sequence {
         if (!v.isSnapshot()) {
             throw new UserErrorException(
                     "the current version (" + v + ") is not a snapshot version, cannot start the release sequence");
+        }
+    }
+
+    public void insureCustomReleaseHasCustomVersionLabel(SequenceExecutionContext context) throws Exception {
+
+        ReleaseMode rm = context.getReleaseMode();
+
+        if (!rm.isCustom()) {
+
+            return;
+        }
+
+        Version v = rm.getCustomVersion();
+
+        if (v == null) {
+
+            throw new IllegalArgumentException("custom release mode is missing the custom version information");
         }
     }
 
@@ -128,7 +152,7 @@ public class QualificationSequence implements Sequence {
 
         log.debug("attempt to increment the current version, if necessary, release mode " + rm);
 
-        Project p = context.getProject();
+
         Version currentVersion = context.getCurrentVersion();
         Version nextVersion = null;
 
@@ -173,6 +197,7 @@ public class QualificationSequence implements Sequence {
 
         log.debug("updating current version to " + nextVersion);
 
+        Project p = context.getProject();
         p.setVersion(nextVersion);
 
         //
@@ -280,7 +305,7 @@ public class QualificationSequence implements Sequence {
 
         log.debug("'" + command + "' output: \n" + stdoutContent);
 
-        Version installedVersion = null;
+        Version installedVersion;
 
         try {
 

@@ -122,6 +122,12 @@ public class MockSequence implements Sequence {
         return undoInvoked;
     }
 
+    @Override
+    public String toString() {
+
+        return "mock sequence";
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------

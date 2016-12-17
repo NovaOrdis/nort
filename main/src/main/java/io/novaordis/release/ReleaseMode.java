@@ -60,6 +60,22 @@ public enum ReleaseMode {
         return this.equals(major) || this.equals(minor) || this.equals(patch);
     }
 
+    public boolean isSnapshot() {
+
+        if (this.equals(custom)) {
+
+            Version customVersion = getCustomVersion();
+            return customVersion != null && customVersion.isSnapshot();
+        }
+
+        return this.equals(snapshot);
+    }
+
+    public boolean isCustom() {
+
+        return this.equals(custom);
+    }
+
     /**
      * @param s a custom version label. Can be null, in which case it resets the internal state to null.
      *
@@ -114,14 +130,16 @@ public enum ReleaseMode {
         this.customLabel = null;
     }
 
-    public boolean isSnapshot() {
+    @Override
+    public String toString() {
 
-        if (this.equals(custom)) {
+        String s = name();
 
-            Version customVersion = getCustomVersion();
-            return customVersion != null && customVersion.isSnapshot();
+        if (custom.equals(this)) {
+
+            s += " " + getCustomVersion();
         }
 
-        return this.equals(snapshot);
+        return s;
     }
 }
