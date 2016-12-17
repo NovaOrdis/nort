@@ -508,9 +508,6 @@ public class QualificationSequenceTest extends SequenceTest {
         String warning = mr.getWarningContent();
 
         assertEquals("cannot get the version of currently installed blah: command to read it is not configured\n", warning);
-
-        //((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
-        //mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock successful command");
     }
 
     @Test

@@ -287,7 +287,7 @@ public class ReleaseCommand extends CommandBase {
 
 
             throw new UserErrorException(Files.normalizePath(p.getBaseDirectory().getAbsolutePath()) +
-                    " does not seem to contain a valid POM. Make sure the release process is started from the project directory.");
+                    " does not seem to contain a valid top-level project POM. Make sure the release process is started from the project directory.");
         }
     }
     // Inner classes ---------------------------------------------------------------------------------------------------

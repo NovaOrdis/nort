@@ -22,6 +22,8 @@ import io.novaordis.release.version.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/17/16
@@ -50,31 +52,8 @@ public class CompletionSequence implements Sequence {
     @Override
     public boolean execute(SequenceExecutionContext context) throws Exception {
 
-        Project p = context.getProject();
-        ReleaseMode rm = context.getReleaseMode();
-
-        Version currentVersion = p.getVersion();
-
-        if ((rm.isSnapshot() && currentVersion.isDot()) || (rm.isDot() && currentVersion.isSnapshot())) {
-
-            throw new IllegalStateException(
-                    "current version cannot be a " + (currentVersion.isSnapshot() ? "snapshot" : "dot") +
-                            " version (" + currentVersion + ") for a " + (rm.isSnapshot() ? "snapshot" : "dot") +
-                            " release");
-        }
-
-        //
-        // we always increment to the next snapshot
-        //
-        Version nextVersion = Version.nextVersion(currentVersion, ReleaseMode.snapshot);
-
-        log.debug("incrementing release metadata to the next " + rm + " version " + nextVersion + " in " +
-                p.getBaseDirectory().getAbsolutePath() + " workarea ...");
-
-        p.setVersion(nextVersion);
-        executeChangedState = p.save() || executeChangedState;
-
-        log.debug("version " + nextVersion + " written to " + p.getFile());
+        insureCurrentVersionConsistentWithReleaseMode(context);
+        incrementVersionIfNecessary(context);
 
         return executeChangedState;
     }
@@ -106,6 +85,55 @@ public class CompletionSequence implements Sequence {
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
+
+    void insureCurrentVersionConsistentWithReleaseMode(SequenceExecutionContext context) throws IllegalStateException {
+
+        ReleaseMode releaseMode = context.getReleaseMode();
+        Version currentVersion = context.getCurrentVersion();
+
+        if ((releaseMode.isSnapshot() && currentVersion.isDot()) ||
+                (releaseMode.isDot() && currentVersion.isSnapshot())) {
+
+            throw new IllegalStateException(
+                    "current version cannot be a " + (currentVersion.isSnapshot() ? "snapshot" : "dot") +
+                            " version (" + currentVersion + ") for a " +
+                            (releaseMode.isSnapshot() ? "snapshot" : "dot") +
+                            " release");
+        }
+    }
+
+    /**
+     * If we perform a snapshot release
+     *
+     * If we perform a dot release
+     *
+     * If we perform a custom dot snapshot
+     *
+     * If we perform a custom dot release
+     *
+     */
+    void incrementVersionIfNecessary(SequenceExecutionContext context) throws IOException {
+
+        ReleaseMode rm = context.getReleaseMode();
+        Version currentVersion = context.getCurrentVersion();
+        Project p = context.getProject();
+
+        //
+        // we always increment to the next snapshot
+        //
+
+        Version nextVersion = Version.nextVersion(currentVersion, ReleaseMode.snapshot);
+
+        log.debug("incrementing release metadata to the next " + rm + " version " + nextVersion + " in " +
+                p.getBaseDirectory().getAbsolutePath() + " workarea ...");
+
+        p.setVersion(nextVersion);
+        executeChangedState = p.save() || executeChangedState;
+
+        context.setCurrentVersion(nextVersion);
+
+        log.debug("version " + nextVersion + " written to " + p.getFile());
+    }
 
     // Protected -------------------------------------------------------------------------------------------------------
 

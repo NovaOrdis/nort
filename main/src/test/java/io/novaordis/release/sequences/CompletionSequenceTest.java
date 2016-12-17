@@ -20,6 +20,7 @@ import io.novaordis.release.MockConfiguration;
 import io.novaordis.release.MockOS;
 import io.novaordis.release.MockReleaseApplicationRuntime;
 import io.novaordis.release.ReleaseMode;
+import io.novaordis.release.model.MockProject;
 import io.novaordis.release.model.maven.MavenProject;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
@@ -31,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -252,6 +254,106 @@ public class CompletionSequenceTest extends SequenceTest {
 
         MavenProject mp2 = new MavenProject(testPom);
         assertEquals(new Version("1.2.3-SNAPSHOT-4"), mp2.getVersion());
+    }
+
+    // incrementVersionIfNecessary() -----------------------------------------------------------------------------------
+
+    @Test
+    public void incrementVersionIfNecessary_SnapshotRelease() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockProject mp = new MockProject("1-SNAPSHOT-1");
+        ReleaseMode rm = ReleaseMode.snapshot;
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, rm, true, null);
+
+        CompletionSequence s = new CompletionSequence();
+
+        s.incrementVersionIfNecessary(c);
+
+        assertEquals(new Version("1-SNAPSHOT-2"), c.getCurrentVersion());
+
+        List<Version> savedVersionHistory = mp.getSavedVersionHistory();
+        assertEquals(1, savedVersionHistory.size());
+        assertEquals(new Version("1-SNAPSHOT-2"), savedVersionHistory.get(0));
+
+        assertTrue(s.didExecuteChangeState());
+    }
+
+    @Test
+    public void incrementVersionIfNecessary_DotRelease() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockProject mp = new MockProject("1.0.1");
+        ReleaseMode rm = ReleaseMode.patch;
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, rm, true, null);
+
+        CompletionSequence s = new CompletionSequence();
+
+        s.incrementVersionIfNecessary(c);
+
+        assertEquals(new Version("1.0.2-SNAPSHOT-1"), c.getCurrentVersion());
+
+        List<Version> savedVersionHistory = mp.getSavedVersionHistory();
+        assertEquals(1, savedVersionHistory.size());
+        assertEquals(new Version("1.0.2-SNAPSHOT-1"), savedVersionHistory.get(0));
+
+        assertTrue(s.didExecuteChangeState());
+    }
+
+    @Test
+    public void incrementVersionIfNecessary_CustomSnapshotRelease() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        String versionBeingReleased = "1-SNAPSHOT-1";
+        MockProject mp = new MockProject(versionBeingReleased);
+        ReleaseMode rm = ReleaseMode.custom;
+        rm.setCustomLabel(versionBeingReleased);
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, rm, true, null);
+
+        CompletionSequence s = new CompletionSequence();
+
+        s.incrementVersionIfNecessary(c);
+
+        assertEquals(new Version("1-SNAPSHOT-2"), c.getCurrentVersion());
+
+        List<Version> savedVersionHistory = mp.getSavedVersionHistory();
+        assertEquals(1, savedVersionHistory.size());
+        assertEquals(new Version("1-SNAPSHOT-2"), savedVersionHistory.get(0));
+
+        assertTrue(s.didExecuteChangeState());
+    }
+
+    @Test
+    public void incrementVersionIfNecessary_CustomDotRelease() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        String versionBeingReleased = "1.2";
+        MockProject mp = new MockProject(versionBeingReleased);
+        ReleaseMode rm = ReleaseMode.custom;
+        rm.setCustomLabel(versionBeingReleased);
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, rm, true, null);
+
+        CompletionSequence s = new CompletionSequence();
+
+        s.incrementVersionIfNecessary(c);
+
+        assertEquals(new Version("1.2.1-SNAPSHOT-1"), c.getCurrentVersion());
+
+        List<Version> savedVersionHistory = mp.getSavedVersionHistory();
+        assertEquals(1, savedVersionHistory.size());
+        assertEquals(new Version("1.2.1-SNAPSHOT-1"), savedVersionHistory.get(0));
+
+        assertTrue(s.didExecuteChangeState());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
