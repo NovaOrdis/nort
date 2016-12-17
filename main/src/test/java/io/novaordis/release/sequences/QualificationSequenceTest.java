@@ -493,6 +493,8 @@ public class QualificationSequenceTest extends SequenceTest {
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
 
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
+        mp.setName("blah");
+
         SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, true, null);
 
         QualificationSequence s = new QualificationSequence();
@@ -504,7 +506,8 @@ public class QualificationSequenceTest extends SequenceTest {
         //
 
         String warning = mr.getWarningContent();
-        assertEquals("command to get the version of the already installed release not configured\n", warning);
+
+        assertEquals("cannot get the version of currently installed blah: command to read it is not configured\n", warning);
 
         //((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
         //mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock successful command");

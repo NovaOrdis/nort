@@ -1,0 +1,13 @@
+#
+# nort release configuration 
+#
+qualification:
+
+  os.command.to.get.installed.version: nort version
+
+build:
+
+publish:
+
+install:
+

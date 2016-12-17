@@ -255,7 +255,8 @@ public class QualificationSequence implements Sequence {
             // we won't perform the test, but warn
             //
 
-            r.warn("command to get the version of the already installed release not configured");
+            r.warn("cannot get the version of currently installed " + context.getProject().getName() +
+                    ": command to read it is not configured");
             return;
         }
 

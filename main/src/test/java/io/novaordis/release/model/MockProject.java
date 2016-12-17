@@ -40,6 +40,8 @@ public class MockProject implements Project {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private String name;
+
     private Version currentVersion;
 
     private List<Version> savedVersionHistory;
@@ -64,13 +66,15 @@ public class MockProject implements Project {
         setVersion(currentVersion);
         this.savedVersionHistory = new ArrayList<>();
         this.artifacts = new HashMap<>();
+        this.name = "mock";
     }
 
     // Project implementation -------------------------------------------------------------------------------------
 
     @Override
     public String getName() {
-        throw new RuntimeException("getName() NOT YET IMPLEMENTED");
+
+        return name;
     }
 
     @Override
@@ -174,6 +178,11 @@ public class MockProject implements Project {
         }
 
         as.add(new MockMavenArtifact(type, remoteFile, localFile));
+    }
+
+    public void setName(String name) {
+
+        this.name = name;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

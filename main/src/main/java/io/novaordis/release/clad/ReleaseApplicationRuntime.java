@@ -25,9 +25,13 @@ import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.zip.ZipUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -127,6 +131,48 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         configuration.set(ConfigurationLabels.RUNTIME_DIRECTORY, s);
 
+        //
+        // TODO hackishly install the command to read the version of the already installed artifact
+        // Normally this should be done via a generic configuration file system, but clad does not have
+        // that yet, so we just read a ./.nort/project.yaml
+        //
+
+        Map<String, Object> yamlFileConfiguration = null;
+
+        File configFile = new File("./.nort/project.yaml");
+
+        if (configFile.isFile() && configFile.canRead()) {
+
+            BufferedInputStream bis = null;
+
+            try {
+
+                bis = new BufferedInputStream(new FileInputStream(configFile));
+
+                Yaml yaml = new Yaml();
+                //noinspection unchecked
+                yamlFileConfiguration = (Map<String, Object>)yaml.load(bis);
+            }
+            finally {
+
+                if (bis != null) {
+
+                    bis.close();
+                }
+            }
+        }
+
+        if (yamlFileConfiguration != null) {
+
+            //noinspection unchecked
+            Map m = (Map<String, Object>)yamlFileConfiguration.get("qualification");
+            if (m != null) {
+                String c = (String)m.get("os.command.to.get.installed.version");
+                if (c != null) {
+                    configuration.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, c);
+                }
+            }
+        }
     }
 
     /**
