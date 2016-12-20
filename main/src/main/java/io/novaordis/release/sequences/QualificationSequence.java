@@ -127,6 +127,8 @@ public class QualificationSequence implements Sequence {
             return;
         }
 
+        log.debug("insuring that the custom release has a custom version label ...");
+
         Version v = rm.getCustomVersion();
 
         if (v == null) {
@@ -150,8 +152,7 @@ public class QualificationSequence implements Sequence {
 
         ReleaseMode rm = context.getReleaseMode();
 
-        log.debug("attempt to increment the current version, if necessary, release mode " + rm);
-
+        log.debug("attempting to increment the current version, if necessary, release mode " + rm);
 
         Version currentVersion = context.getCurrentVersion();
         Version nextVersion = null;
