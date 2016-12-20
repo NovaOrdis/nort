@@ -144,7 +144,7 @@ public class QualificationSequence implements Sequence {
      *
      * The method will also update the context with the current version (which may be incremented).
      *
-     * @exception IllegalArgumentException if we attempt to update to a custom version that is older then the current.
+     * @exception UserErrorException if we attempt to update to a custom version that is older then the current.
      */
     void incrementCurrentVersionIfNecessary(SequenceExecutionContext context) throws Exception {
 
@@ -192,7 +192,7 @@ public class QualificationSequence implements Sequence {
             // fail if we devolve
             //
 
-            throw new IllegalArgumentException(currentVersion + " cannot be changed to preceding " + nextVersion);
+            throw new UserErrorException(currentVersion + " cannot be changed to preceding " + nextVersion);
         }
 
         log.debug("updating current version to " + nextVersion);

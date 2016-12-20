@@ -405,7 +405,7 @@ public class QualificationSequenceTest extends SequenceTest {
             s.incrementCurrentVersionIfNecessary(c);
             fail("should throw exception");
         }
-        catch(IllegalArgumentException e) {
+        catch(UserErrorException e) {
 
             String msg = e.getMessage();
             log.info(msg);
