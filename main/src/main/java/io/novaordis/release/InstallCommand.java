@@ -18,7 +18,6 @@ package io.novaordis.release;
 
 import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.command.CommandBase;
-import io.novaordis.clad.configuration.Configuration;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -36,7 +35,7 @@ public class InstallCommand extends CommandBase {
 
     // CommandBase overrides -------------------------------------------------------------------------------------------
 
-    public void execute(Configuration configuration, ApplicationRuntime runtime) throws Exception {
+    public void execute(ApplicationRuntime runtime) throws Exception {
         System.out.println("executing " + getName());
     }
 

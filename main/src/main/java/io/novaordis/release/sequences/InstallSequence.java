@@ -164,7 +164,7 @@ public class InstallSequence implements Sequence {
         // lookup the runtime directory, fail if not available
         //
 
-        s = conf.get(ConfigurationLabels.RUNTIME_DIRECTORY);
+        s = conf.get(ConfigurationLabels.INSTALLATION_DIRECTORY);
 
         if (s == null) {
 

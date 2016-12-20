@@ -96,7 +96,7 @@ public class InstallSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         assertFalse(is.execute(c));
     }
@@ -106,10 +106,9 @@ public class InstallSequenceTest extends SequenceTest {
 
         InstallSequence is = new InstallSequence();
 
-        MockConfiguration mc = new MockConfiguration();
         MockProject mp = new MockProject("1.0");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, null, false, null);
 
         mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("/does/not/matter.zip"), null);
 
@@ -133,11 +132,12 @@ public class InstallSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, "/I/am/sure/there/is/no/such/directory");
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
         MockProject mp = new MockProject("1.0");
         mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("/does/not/matter.zip"), null);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         try {
 
@@ -161,7 +161,7 @@ public class InstallSequenceTest extends SequenceTest {
         // the local artifact repository root must be configured and exist
         //
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         File localArtifactRepositoryRoot = new File(scratchDirectory, "mock-artifact-repository");
         assertTrue(localArtifactRepositoryRoot.mkdir());
         mc.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, localArtifactRepositoryRoot.getAbsolutePath());
@@ -171,7 +171,7 @@ public class InstallSequenceTest extends SequenceTest {
                 new File("I/am/sure/there/is/no/such/file/in/repository.zip"),
                 new File("I/am/sure/there/is/no/such/file/locally.zip"));
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         try {
 
@@ -203,7 +203,9 @@ public class InstallSequenceTest extends SequenceTest {
         assertTrue(Files.write(distributionFile, "..."));
         mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()), null);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         try {
 
@@ -235,9 +237,11 @@ public class InstallSequenceTest extends SequenceTest {
         assertTrue(Files.write(distributionFile, "..."));
         mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File(distributionFile.getName()), null);
 
-        mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, "/I/am/sure/there/is/no/such/directory");
+        mc.set(ConfigurationLabels.INSTALLATION_DIRECTORY, "/I/am/sure/there/is/no/such/directory");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         try {
 
@@ -273,9 +277,11 @@ public class InstallSequenceTest extends SequenceTest {
         assertTrue(rd.mkdir());
         assertTrue(Files.chmod(rd, "r--r--r--"));
 
-        mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
+        mc.set(ConfigurationLabels.INSTALLATION_DIRECTORY, rd.getAbsolutePath());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, null, mp, null, false, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         try {
 
@@ -309,14 +315,14 @@ public class InstallSequenceTest extends SequenceTest {
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
-        mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
+        mc.set(ConfigurationLabels.INSTALLATION_DIRECTORY, rd.getAbsolutePath());
 
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
         MockOS mockOS = (MockOS) OS.getInstance();
         mockOS.allCommandsFail();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         try {
 
@@ -350,14 +356,14 @@ public class InstallSequenceTest extends SequenceTest {
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
-        mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
+        mc.set(ConfigurationLabels.INSTALLATION_DIRECTORY, rd.getAbsolutePath());
 
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
         MockOS mockOS = (MockOS) OS.getInstance();
         mockOS.allCommandsSucceedByDefault();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         try {
 
@@ -393,9 +399,9 @@ public class InstallSequenceTest extends SequenceTest {
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
-        mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
+        mc.set(ConfigurationLabels.INSTALLATION_DIRECTORY, rd.getAbsolutePath());
 
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         mr.setBinaryDistributionTopLevelDirectoryName(distributionFileName);
 
         MockOS mockOS = (MockOS) OS.getInstance();
@@ -414,7 +420,7 @@ public class InstallSequenceTest extends SequenceTest {
         assertTrue(Files.write(installationScript, "#/bin/bash\n\necho ."));
         assertTrue(Files.chmod(installationScript, "r-xr--r--"));
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         try {
 
@@ -451,9 +457,9 @@ public class InstallSequenceTest extends SequenceTest {
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
-        mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
+        mc.set(ConfigurationLabels.INSTALLATION_DIRECTORY, rd.getAbsolutePath());
 
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         mr.setBinaryDistributionTopLevelDirectoryName(distributionFileName);
 
         MockOS mockOS = (MockOS) OS.getInstance();
@@ -472,7 +478,7 @@ public class InstallSequenceTest extends SequenceTest {
         assertTrue(Files.write(installationScript, "#/bin/bash\n\necho ."));
         assertTrue(Files.chmod(installationScript, "r-xr--r--"));
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         assertTrue(is.execute(c));
 
@@ -513,9 +519,9 @@ public class InstallSequenceTest extends SequenceTest {
 
         File rd = new File(scratchDirectory, "test-runtime-dir");
         assertTrue(rd.mkdir());
-        mc.set(ConfigurationLabels.RUNTIME_DIRECTORY, rd.getAbsolutePath());
+        mc.set(ConfigurationLabels.INSTALLATION_DIRECTORY, rd.getAbsolutePath());
 
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         mr.setBinaryDistributionTopLevelDirectoryName(distributionFileName);
 
         MockOS mockOS = (MockOS) OS.getInstance();
@@ -534,7 +540,7 @@ public class InstallSequenceTest extends SequenceTest {
         assertTrue(Files.write(installationScript, "#/bin/bash\n\necho ."));
         assertTrue(Files.chmod(installationScript, "r-xr--r--"));
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         assertTrue(is.execute(c));
 

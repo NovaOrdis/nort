@@ -37,8 +37,8 @@ import java.util.Map;
  *
  * Contexts are created for SequenceController.execute() or SequenceController.undo() operations.
  *
- * @see SequenceController#execute(Configuration, ReleaseApplicationRuntime, Project)
- * @see SequenceController#undo(Configuration, ReleaseApplicationRuntime, Project)
+ * @see SequenceController#execute(ReleaseApplicationRuntime, Project)
+ * @see SequenceController#undo(ReleaseApplicationRuntime, Project)
  *
  * @see ExecutionHistory
  *
@@ -77,12 +77,11 @@ public class SequenceExecutionContext {
      * @throws IllegalStateException on invalid project state
      */
     public SequenceExecutionContext(
-            Configuration c, ReleaseApplicationRuntime r, Project m,
-            ReleaseMode rm, boolean noPush, ExecutionHistory h) {
+            ReleaseApplicationRuntime r, Project m, ReleaseMode rm, boolean noPush, ExecutionHistory h) {
 
         this.state = new HashMap<>();
 
-        this.configuration = c;
+        this.configuration = r.getConfiguration();
         this.runtime = r;
         this.project = m;
 

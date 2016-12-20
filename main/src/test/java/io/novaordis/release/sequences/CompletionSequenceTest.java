@@ -87,7 +87,7 @@ public class CompletionSequenceTest extends SequenceTest {
     public void successfulExecution_SnapshotRelease_SnapshotVersionOnDisk() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         File testPom = new File(new File(scratchDirectory, "test"), "test-pom.xml");
         assertTrue(Files.mkdir(testPom.getParentFile()));
         assertTrue(Files.cp(new File(baseDirectory, "src/test/resources/data/maven/pom-sample-snapshot.xml"), testPom));
@@ -99,7 +99,7 @@ public class CompletionSequenceTest extends SequenceTest {
         //
         // snapshot release, the version on disk is snapshot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, false, null);
 
         assertTrue(mp.getVersion().isSnapshot());
         assertEquals(new Version("1.2.3-SNAPSHOT-4"), mp.getVersion());
@@ -124,7 +124,7 @@ public class CompletionSequenceTest extends SequenceTest {
     public void failedExecution_SnapshotRelease_DotVersionOnDisk() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         File testPom = new File(new File(scratchDirectory, "test"), "test-pom.xml");
         assertTrue(Files.mkdir(testPom.getParentFile()));
         assertTrue(Files.cp(new File(baseDirectory, "src/test/resources/data/maven/pom-sample-dot.xml"), testPom));
@@ -136,7 +136,7 @@ public class CompletionSequenceTest extends SequenceTest {
         //
         // snapshot release, the version on disk is dot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.snapshot, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, false, null);
 
 
         assertTrue(mp.getVersion().isDot());
@@ -174,7 +174,7 @@ public class CompletionSequenceTest extends SequenceTest {
     public void successfulExecution_DotRelease_DotVersionOnDisk() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         File testPom = new File(new File(scratchDirectory, "test"), "test-pom.xml");
         assertTrue(Files.mkdir(testPom.getParentFile()));
         assertTrue(Files.cp(new File(baseDirectory, "src/test/resources/data/maven/pom-sample-dot.xml"), testPom));
@@ -186,7 +186,7 @@ public class CompletionSequenceTest extends SequenceTest {
         //
         // dot release, the version on disk is dot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.patch, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, false, null);
 
         assertTrue(mp.getVersion().isDot());
         assertEquals(new Version("1.2.3"), mp.getVersion());
@@ -211,7 +211,7 @@ public class CompletionSequenceTest extends SequenceTest {
     public void failedExecution_DotRelease_SnapshotVersionOnDisk() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         File testPom = new File(new File(scratchDirectory, "test"), "test-pom.xml");
         assertTrue(Files.mkdir(testPom.getParentFile()));
         assertTrue(Files.cp(new File(baseDirectory, "src/test/resources/data/maven/pom-sample-snapshot.xml"), testPom));
@@ -223,7 +223,7 @@ public class CompletionSequenceTest extends SequenceTest {
         //
         // dot release, the version on disk is snapshot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, ReleaseMode.patch, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, false, null);
 
         assertTrue(mp.getVersion().isSnapshot());
         assertEquals(new Version("1.2.3-SNAPSHOT-4"), mp.getVersion());
@@ -262,11 +262,11 @@ public class CompletionSequenceTest extends SequenceTest {
     public void incrementVersionIfNecessary_SnapshotRelease() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         MockProject mp = new MockProject("1-SNAPSHOT-1");
         ReleaseMode rm = ReleaseMode.snapshot;
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, rm, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, true, null);
 
         CompletionSequence s = new CompletionSequence();
 
@@ -285,11 +285,11 @@ public class CompletionSequenceTest extends SequenceTest {
     public void incrementVersionIfNecessary_DotRelease() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         MockProject mp = new MockProject("1.0.1");
         ReleaseMode rm = ReleaseMode.patch;
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, rm, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, true, null);
 
         CompletionSequence s = new CompletionSequence();
 
@@ -308,14 +308,14 @@ public class CompletionSequenceTest extends SequenceTest {
     public void incrementVersionIfNecessary_CustomSnapshotRelease() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
         String versionBeingReleased = "1-SNAPSHOT-1";
         MockProject mp = new MockProject(versionBeingReleased);
         ReleaseMode rm = ReleaseMode.custom;
         rm.setCustomLabel(versionBeingReleased);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, rm, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, true, null);
 
         CompletionSequence s = new CompletionSequence();
 
@@ -334,14 +334,14 @@ public class CompletionSequenceTest extends SequenceTest {
     public void incrementVersionIfNecessary_CustomDotRelease() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
         String versionBeingReleased = "1.2";
         MockProject mp = new MockProject(versionBeingReleased);
         ReleaseMode rm = ReleaseMode.custom;
         rm.setCustomLabel(versionBeingReleased);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, rm, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, true, null);
 
         CompletionSequence s = new CompletionSequence();
 

@@ -16,7 +16,6 @@
 
 package io.novaordis.release.sequences;
 
-import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.ReleaseMode;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.model.Project;
@@ -99,10 +98,9 @@ public class SequenceController {
      *
      * @return the SequenceExecutionContext for this operation.
      */
-    public SequenceExecutionContext execute(Configuration c, ReleaseApplicationRuntime r, Project m)
-            throws Exception {
+    public SequenceExecutionContext execute(ReleaseApplicationRuntime r, Project m) throws Exception {
 
-        SequenceExecutionContext context = new SequenceExecutionContext(c, r, m, rm, noPush, history);
+        SequenceExecutionContext context = new SequenceExecutionContext(r, m, rm, noPush, history);
 
         for(Sequence s: sequences) {
 
@@ -129,9 +127,9 @@ public class SequenceController {
      *
      * @return true if the undo operation modified state, false otherwise.
      */
-    public SequenceExecutionContext undo(Configuration c, ReleaseApplicationRuntime r, Project m) {
+    public SequenceExecutionContext undo(ReleaseApplicationRuntime r, Project m) {
 
-        SequenceExecutionContext context = new SequenceExecutionContext(c, r, m, rm, noPush, history);
+        SequenceExecutionContext context = new SequenceExecutionContext(r, m, rm, noPush, history);
 
         //
         // undo in the reverse order

@@ -73,14 +73,14 @@ public class PublishSequenceTest extends SequenceTest {
     public void osCommandToPublishLocallyNotConfigured() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         MockMavenProject mp = new MockMavenProject();
 
         assertNull(mc.get(ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY));
 
         PublishSequence s = new PublishSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, true, null);
 
         try {
 
@@ -101,7 +101,7 @@ public class PublishSequenceTest extends SequenceTest {
     public void publishingFailure() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         MockMavenProject mp = new MockMavenProject();
 
         //
@@ -113,7 +113,7 @@ public class PublishSequenceTest extends SequenceTest {
 
         PublishSequence s = new PublishSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, true, null);
 
         try {
 
@@ -401,7 +401,7 @@ public class PublishSequenceTest extends SequenceTest {
     public void endToEndPublishingSuccess_NoPush() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
         MockMavenProject mp = new MockMavenProject();
 
@@ -420,7 +420,7 @@ public class PublishSequenceTest extends SequenceTest {
         //
         final boolean noPush = true;
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, noPush, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, noPush, null);
 
         c.setCurrentVersion(new Version("99.9"));
 
@@ -438,7 +438,7 @@ public class PublishSequenceTest extends SequenceTest {
     public void endToEndPublishingSuccess_RemotePush() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
         MockMavenProject mp = new MockMavenProject();
 
@@ -458,7 +458,7 @@ public class PublishSequenceTest extends SequenceTest {
 
         final boolean noPush = false;
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, noPush, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, noPush, null);
 
         c.setCurrentVersion(new Version("99.9"));
 

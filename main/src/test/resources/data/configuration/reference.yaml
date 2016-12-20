@@ -1,0 +1,14 @@
+#
+# reference configuration file
+#
+
+qualification:
+  os.command.to.get.installed.version: some-command
+
+build:
+
+publish:
+  local.artifact.repository.root: ${M2}
+
+install:
+  installation.directory: ${RUNTIME_DIR}

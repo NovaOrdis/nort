@@ -16,39 +16,46 @@
 
 package io.novaordis.release.clad;
 
+import io.novaordis.utilities.env.EnvironmentVariableProvider;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 11/16/16
+ * @since 12/20/16
  */
-public class ConfigurationLabels {
+public class MockEnvironmentVariableProvider implements EnvironmentVariableProvider {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    public static final String OS_COMMAND_TO_EXECUTE_ALL_TESTS = "os.command.to.execute.all.tests";
-    public static final String OS_COMMAND_TO_BUILD_WITH_TESTS = "os.command.to.build.with.tests";
-    public static final String OS_COMMAND_TO_BUILD_WITHOUT_TESTS = "os.command.to.build.without.tests";
-    public static final String OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY = "os.command.to.publish.into.local.repository";
-
-    public static final String OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY = "os.command.to.add.to.local.source.repository";
-    public static final String OS_COMMAND_TO_COMMIT_TO_LOCAL_SOURCE_REPOSITORY = "os.command.to.commit.to.local.source.repository";
-
-    public static final String OS_COMMAND_TO_TAG_LOCAL_SOURCE_REPOSITORY = "os.command.to.tag.local.source.repository";
-    public static final String OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY = "os.command.to.push.to.remote.source.repository";
-
-    public static final String LOCAL_ARTIFACT_REPOSITORY_ROOT = "local.artifact.repository.root";
-
-    public static final String OS_COMMAND_TO_GET_INSTALLED_VERSION = "os.command.to.get.installed.version";
-
-    public static final String INSTALLATION_DIRECTORY = "installation.directory";
-
-
     // Attributes ------------------------------------------------------------------------------------------------------
+
+    private Map<String, String> simulatedEnvironmentVariables;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
+    public MockEnvironmentVariableProvider() {
+
+        this.simulatedEnvironmentVariables = new HashMap<>();
+    }
+
+    // EnvironmentVariableProvider implementation ----------------------------------------------------------------------
+
+    @Override
+    public String getenv(String s) {
+
+        return simulatedEnvironmentVariables.get(s);
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
+
+    public void installEnvironmentVariable(String name, String value) {
+
+        simulatedEnvironmentVariables.put(name, value);
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

@@ -271,10 +271,11 @@ public class ReleaseCommandTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
         mr.setCurrentDirectory(crtDir);
 
         try {
-            command.execute(mc, mr);
+            command.execute(mr);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -304,6 +305,7 @@ public class ReleaseCommandTest {
         MockConfiguration mc = new MockConfiguration();
         MockProjectBuilder mb = new MockProjectBuilder(new MockProject("1-SNAPSHOT-1"));
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
 
         ReleaseCommand c = new ReleaseCommand();
         c.setMode(ReleaseMode.snapshot);
@@ -317,7 +319,7 @@ public class ReleaseCommandTest {
 
         try {
 
-            c.execute(mc, mr);
+            c.execute(mr);
             fail("should have thrown exception");
         }
         catch(RuntimeException e) {
@@ -394,7 +396,7 @@ public class ReleaseCommandTest {
 
         try {
 
-            c.execute(conf, r);
+            c.execute(r);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -488,7 +490,7 @@ public class ReleaseCommandTest {
         //
         File runtimeDir = new File(scratchDirectory, "mock-runtime-dir");
         assertTrue(runtimeDir.mkdir());
-        conf.set(ConfigurationLabels.RUNTIME_DIRECTORY, runtimeDir.getAbsolutePath());
+        conf.set(ConfigurationLabels.INSTALLATION_DIRECTORY, runtimeDir.getAbsolutePath());
         File installationFile = new File(runtimeDir, "mock-artifact/bin/.install");
         assertTrue(Files.write(installationFile, "MOCK INSTALLATION FILE"));
         assertTrue(Files.chmod(installationFile, "r-xr--r--"));
@@ -508,7 +510,7 @@ public class ReleaseCommandTest {
         // execution must be successful
         //
 
-        c.execute(conf, r);
+        c.execute(r);
 
         //
         // make sure all sequences have been executed in order and are successful
@@ -595,7 +597,7 @@ public class ReleaseCommandTest {
         //
         File runtimeDir = new File(scratchDirectory, "mock-runtime-dir");
         assertTrue(runtimeDir.mkdir());
-        conf.set(ConfigurationLabels.RUNTIME_DIRECTORY, runtimeDir.getAbsolutePath());
+        conf.set(ConfigurationLabels.INSTALLATION_DIRECTORY, runtimeDir.getAbsolutePath());
         File installationFile = new File(runtimeDir, "mock-artifact/bin/.install");
         assertTrue(Files.write(installationFile, "MOCK INSTALLATION FILE"));
         assertTrue(Files.chmod(installationFile, "r-xr--r--"));
@@ -615,7 +617,7 @@ public class ReleaseCommandTest {
         // execution must be successful
         //
 
-        c.execute(conf, r);
+        c.execute(r);
 
         //
         // make sure all sequences have been executed in order and are successful
@@ -702,7 +704,7 @@ public class ReleaseCommandTest {
         //
         File runtimeDir = new File(scratchDirectory, "mock-runtime-dir");
         assertTrue(runtimeDir.mkdir());
-        conf.set(ConfigurationLabels.RUNTIME_DIRECTORY, runtimeDir.getAbsolutePath());
+        conf.set(ConfigurationLabels.INSTALLATION_DIRECTORY, runtimeDir.getAbsolutePath());
         File installationFile = new File(runtimeDir, "mock-artifact/bin/.install");
         assertTrue(Files.write(installationFile, "MOCK INSTALLATION FILE"));
         assertTrue(Files.chmod(installationFile, "r-xr--r--"));
@@ -725,7 +727,7 @@ public class ReleaseCommandTest {
         // execution must be successful
         //
 
-        c.execute(conf, r);
+        c.execute(r);
 
         //
         // make sure all sequences have been executed in order and are successful

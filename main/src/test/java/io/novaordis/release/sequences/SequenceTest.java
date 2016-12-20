@@ -43,7 +43,7 @@ public abstract class SequenceTest {
 
         // noop
 
-        assertFalse(s.undo(new SequenceExecutionContext(null, null, null, null, true, null)));
+        assertFalse(s.undo(new SequenceExecutionContext(null, null, null, true, null)));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

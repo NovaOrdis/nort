@@ -21,6 +21,7 @@ import io.novaordis.clad.option.Option;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.utilities.NotYetImplementedException;
+import io.novaordis.utilities.UserErrorException;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -46,10 +47,16 @@ public class MockReleaseApplicationRuntime extends ReleaseApplicationRuntime {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockReleaseApplicationRuntime() {
+    public MockReleaseApplicationRuntime() throws UserErrorException {
+
+        this(null);
+    }
+
+    public MockReleaseApplicationRuntime(Configuration c) throws UserErrorException {
 
         this.warningContent = "";
         this.binaryDistributionTopLevelDirectoryName = "mock-top-level-directory";
+        init(c);
     }
 
     // ReleaseApplicationRuntime overrides -----------------------------------------------------------------------------
@@ -77,11 +84,6 @@ public class MockReleaseApplicationRuntime extends ReleaseApplicationRuntime {
     @Override
     public Set<Option> optionalGlobalOptions() {
         throw new RuntimeException("optionalGlobalOptions() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public void init(Configuration configuration) throws Exception {
-        super.init(configuration);
     }
 
     @Override

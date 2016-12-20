@@ -14,21 +14,34 @@
  * limitations under the License.
  */
 
-package io.novaordis.release;
+package io.novaordis.release.clad;
 
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.clad.option.Option;
+import io.novaordis.utilities.NotYetImplementedException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 11/8/16
+ * @since 12/20/16
  */
-public class MockConfiguration implements Configuration {
+public class NortConfiguration implements Configuration {
+
+    //
+    //
+    // TODO This is an experimental implementation, and upon the success of the experiment, some of the features
+    //      will be ported to clad Configuration support. Currently we wrap around the native configuration instance
+    //      and delegate to it
+    //
+    // Example:
+    //
+    // 1. Extensible configuration implementation, which offers extensible typed access to application-specific
+    //    configuration.
+    //
+    // 2. Variable support
+    //
+    //
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -36,84 +49,44 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    // if get is broken, get() invocation will fail with a synthetic RuntimeException
-    private boolean getBroken;
-
-    private Map<String, String> genericLabels;
-
-    private List<Option> globalOptions;
+    private Configuration delegateNativeConfiguration;
 
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    public MockConfiguration() {
-
-        this.genericLabels = new HashMap<>();
-        this.globalOptions = new ArrayList<>();
-    }
 
     // Configuration implementation ------------------------------------------------------------------------------------
 
     @Override
     public String getApplicationName() {
-        throw new RuntimeException("getApplicationName() NOT YET IMPLEMENTED");
+        throw new NotYetImplementedException("getApplicationName() NOT YET IMPLEMENTED");
     }
 
     @Override
     public List<Option> getGlobalOptions() {
-
-        return globalOptions;
+        throw new NotYetImplementedException("getGlobalOptions() NOT YET IMPLEMENTED");
     }
 
     @Override
-    public Option getGlobalOption(Option definition) {
-
-        for(Option o: globalOptions) {
-
-            if (o.equals(definition)) {
-
-                return o;
-            }
-        }
-
-        return null;
+    public Option getGlobalOption(Option option) {
+        throw new NotYetImplementedException("getGlobalOption() NOT YET IMPLEMENTED");
     }
 
     @Override
     public boolean isVerbose() {
-
-        return true;
+        throw new NotYetImplementedException("isVerbose() NOT YET IMPLEMENTED");
     }
 
     @Override
-    public void set(String configurationLabel, String value) {
-
-        genericLabels.put(configurationLabel, value);
+    public void set(String s, String s1) {
+        throw new NotYetImplementedException("set() NOT YET IMPLEMENTED");
     }
 
     @Override
-    public String get(String configurationLabel) {
-
-        if (getBroken) {
-            throw new RuntimeException("SYNTHETIC");
-        }
-
-        return genericLabels.get(configurationLabel);
+    public String get(String s) {
+        throw new NotYetImplementedException("get() NOT YET IMPLEMENTED");
     }
+
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    /**
-     * Make get() invocation to fail with a synthetic RuntimeException
-     */
-    public void breakGet() {
-
-        this.getBroken = true;
-    }
-
-    public void addGlobalOption(Option o) {
-
-        globalOptions.add(o);
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

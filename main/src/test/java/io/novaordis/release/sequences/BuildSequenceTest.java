@@ -71,13 +71,15 @@ public class BuildSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
+
         MockMavenProject mp = new MockMavenProject();
 
         assertNull(mc.get(ConfigurationLabels.OS_COMMAND_TO_BUILD_WITH_TESTS));
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
         c.setTestsExecuted(false);
 
         try {
@@ -98,13 +100,15 @@ public class BuildSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
+
         MockMavenProject mp = new MockMavenProject();
 
         assertNull(mc.get(ConfigurationLabels.OS_COMMAND_TO_BUILD_WITHOUT_TESTS));
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
         c.setTestsExecuted(true);
 
         try {
@@ -125,6 +129,8 @@ public class BuildSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
+
         MockMavenProject mp = new MockMavenProject();
 
         //
@@ -136,7 +142,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
         c.setTestsExecuted(false);
 
         s.execute(c);
@@ -151,6 +157,8 @@ public class BuildSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
+
         MockMavenProject mp = new MockMavenProject();
 
         //
@@ -162,7 +170,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
         c.setTestsExecuted(true);
 
         s.execute(c);
@@ -177,6 +185,8 @@ public class BuildSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
+
         MockMavenProject mp = new MockMavenProject();
 
         //
@@ -188,7 +198,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mc, mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
         c.setTestsExecuted(false);
 
         try {

@@ -80,7 +80,7 @@ public class SequenceControllerTest {
         c.add(s2);
 
         try {
-            c.execute(null, null, null);
+            c.execute(null, null);
             fail("should have thrown exception");
         }
         catch(MockSequenceExecutionException e) {
@@ -108,7 +108,7 @@ public class SequenceControllerTest {
         c.add(s3);
 
         try {
-            c.execute(null, null, null);
+            c.execute(null, null);
             fail("should have thrown exception");
         }
         catch(MockSequenceExecutionException e) {
@@ -137,7 +137,7 @@ public class SequenceControllerTest {
         c.add(s3);
 
         try {
-            c.execute(null, null, null);
+            c.execute(null, null);
             fail("should have thrown exception");
         }
         catch(MockSequenceExecutionException e) {
@@ -168,7 +168,7 @@ public class SequenceControllerTest {
         c.add(s2);
         c.add(s3);
 
-        SequenceExecutionContext ctx = c.execute(null, null, null);
+        SequenceExecutionContext ctx = c.execute(null, null);
 
         assertTrue(s1.wasExecuteInvoked());
         assertTrue(s2.wasExecuteInvoked());
@@ -203,7 +203,7 @@ public class SequenceControllerTest {
 
         SequenceController c = new SequenceController(ReleaseMode.snapshot, true, s1, s2, s3);
 
-        SequenceExecutionContext ctx = c.undo(null, null, null);
+        SequenceExecutionContext ctx = c.undo(null, null);
 
         ExecutionHistory h = ctx.getHistory();
 
@@ -241,7 +241,7 @@ public class SequenceControllerTest {
 
         SequenceController c = new SequenceController(ReleaseMode.snapshot, true, s1, s2, s3);
 
-        SequenceExecutionContext ctx = c.undo(null, null, null);
+        SequenceExecutionContext ctx = c.undo(null, null);
 
         ExecutionHistory h = ctx.getHistory();
 

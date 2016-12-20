@@ -18,7 +18,6 @@ package io.novaordis.release;
 
 import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.command.CommandBase;
-import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.clad.option.BooleanOption;
 import io.novaordis.clad.option.Option;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
@@ -189,7 +188,7 @@ public class ReleaseCommand extends CommandBase {
     }
 
     @Override
-    public void execute(Configuration c, ApplicationRuntime runtime) throws Exception {
+    public void execute(ApplicationRuntime runtime) throws Exception {
 
         ReleaseApplicationRuntime r = (ReleaseApplicationRuntime)runtime;
         Project p = projectBuilder.build(r.getCurrentDirectory());
@@ -202,7 +201,7 @@ public class ReleaseCommand extends CommandBase {
         }
         else {
 
-            executeReleaseSequence(c, r, p, mode);
+            executeReleaseSequence(r, p, mode);
         }
     }
 
@@ -247,7 +246,7 @@ public class ReleaseCommand extends CommandBase {
 
     }
 
-    private void executeReleaseSequence(Configuration c, ReleaseApplicationRuntime r, Project p, ReleaseMode rm)
+    private void executeReleaseSequence(ReleaseApplicationRuntime r, Project p, ReleaseMode rm)
             throws Exception {
 
         //
@@ -261,14 +260,14 @@ public class ReleaseCommand extends CommandBase {
 
         try {
 
-            ctx = controller.execute(c, r, p);
+            ctx = controller.execute(r, p);
             successfulRelease = true;
         }
         finally {
 
             if (!successfulRelease) {
 
-                ctx = controller.undo(c, r, p);
+                ctx = controller.undo(r, p);
             }
 
             r.setLastExecutionContext(ctx);

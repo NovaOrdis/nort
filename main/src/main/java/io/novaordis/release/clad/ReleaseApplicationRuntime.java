@@ -19,17 +19,21 @@ package io.novaordis.release.clad;
 import io.novaordis.clad.application.ApplicationRuntimeBase;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.clad.option.Option;
+import io.novaordis.clad.option.StringOption;
 import io.novaordis.release.ZipHandler;
 import io.novaordis.release.sequences.SequenceExecutionContext;
+import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.zip.ZipUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -43,39 +47,36 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
+
     // Constants -------------------------------------------------------------------------------------------------------
 
     private static final Logger log = LoggerFactory.getLogger(ReleaseApplicationRuntime.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    // Attributes ------------------------------------------------------------------------------------------------------
+    // Package protected static ----------------------------------------------------------------------------------------
 
-    private SequenceExecutionContext lastExecutionContext;
+    /**
+     * Do not fail here if specific configuration is missing. The Qualification Sequence will perform all checks. This
+     * is because we don't know yet what specific configuration is required and what not. Fail on configuration file
+     * parsing errors though.
+     *
+     * @throws UserErrorException on configuration file parsing errors.
+     */
+    static void initializeEnvironmentRelatedConfiguration(Configuration configuration) throws UserErrorException {
 
-    // Constructors ----------------------------------------------------------------------------------------------------
+        //
+        // TODO hackishly install the command to read the version of the already installed artifact and some other
+        // configuration elements. Normally this should be done via a generic configuration file system, but clad does
+        // not have that yet. Currently we rely on the -c <configuration-file> global variable.
+        //
 
-    // ApplicationRuntimeBase overrides --------------------------------------------------------------------------------
+        StringOption configurationFileOption = (StringOption)configuration.getGlobalOption(new StringOption('c'));
 
-    @Override
-    public String getDefaultCommandName() {
-        return null;
-    }
+        if (configurationFileOption != null) {
 
-    @Override
-    public Set<Option> requiredGlobalOptions() {
-
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<Option> optionalGlobalOptions() {
-
-        return Collections.emptySet();
-    }
-
-    @Override
-    public void init(Configuration configuration) throws Exception {
+            loadConfiguration(configurationFileOption.getString(), configuration);
+        }
 
         //
         // install the hardcoded defaults
@@ -113,66 +114,177 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         configuration.set(label, "git push --follow-tags");
         log.debug("set '" + label + "' to \"" + configuration.get(label) + "\"");
 
-        //
-        // install the environment-dependent state
-        //
+    }
 
-        String s = System.getenv("M2");
-        if (s == null) {
-            throw new UserErrorException("M2 environment variable not defined, configure the location of the local Maven repository in the project configuration file");
+    /**
+     * Loads relevant configuration from file into the configuration instance.
+     *
+     * Do not fail here if specific configuration is missing. The Qualification Sequence will perform all checks. This
+     * is because we don't know yet what specific configuration is required and what not. Fail on configuration file
+     * parsing errors though.
+     *
+     * @param path the configuration file path. Must exist, be readable and parseable, otherwise the method throws
+     *             a UserErrorException.
+     *
+     * @throws UserErrorException on configuration file parsing errors.
+     */
+    static void loadConfiguration(String path, Configuration configuration)
+            throws UserErrorException {
+
+        File configFile = new File(path);
+
+        if (!configFile.isFile()) {
+
+            throw new UserErrorException("configuration file " + Files.normalizePath(path) + " does not exist");
         }
 
-        configuration.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, s);
+        if (!configFile.canRead()) {
 
-        s = System.getenv("RUNTIME_DIR");
-        if (s == null) {
-            throw new UserErrorException("RUNTIME_DIR environment variable not defined, configure the location of the runtime directory in the project configuration file");
+            throw new UserErrorException("configuration file " + Files.normalizePath(path) + " is not readable");
         }
 
-        configuration.set(ConfigurationLabels.RUNTIME_DIRECTORY, s);
-
-        //
-        // TODO hackishly install the command to read the version of the already installed artifact
-        // Normally this should be done via a generic configuration file system, but clad does not have
-        // that yet, so we just read a ./.nort/project.yaml
-        //
-
+        BufferedInputStream bis = null;
         Map<String, Object> yamlFileConfiguration = null;
 
-        File configFile = new File("./.nort/project.yaml");
+        try {
 
-        if (configFile.isFile() && configFile.canRead()) {
+            bis = new BufferedInputStream(new FileInputStream(configFile));
 
-            BufferedInputStream bis = null;
-
-            try {
-
-                bis = new BufferedInputStream(new FileInputStream(configFile));
-
-                Yaml yaml = new Yaml();
-                //noinspection unchecked
-                yamlFileConfiguration = (Map<String, Object>)yaml.load(bis);
-            }
-            finally {
-
-                if (bis != null) {
-
-                    bis.close();
-                }
-            }
-        }
-
-        if (yamlFileConfiguration != null) {
+            Yaml yaml = new Yaml();
 
             //noinspection unchecked
-            Map m = (Map<String, Object>)yamlFileConfiguration.get("qualification");
-            if (m != null) {
-                String c = (String)m.get("os.command.to.get.installed.version");
-                if (c != null) {
-                    configuration.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, c);
+            yamlFileConfiguration = (Map<String, Object>)yaml.load(bis);
+        }
+        catch(YAMLException e) {
+
+            throw new UserErrorException(
+                    "YAML file " + Files.normalizePath(path) + " parsing error: " + e.getMessage(), e);
+        }
+        catch(IOException e) {
+
+            throw new UserErrorException(e);
+        }
+        finally {
+
+            if (bis != null) {
+
+                try {
+                    bis.close();
+                }
+                catch(Exception e) {
+
+                    log.warn("failed to close input stream", e);
                 }
             }
         }
+
+        //
+        // Qualification Sequence Configuration
+        //
+
+        //noinspection unchecked
+        Map qualificationConfig = (Map<String, Object>)yamlFileConfiguration.get("qualification");
+
+        if (qualificationConfig != null) {
+
+            String s = (String) qualificationConfig.get(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION);
+
+            if (s != null) {
+
+                configuration.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, s);
+            }
+        }
+
+        //
+        // Publish Sequence Configuration
+        //
+
+        //noinspection unchecked
+        Map publishConfig = (Map<String, Object>)yamlFileConfiguration.get("publish");
+
+        if (publishConfig != null) {
+
+            String s = (String) publishConfig.get(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT);
+
+            if (s != null) {
+
+                configuration.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, s);
+            }
+        }
+
+        //
+        // Installation Sequence Configuration
+        //
+
+        //noinspection unchecked
+        Map installConfig = (Map<String, Object>)yamlFileConfiguration.get("install");
+
+        if (installConfig != null) {
+
+            String s = (String) installConfig.get(ConfigurationLabels.INSTALLATION_DIRECTORY);
+
+            if (s != null) {
+
+                configuration.set(ConfigurationLabels.INSTALLATION_DIRECTORY, s);
+            }
+        }
+
+//        //
+//        // install the environment-dependent state
+//        //
+//
+//        EnvironmentVariableProvider evp = EnvironmentVariableProvider.getInstance();
+//
+//        String s = evp.getenv("M2");
+//
+//        if (s == null) {
+//
+//            throw new UserErrorException(
+//                    "M2 environment variable not defined, configure the location of the local Maven repository in the project configuration file");
+//        }
+//
+//        configuration.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, s);
+//
+//        s = evp.getenv("RUNTIME_DIR");
+//
+//        if (s == null) {
+//
+//            throw new UserErrorException(
+//                    "RUNTIME_DIR environment variable not defined, configure the location of the runtime directory in the project configuration file");
+//        }
+//
+//        configuration.set(ConfigurationLabels.INSTALLATION_DIRECTORY, s);
+    }
+
+    // Attributes ------------------------------------------------------------------------------------------------------
+
+    private SequenceExecutionContext lastExecutionContext;
+
+    // Constructors ----------------------------------------------------------------------------------------------------
+
+    // ApplicationRuntimeBase overrides --------------------------------------------------------------------------------
+
+    @Override
+    public String getDefaultCommandName() {
+        return null;
+    }
+
+    @Override
+    public Set<Option> requiredGlobalOptions() {
+
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<Option> optionalGlobalOptions() {
+
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void init(Configuration configuration) throws UserErrorException {
+
+        initializeEnvironmentRelatedConfiguration(configuration);
     }
 
     /**

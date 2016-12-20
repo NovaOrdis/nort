@@ -46,7 +46,7 @@ public class SequenceExecutionContextTest {
     @Test
     public void nullGenericState() throws Exception {
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, false, null);
 
         assertNull(c.get("something"));
         assertNull(c.get(null));
@@ -55,7 +55,7 @@ public class SequenceExecutionContextTest {
     @Test
     public void genericState() throws Exception {
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, false, null);
 
         c.set("something", "somethingelse");
         assertEquals("somethingelse", c.get("something"));
@@ -68,7 +68,7 @@ public class SequenceExecutionContextTest {
 
         MockProject mp = new MockProject("1.2.3-SNAPSHOT-4");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, null, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, null, false, null);
 
         Version v = c.getCurrentVersion();
         assertEquals(new Version("1.2.3-SNAPSHOT-4"), v);
@@ -79,7 +79,7 @@ public class SequenceExecutionContextTest {
     @Test
     public void typedAccess_wereTestsExecuted() throws Exception {
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, false, null);
 
         assertFalse(c.wereTestsExecuted());
 
@@ -91,7 +91,7 @@ public class SequenceExecutionContextTest {
     @Test
     public void typedAccess_getCurrentVersion() throws Exception {
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, false, null);
 
         assertNull(c.getCurrentVersion());
 
