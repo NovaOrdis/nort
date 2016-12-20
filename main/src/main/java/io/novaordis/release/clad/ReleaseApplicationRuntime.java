@@ -284,6 +284,8 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
     @Override
     public void init(Configuration configuration) throws UserErrorException {
 
+        super.init(configuration);
+
         initializeEnvironmentRelatedConfiguration(configuration);
     }
 

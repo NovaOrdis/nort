@@ -56,7 +56,10 @@ public class MockReleaseApplicationRuntime extends ReleaseApplicationRuntime {
 
         this.warningContent = "";
         this.binaryDistributionTopLevelDirectoryName = "mock-top-level-directory";
-        init(c);
+
+        if (c != null) {
+            init(c);
+        }
     }
 
     // ReleaseApplicationRuntime overrides -----------------------------------------------------------------------------
