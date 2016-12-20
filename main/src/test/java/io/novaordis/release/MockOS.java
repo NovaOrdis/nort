@@ -101,14 +101,15 @@ public class MockOS implements OS {
         executedCommands.add(command);
 
         if (allCommandsFail) {
-            return new NativeExecutionResult(1, "mock \"" + command + "\" stdout", "mock \"" + command + "\" stderr");
+            return new NativeExecutionResult(
+                    1, "mock \"" + command + "\" stdout", "mock \"" + command + "\" stderr", false, false);
         }
 
         for(CommandAndOutput c: commandsThatFail) {
 
             if (c.command.equals(command)) {
 
-                return new NativeExecutionResult(1, c.stdout, c.stderr);
+                return new NativeExecutionResult(1, c.stdout, c.stderr, false, false);
             }
         }
 
@@ -116,13 +117,14 @@ public class MockOS implements OS {
 
             if (c.command.equals(command)) {
 
-                return new NativeExecutionResult(0, c.stdout, c.stderr);
+                return new NativeExecutionResult(0, c.stdout, c.stderr, false, false);
             }
         }
 
         if (allCommandsSucceedByDefault) {
 
-            return new NativeExecutionResult(0, "mock \"" + command + "\" stdout", "mock \"" + command + "\" stderr");
+            return new NativeExecutionResult(
+                    0, "mock \"" + command + "\" stdout", "mock \"" + command + "\" stderr", false, false);
         }
 
         throw new RuntimeException("WE DON'T KNOW HOW TO HANDLE " + command);
