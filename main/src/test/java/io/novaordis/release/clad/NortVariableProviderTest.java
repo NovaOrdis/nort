@@ -18,10 +18,14 @@ package io.novaordis.release.clad;
 
 import io.novaordis.utilities.env.EnvironmentVariableProvider;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -30,6 +34,8 @@ import static org.junit.Assert.assertNotNull;
 public class NortVariableProviderTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    private static final Logger log = LoggerFactory.getLogger(NortVariableProviderTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -60,6 +66,39 @@ public class NortVariableProviderTest {
 
         assertEquals(p3, p2);
         assertNotEquals(p3, original);
+
+        //
+        // we don't have a parent
+        //
+        assertNull(p.getVariableProviderParent());
+
+        try {
+
+            p.setVariableProviderParent(new MockVariableProvider());
+            fail("should have thrown exception");
+        }
+        catch(UnsupportedOperationException e) {
+
+            log.info("" + e);
+        }
+    }
+
+    @Test
+    public void resolveAnEnvironmentVariable() {
+
+        MockEnvironmentVariableProvider mp = new MockEnvironmentVariableProvider();
+
+        NortVariableProvider p = new NortVariableProvider();
+        p.setEnvironmentVariableProvider(mp);
+
+        assertNull(p.getVariableValue("NO_SUCH_VARIABLE"));
+
+        String value = "some value";
+        String variableName = "SOME_VARIABLE";
+        mp.installEnvironmentVariable(variableName, value);
+
+        String s = p.getVariableValue(variableName);
+        assertEquals("some value", s);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

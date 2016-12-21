@@ -21,6 +21,8 @@ import io.novaordis.utilities.env.EnvironmentVariableProvider;
 import io.novaordis.utilities.variable.VariableProvider;
 
 /**
+ * The instance resolves variables from the environment, so far.
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 12/20/16
  */
@@ -45,22 +47,30 @@ public class NortVariableProvider implements VariableProvider {
 
     @Override
     public String getVariableValue(String s) {
-        throw new NotYetImplementedException("getVariableValue() NOT YET IMPLEMENTED");
+
+        //
+        // we first try environment variables
+        //
+
+        return environmentVariableProvider.getenv(s);
     }
 
     @Override
     public String setVariableValue(String s, String s1) {
+
         throw new NotYetImplementedException("setVariableValue() NOT YET IMPLEMENTED");
     }
 
     @Override
     public VariableProvider getVariableProviderParent() {
-        throw new NotYetImplementedException("getVariableProviderParent() NOT YET IMPLEMENTED");
+
+        return null;
     }
 
     @Override
     public void setVariableProviderParent(VariableProvider variableProvider) {
-        throw new NotYetImplementedException("setVariableProviderParent() NOT YET IMPLEMENTED");
+
+        throw new UnsupportedOperationException();
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
