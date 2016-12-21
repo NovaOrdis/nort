@@ -54,6 +54,8 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
     private static final Logger log = LoggerFactory.getLogger(ReleaseApplicationRuntime.class);
 
+    public static final String DEFAULT_CONFIGURATION_FILE = "./.nort/project.yaml";
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Package protected static ----------------------------------------------------------------------------------------
@@ -76,12 +78,34 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         // not have that yet. Currently we rely on the -c <configuration-file> global variable.
         //
 
+        String configurationFile;
+
         StringOption configurationFileOption = (StringOption)configuration.getGlobalOption(new StringOption('c'));
 
         if (configurationFileOption != null) {
 
-            loadConfiguration(configurationFileOption.getString(), configuration, provider);
+            //
+            // command line configuration file takes precedence
+            //
+
+            configurationFile = configurationFileOption.getString();
         }
+        else {
+
+            configurationFile = DEFAULT_CONFIGURATION_FILE;
+
+            if (!new File(configurationFile).isFile()) {
+
+                log.warn("default configuration file " + configurationFile + " not found");
+                configurationFile = null;
+            }
+
+        }
+
+        if (configurationFile != null) {
+            loadConfiguration(configurationFile, configuration, provider);
+        }
+
 
         //
         // install the hardcoded defaults
