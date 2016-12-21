@@ -23,7 +23,7 @@
 
     <groupId>io.novaordis.nort</groupId>
     <artifactId>NORT</artifactId>
-    <version>1.0.2-SNAPSHOT-7</version>
+    <version>1.0.2-SNAPSHOT-8</version>
     <packaging>pom</packaging>
 
     <modules>
