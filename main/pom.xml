@@ -34,7 +34,7 @@
         <release_date>${maven.build.timestamp}</release_date>
 
         <novaordis.utilities.version>4.4.0-SNAPSHOT-5</novaordis.utilities.version>
-        <clad.version>3.4.0-SNAPSHOT-2</clad.version>
+        <clad.version>3.4.0-SNAPSHOT-3</clad.version>
     </properties>
 
     <build>

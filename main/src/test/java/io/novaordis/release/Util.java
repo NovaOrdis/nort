@@ -19,6 +19,7 @@ package io.novaordis.release;
 import io.novaordis.utilities.Files;
 
 import java.io.File;
+import java.util.StringTokenizer;
 
 import static org.junit.Assert.assertTrue;
 
@@ -69,6 +70,23 @@ public class Util {
 
         return cp(new File(System.getProperty("basedir"), "src/test/resources/data"), srcPathRelativeToBaseDataDir,
                 scratchDirectory);
+    }
+
+    public static String dropLineThatStartsWith(String prefix, String buffer) {
+
+        String s = "";
+
+        for(StringTokenizer st = new StringTokenizer(buffer, "\n"); st.hasMoreTokens(); ) {
+
+            String tok = st.nextToken();
+
+            if (!tok.startsWith(prefix)) {
+
+                s += tok + "\n";
+            }
+        }
+
+        return s;
     }
 
     // Attributes ------------------------------------------------------------------------------------------------------

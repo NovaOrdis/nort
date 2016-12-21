@@ -20,6 +20,7 @@ import io.novaordis.release.MockConfiguration;
 import io.novaordis.release.MockOS;
 import io.novaordis.release.MockReleaseApplicationRuntime;
 import io.novaordis.release.ReleaseMode;
+import io.novaordis.release.Util;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.model.MockProject;
 import io.novaordis.release.model.maven.MavenProject;
@@ -38,7 +39,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -523,7 +523,7 @@ public class QualificationSequenceTest extends SequenceTest {
         //
 
         String warning = mr.getWarningContent();
-
+        warning = Util.dropLineThatStartsWith("default configuration file", warning);
         assertEquals("cannot get the version of currently installed blah: command to read it is not configured\n", warning);
     }
 
@@ -551,6 +551,7 @@ public class QualificationSequenceTest extends SequenceTest {
         //
 
         String warning = mr.getWarningContent();
+        warning = Util.dropLineThatStartsWith("default configuration file", warning);
         assertEquals(
                 "failed to execute the command that gets the version of the already installed release (mock-release-version-command)\n" +
                         "mock stdout content\n" +
@@ -581,6 +582,7 @@ public class QualificationSequenceTest extends SequenceTest {
         //
 
         String warning = mr.getWarningContent();
+        warning = Util.dropLineThatStartsWith("default configuration file", warning);
         assertTrue(warning.startsWith("invalid 'mock-release-version-command' output:"));
     }
 
@@ -673,6 +675,7 @@ public class QualificationSequenceTest extends SequenceTest {
         s.failIfInstalledVersionIsEqualOrNewer(c);
 
         String warning = mr.getWarningContent();
+        warning = Util.dropLineThatStartsWith("default configuration file", warning);
         log.info(warning);
         assertTrue(warning.isEmpty());
     }

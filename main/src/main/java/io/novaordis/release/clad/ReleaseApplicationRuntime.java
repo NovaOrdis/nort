@@ -17,6 +17,7 @@
 package io.novaordis.release.clad;
 
 import io.novaordis.clad.application.ApplicationRuntimeBase;
+import io.novaordis.clad.application.Console;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.clad.option.Option;
 import io.novaordis.clad.option.StringOption;
@@ -69,8 +70,8 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
      *
      * @throws UserErrorException on configuration file parsing errors.
      */
-    static void initializeEnvironmentRelatedConfiguration(Configuration configuration, VariableProvider provider)
-            throws UserErrorException {
+    static void initializeEnvironmentRelatedConfiguration(
+            Console console, Configuration configuration, VariableProvider provider) throws UserErrorException {
 
         //
         // TODO hackishly install the command to read the version of the already installed artifact and some other
@@ -96,7 +97,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
             if (!new File(configurationFile).isFile()) {
 
-                log.warn("default configuration file " + configurationFile + " not found");
+                console.warn("default configuration file " + configurationFile + " not found");
                 configurationFile = null;
             }
 
@@ -351,7 +352,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         super.init(configuration);
 
-        initializeEnvironmentRelatedConfiguration(configuration, variableProvider);
+        initializeEnvironmentRelatedConfiguration(this, configuration, variableProvider);
     }
 
     /**

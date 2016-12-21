@@ -113,7 +113,7 @@ public class ReleaseApplicationRuntimeTest {
 
         try {
 
-            ReleaseApplicationRuntime.initializeEnvironmentRelatedConfiguration(mc, mp);
+            ReleaseApplicationRuntime.initializeEnvironmentRelatedConfiguration(null, mc, mp);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
