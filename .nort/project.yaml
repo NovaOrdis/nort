@@ -11,3 +11,5 @@ publish:
 
 install:
 
+  installation.directory: ${RUNTIME_DIR}
+
