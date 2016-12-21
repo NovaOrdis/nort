@@ -6,9 +6,9 @@ qualification:
   os.command.to.get.installed.version: nort version
 
 build:
-  local.artifact.repository.root: ${M2}
 
 publish:
+  local.artifact.repository.root: ${M2}
 
 install:
   installation.directory: ${RUNTIME_DIR}
