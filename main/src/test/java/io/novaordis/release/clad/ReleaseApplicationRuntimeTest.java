@@ -22,6 +22,8 @@ import io.novaordis.release.Util;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.env.EnvironmentVariableProvider;
+import io.novaordis.utilities.variable.VariableNotDefinedException;
+import io.novaordis.utilities.variable.VariableProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,9 +32,12 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -99,8 +104,8 @@ public class ReleaseApplicationRuntimeTest {
                 "a: b\n" +
                         "  c: d\n"));
 
-
         MockConfiguration mc = new MockConfiguration();
+        VariableProvider mp = new MockVariableProvider();
 
         StringOption so = new StringOption('c');
         so.setValue(f.getPath());
@@ -108,7 +113,7 @@ public class ReleaseApplicationRuntimeTest {
 
         try {
 
-            ReleaseApplicationRuntime.initializeEnvironmentRelatedConfiguration(mc);
+            ReleaseApplicationRuntime.initializeEnvironmentRelatedConfiguration(mc, mp);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -127,7 +132,6 @@ public class ReleaseApplicationRuntimeTest {
 
     // loadConfiguration() ---------------------------------------------------------------------------------------------
 
-
     @Test
     public void loadConfiguration_FileDoesNotExist() throws Exception {
 
@@ -135,7 +139,7 @@ public class ReleaseApplicationRuntimeTest {
 
         try {
 
-            ReleaseApplicationRuntime.loadConfiguration("/I/am/sure/this/file/does/not/exist.yaml", mc);
+            ReleaseApplicationRuntime.loadConfiguration("/I/am/sure/this/file/does/not/exist.yaml", mc, null);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -158,7 +162,7 @@ public class ReleaseApplicationRuntimeTest {
 
         try {
 
-            ReleaseApplicationRuntime.loadConfiguration(f.getPath(), mc);
+            ReleaseApplicationRuntime.loadConfiguration(f.getPath(), mc, null);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -181,7 +185,7 @@ public class ReleaseApplicationRuntimeTest {
 
         try {
 
-            ReleaseApplicationRuntime.loadConfiguration(f.getPath(), mc);
+            ReleaseApplicationRuntime.loadConfiguration(f.getPath(), mc, null);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -197,24 +201,131 @@ public class ReleaseApplicationRuntimeTest {
     }
 
     @Test
-    public void processConfigurationFile_ReferenceConfigurationFile() throws Exception {
+    public void loadConfiguration_localArtifactRepositoryRootVariableNotDefined() throws Exception {
 
         File config = Util.cp("configuration/reference.yaml", scratchDirectory);
 
+        File localRepositoryDirectory = new File(scratchDirectory, "mock-repository-directory");
+        assertTrue(localRepositoryDirectory.mkdir());
+
+        File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
+        assertTrue(installationDirectory.mkdir());
+
+        MockVariableProvider mp = new MockVariableProvider();
+
         //
-        // one environment variable is defined, the other one is not
+        // M2 variable not defined
         //
 
-        fail("RETURN HERE");
-        // set("M2", "/mock/repository");
-
-        //
-        // "RUNTIME_DIR" is not defined
-        //
+        assertNull(mp.getVariableValue("M2"));
 
         MockConfiguration mc = new MockConfiguration();
 
-        ReleaseApplicationRuntime.loadConfiguration(config.getPath(), mc);
+        try {
+            ReleaseApplicationRuntime.loadConfiguration(config.getPath(), mc, mp);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+
+            VariableNotDefinedException e2 = (VariableNotDefinedException)e.getCause();
+            assertEquals("\"M2\" not defined", e2.getMessage());
+            assertEquals("M2", e2.getVariableName());
+        }
+    }
+
+    @Test
+    public void loadConfiguration_localArtifactRepositoryRootVariableInvalidValue() throws Exception {
+
+        File config = Util.cp("configuration/reference.yaml", scratchDirectory);
+
+        File localRepositoryDirectory = new File(scratchDirectory, "mock-repository-directory");
+        assertTrue(localRepositoryDirectory.mkdir());
+
+        File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
+        assertTrue(installationDirectory.mkdir());
+
+        MockVariableProvider mp = new MockVariableProvider();
+
+        //
+        // M2 variable has an invalid value
+        //
+
+        mp.setVariableValue("M2", "/I/am/pretty/sure/there/is/no/such/directory");
+
+        MockConfiguration mc = new MockConfiguration();
+
+        try {
+            ReleaseApplicationRuntime.loadConfiguration(config.getPath(), mc, mp);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertTrue(msg.matches(
+                    "'" + ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT + "' resolves to an invalid directory .*"));
+        }
+    }
+
+    @Test
+    public void loadConfiguration_installationDirectoryVariableNotDefined() throws Exception {
+
+        File config = Util.cp("configuration/reference.yaml", scratchDirectory);
+
+        File localRepositoryDirectory = new File(scratchDirectory, "mock-repository-directory");
+        assertTrue(localRepositoryDirectory.mkdir());
+
+        File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
+        assertTrue(installationDirectory.mkdir());
+
+        MockVariableProvider mp = new MockVariableProvider();
+
+        mp.setVariableValue("M2", localRepositoryDirectory.getPath());
+        //
+        // RUNTIME_DIR variable not defined
+        //
+
+        assertNull(mp.getVariableValue("RUNTIME_DIR"));
+
+        MockConfiguration mc = new MockConfiguration();
+
+        try {
+            ReleaseApplicationRuntime.loadConfiguration(config.getPath(), mc, mp);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+
+            VariableNotDefinedException e2 = (VariableNotDefinedException)e.getCause();
+            assertEquals("\"RUNTIME_DIR\" not defined", e2.getMessage());
+            assertEquals("RUNTIME_DIR", e2.getVariableName());
+        }
+    }
+
+    @Test
+    public void loadConfiguration_ReferenceConfigurationFile() throws Exception {
+
+        File config = Util.cp("configuration/reference.yaml", scratchDirectory);
+
+        File localRepositoryDirectory = new File(scratchDirectory, "mock-repository-directory");
+        assertTrue(localRepositoryDirectory.mkdir());
+
+        File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
+        assertTrue(installationDirectory.mkdir());
+
+        MockVariableProvider mp = new MockVariableProvider();
+
+        mp.setVariableValue("M2", localRepositoryDirectory.getPath());
+        mp.setVariableValue("RUNTIME_DIR", installationDirectory.getPath());
+
+        MockConfiguration mc = new MockConfiguration();
+
+        ReleaseApplicationRuntime.loadConfiguration(config.getPath(), mc, mp);
 
         String value;
 
@@ -222,10 +333,74 @@ public class ReleaseApplicationRuntimeTest {
         assertEquals("some-command", value);
 
         value = mc.get(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT);
-        assertEquals("/mock/repository", value);
+        assertEquals(localRepositoryDirectory.getPath(), value);
 
         value = mc.get(ConfigurationLabels.INSTALLATION_DIRECTORY);
-        assertEquals("${RUNTIME_DIR}", value);
+        assertEquals(installationDirectory.getPath(), value);
+    }
+
+    // extractString() -------------------------------------------------------------------------------------------------
+
+    @Test
+    public void extractString() throws Exception {
+
+        String configKey = "a";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put(configKey, "${b}");
+        MockConfiguration mc = new MockConfiguration();
+        MockVariableProvider mp = new MockVariableProvider();
+        mp.setVariableValue("b", "B");
+
+        ReleaseApplicationRuntime.extractString(map, configKey, mp, mc);
+
+        String s = mc.get(configKey);
+        assertEquals("B", s);
+    }
+
+    // extractDirectory() ----------------------------------------------------------------------------------------------
+
+    @Test
+    public void extractDirectory() throws Exception {
+
+        File someDir = new File(scratchDirectory, "mock-directory");
+        assertTrue(someDir.mkdir());
+
+        String configKey = "a";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put(configKey, "${b}");
+        MockConfiguration mc = new MockConfiguration();
+        MockVariableProvider mp = new MockVariableProvider();
+        mp.setVariableValue("b", someDir.getPath());
+
+        ReleaseApplicationRuntime.extractDirectory(map, configKey, mp, mc);
+
+        String s = mc.get(configKey);
+        assertEquals(someDir.getPath(), s);
+    }
+
+    @Test
+    public void extractDirectory_InvalidValue() throws Exception {
+
+        String configKey = "a";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put(configKey, "${b}");
+        MockConfiguration mc = new MockConfiguration();
+        MockVariableProvider mp = new MockVariableProvider();
+        mp.setVariableValue("b", "/I/am/sure/this/directory/does/not/exist");
+
+        try {
+            ReleaseApplicationRuntime.extractDirectory(map, configKey, mp, mc);
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("'a' resolves to an invalid directory /I/am/sure/this/directory/does/not/exist", msg);
+        }
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -81,6 +81,10 @@ public class SequenceExecutionContext {
 
         this.state = new HashMap<>();
 
+        if (r == null) {
+            throw new IllegalArgumentException("null runtime");
+        }
+
         this.configuration = r.getConfiguration();
         this.runtime = r;
         this.project = m;

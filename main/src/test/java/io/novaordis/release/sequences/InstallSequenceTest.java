@@ -108,7 +108,9 @@ public class InstallSequenceTest extends SequenceTest {
 
         MockProject mp = new MockProject("1.0");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, null, false, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("/does/not/matter.zip"), null);
 

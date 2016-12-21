@@ -16,6 +16,8 @@
 
 package io.novaordis.release.sequences;
 
+import io.novaordis.release.MockConfiguration;
+import io.novaordis.release.MockReleaseApplicationRuntime;
 import io.novaordis.release.ReleaseMode;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -79,8 +81,10 @@ public class SequenceControllerTest {
         c.add(s1);
         c.add(s2);
 
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
         try {
-            c.execute(null, null);
+            c.execute(mr, null);
             fail("should have thrown exception");
         }
         catch(MockSequenceExecutionException e) {
@@ -107,8 +111,10 @@ public class SequenceControllerTest {
         c.add(s2);
         c.add(s3);
 
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
         try {
-            c.execute(null, null);
+            c.execute(mr, null);
             fail("should have thrown exception");
         }
         catch(MockSequenceExecutionException e) {
@@ -136,8 +142,10 @@ public class SequenceControllerTest {
         c.add(s2);
         c.add(s3);
 
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
         try {
-            c.execute(null, null);
+            c.execute(mr, null);
             fail("should have thrown exception");
         }
         catch(MockSequenceExecutionException e) {
@@ -168,7 +176,9 @@ public class SequenceControllerTest {
         c.add(s2);
         c.add(s3);
 
-        SequenceExecutionContext ctx = c.execute(null, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext ctx = c.execute(mr, null);
 
         assertTrue(s1.wasExecuteInvoked());
         assertTrue(s2.wasExecuteInvoked());
@@ -203,7 +213,9 @@ public class SequenceControllerTest {
 
         SequenceController c = new SequenceController(ReleaseMode.snapshot, true, s1, s2, s3);
 
-        SequenceExecutionContext ctx = c.undo(null, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext ctx = c.undo(mr, null);
 
         ExecutionHistory h = ctx.getHistory();
 
@@ -241,7 +253,9 @@ public class SequenceControllerTest {
 
         SequenceController c = new SequenceController(ReleaseMode.snapshot, true, s1, s2, s3);
 
-        SequenceExecutionContext ctx = c.undo(null, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext ctx = c.undo(mr, null);
 
         ExecutionHistory h = ctx.getHistory();
 

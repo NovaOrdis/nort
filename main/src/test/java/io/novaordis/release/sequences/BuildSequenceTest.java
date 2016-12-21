@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -75,7 +74,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         MockMavenProject mp = new MockMavenProject();
 
-        assertNull(mc.get(ConfigurationLabels.OS_COMMAND_TO_BUILD_WITH_TESTS));
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_BUILD_WITH_TESTS, null);
 
         BuildSequence s = new BuildSequence();
 
@@ -104,7 +103,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         MockMavenProject mp = new MockMavenProject();
 
-        assertNull(mc.get(ConfigurationLabels.OS_COMMAND_TO_BUILD_WITHOUT_TESTS));
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_BUILD_WITHOUT_TESTS, null);
 
         BuildSequence s = new BuildSequence();
 

@@ -16,6 +16,8 @@
 
 package io.novaordis.release.sequences;
 
+import io.novaordis.release.MockConfiguration;
+import io.novaordis.release.MockReleaseApplicationRuntime;
 import io.novaordis.release.model.MockProject;
 import io.novaordis.release.version.Version;
 import org.junit.Test;
@@ -46,7 +48,9 @@ public class SequenceExecutionContextTest {
     @Test
     public void nullGenericState() throws Exception {
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, false, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
 
         assertNull(c.get("something"));
         assertNull(c.get(null));
@@ -55,7 +59,9 @@ public class SequenceExecutionContextTest {
     @Test
     public void genericState() throws Exception {
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, false, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
 
         c.set("something", "somethingelse");
         assertEquals("somethingelse", c.get("something"));
@@ -68,7 +74,9 @@ public class SequenceExecutionContextTest {
 
         MockProject mp = new MockProject("1.2.3-SNAPSHOT-4");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, null, false, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
 
         Version v = c.getCurrentVersion();
         assertEquals(new Version("1.2.3-SNAPSHOT-4"), v);
@@ -79,7 +87,9 @@ public class SequenceExecutionContextTest {
     @Test
     public void typedAccess_wereTestsExecuted() throws Exception {
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, false, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
 
         assertFalse(c.wereTestsExecuted());
 
@@ -91,7 +101,9 @@ public class SequenceExecutionContextTest {
     @Test
     public void typedAccess_getCurrentVersion() throws Exception {
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, null, null, false, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
 
         assertNull(c.getCurrentVersion());
 

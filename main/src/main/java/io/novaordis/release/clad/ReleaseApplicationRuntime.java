@@ -24,6 +24,8 @@ import io.novaordis.release.ZipHandler;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.variable.StringWithVariables;
+import io.novaordis.utilities.variable.VariableProvider;
 import io.novaordis.utilities.zip.ZipUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +63,12 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
      * is because we don't know yet what specific configuration is required and what not. Fail on configuration file
      * parsing errors though.
      *
+     * @param provider the provider to be used to resolve configuration file variables.
+     *
      * @throws UserErrorException on configuration file parsing errors.
      */
-    static void initializeEnvironmentRelatedConfiguration(Configuration configuration) throws UserErrorException {
+    static void initializeEnvironmentRelatedConfiguration(Configuration configuration, VariableProvider provider)
+            throws UserErrorException {
 
         //
         // TODO hackishly install the command to read the version of the already installed artifact and some other
@@ -75,7 +80,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         if (configurationFileOption != null) {
 
-            loadConfiguration(configurationFileOption.getString(), configuration);
+            loadConfiguration(configurationFileOption.getString(), configuration, provider);
         }
 
         //
@@ -117,18 +122,19 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
     }
 
     /**
-     * Loads relevant configuration from file into the configuration instance.
-     *
-     * Do not fail here if specific configuration is missing. The Qualification Sequence will perform all checks. This
-     * is because we don't know yet what specific configuration is required and what not. Fail on configuration file
-     * parsing errors though.
+     * Loads relevant configuration from file into the configuration instance and perform as many validations as
+     * possible, if a configuration element has a value. If a configuration element is missing, the layer that needs
+     * it (QualificationSequence, etc.) will complain. This is because we don't know yet what specific configuration is
+     * required and what not.
      *
      * @param path the configuration file path. Must exist, be readable and parseable, otherwise the method throws
      *             a UserErrorException.
      *
-     * @throws UserErrorException on configuration file parsing errors.
+     * @param provider the VariableProvider implementation to use to resolve environment variables and other variables.
+     *
+     * @throws UserErrorException on configuration file parsing errors or on invalid values
      */
-    static void loadConfiguration(String path, Configuration configuration)
+    static void loadConfiguration(String path, Configuration configuration, VariableProvider provider)
             throws UserErrorException {
 
         File configFile = new File(path);
@@ -182,85 +188,120 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         // Qualification Sequence Configuration
         //
 
-        //noinspection unchecked
-        Map qualificationConfig = (Map<String, Object>)yamlFileConfiguration.get("qualification");
-
-        if (qualificationConfig != null) {
-
-            String s = (String) qualificationConfig.get(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION);
-
-            if (s != null) {
-
-                configuration.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, s);
-            }
-        }
+        Map qualificationMap = (Map) yamlFileConfiguration.get("qualification");
+        extractString(
+                qualificationMap, ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, provider, configuration);
 
         //
         // Publish Sequence Configuration
         //
 
-        //noinspection unchecked
-        Map publishConfig = (Map<String, Object>)yamlFileConfiguration.get("publish");
-
-        if (publishConfig != null) {
-
-            String s = (String) publishConfig.get(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT);
-
-            if (s != null) {
-
-                configuration.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, s);
-            }
-        }
+        Map publishMap = (Map) yamlFileConfiguration.get("publish");
+        extractDirectory(publishMap, ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, provider, configuration);
 
         //
         // Installation Sequence Configuration
         //
 
-        //noinspection unchecked
-        Map installConfig = (Map<String, Object>)yamlFileConfiguration.get("install");
+        Map installMap = (Map)yamlFileConfiguration.get("install");
+        extractDirectory(installMap, ConfigurationLabels.INSTALLATION_DIRECTORY, provider, configuration);
+    }
 
-        if (installConfig != null) {
+    /**
+     * Attempts to extract a string, and if not null, resolves variables and then installs the result into the
+     * configuration.
+     *
+     * @param map the corresponding configuration map. If null,the whole method is a noop.
+     */
+    static void extractString(Map map, String configKey, VariableProvider provider, Configuration c)
+            throws UserErrorException {
 
-            String s = (String) installConfig.get(ConfigurationLabels.INSTALLATION_DIRECTORY);
+        if (map == null) {
 
-            if (s != null) {
-
-                configuration.set(ConfigurationLabels.INSTALLATION_DIRECTORY, s);
-            }
+            return;
         }
 
-//        //
-//        // install the environment-dependent state
-//        //
-//
-//        EnvironmentVariableProvider evp = EnvironmentVariableProvider.getInstance();
-//
-//        String s = evp.getenv("M2");
-//
-//        if (s == null) {
-//
-//            throw new UserErrorException(
-//                    "M2 environment variable not defined, configure the location of the local Maven repository in the project configuration file");
-//        }
-//
-//        configuration.set(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, s);
-//
-//        s = evp.getenv("RUNTIME_DIR");
-//
-//        if (s == null) {
-//
-//            throw new UserErrorException(
-//                    "RUNTIME_DIR environment variable not defined, configure the location of the runtime directory in the project configuration file");
-//        }
-//
-//        configuration.set(ConfigurationLabels.INSTALLATION_DIRECTORY, s);
+        String s = (String) map.get(configKey);
+
+        if (s == null) {
+
+            log.debug("'" + configKey + "' not defined");
+            return;
+        }
+
+        try {
+
+            s = new StringWithVariables(s, true).resolve(provider);
+        }
+        catch(Exception e) {
+
+            throw new UserErrorException(e);
+        }
+
+        c.set(configKey, s);
+    }
+
+    /**
+     * Attempts to extract a string, and if not null, resolves variables, validates and then installs the result into
+     * the configuration.
+     *
+     * @param map the corresponding configuration map. If null,the whole method is a noop.
+     */
+    static void extractDirectory(Map map, String configKey, VariableProvider provider, Configuration c)
+            throws UserErrorException {
+
+        if (map == null) {
+
+            return;
+        }
+
+        String s = (String) map.get(configKey);
+
+        if (s == null) {
+
+            log.debug("'" + configKey + "' not defined");
+            return;
+        }
+
+        try {
+
+            s = new StringWithVariables(s, true).resolve(provider);
+        }
+        catch(Exception e) {
+
+            throw new UserErrorException(e);
+        }
+
+        //
+        // verify consistency
+        //
+
+        String normalizedPath = Files.normalizePath(s);
+
+        File dir = new File(normalizedPath);
+
+        if (!dir.isDirectory()) {
+
+            throw new UserErrorException(
+                    "'" + configKey + "' resolves to an invalid directory " +
+                            Files.normalizePath(normalizedPath));
+        }
+
+        c.set(configKey, normalizedPath);
     }
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private SequenceExecutionContext lastExecutionContext;
 
+    private VariableProvider variableProvider;
+
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public ReleaseApplicationRuntime() {
+
+        this.variableProvider = new NortVariableProvider();
+    }
 
     // ApplicationRuntimeBase overrides --------------------------------------------------------------------------------
 
@@ -286,7 +327,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         super.init(configuration);
 
-        initializeEnvironmentRelatedConfiguration(configuration);
+        initializeEnvironmentRelatedConfiguration(configuration, variableProvider);
     }
 
     /**

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package io.novaordis.release.sequences;
+package io.novaordis.release.clad;
 
-import io.novaordis.release.MockConfiguration;
-import io.novaordis.release.MockReleaseApplicationRuntime;
-import org.junit.Test;
+import io.novaordis.utilities.NotYetImplementedException;
+import io.novaordis.utilities.variable.VariableProvider;
 
-import static org.junit.Assert.assertFalse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 11/17/16
+ * @since 12/20/16
  */
-public abstract class SequenceTest {
+public class MockVariableProvider implements VariableProvider {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -34,27 +34,44 @@ public abstract class SequenceTest {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private Map<String, String> values;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // Public ----------------------------------------------------------------------------------------------------------
+    public MockVariableProvider() {
 
-    @Test
-    public void ifThereWasNoExecutionUndoIsNoop() throws Exception {
-
-        Sequence s = getSequenceToTest();
-
-        // noop
-
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
-
-        assertFalse(s.undo(new SequenceExecutionContext(mr, null, null, true, null)));
+        this.values = new HashMap<>();
     }
+
+    // VariableProvider implementation ---------------------------------------------------------------------------------
+
+    @Override
+    public String getVariableValue(String s) {
+
+        return values.get(s);
+    }
+
+    @Override
+    public String setVariableValue(String n, String v) {
+
+        return values.put(n, v);
+    }
+
+    @Override
+    public VariableProvider getVariableProviderParent() {
+        throw new NotYetImplementedException("getVariableProviderParent() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public void setVariableProviderParent(VariableProvider variableProvider) {
+        throw new NotYetImplementedException("setVariableProviderParent() NOT YET IMPLEMENTED");
+    }
+
+    // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    protected abstract Sequence getSequenceToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

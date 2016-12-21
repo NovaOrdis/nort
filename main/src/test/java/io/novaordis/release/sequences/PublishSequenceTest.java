@@ -76,7 +76,7 @@ public class PublishSequenceTest extends SequenceTest {
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
         MockMavenProject mp = new MockMavenProject();
 
-        assertNull(mc.get(ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY));
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY, null);
 
         PublishSequence s = new PublishSequence();
 

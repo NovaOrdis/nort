@@ -102,10 +102,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MavenProject mp = new MavenProject(pf);
 
-        //
-        // insure that the command to execute all tests is not configured
-        //
-        assertNull(mc.get(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS));
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS, null);
 
         QualificationSequence s = new QualificationSequence();
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, true, null);
@@ -333,7 +330,9 @@ public class QualificationSequenceTest extends SequenceTest {
         Version v = new Version("1.0.0-SNAPSHOT-1");
         MockProject mp = new MockProject(v);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, ReleaseMode.snapshot, true, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
 
         s.incrementCurrentVersionIfNecessary(c);
 
@@ -352,7 +351,9 @@ public class QualificationSequenceTest extends SequenceTest {
         Version v = new Version("1.0.0-SNAPSHOT-1");
         MockProject mp = new MockProject(v);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, ReleaseMode.patch, true, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, true, null);
 
         s.incrementCurrentVersionIfNecessary(c);
 
@@ -376,7 +377,9 @@ public class QualificationSequenceTest extends SequenceTest {
         ReleaseMode custom = ReleaseMode.custom;
         custom.setCustomLabel("1.9.9");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, custom, true, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, true, null);
 
         try {
             s.incrementCurrentVersionIfNecessary(c);
@@ -404,7 +407,9 @@ public class QualificationSequenceTest extends SequenceTest {
         ReleaseMode custom = ReleaseMode.custom;
         custom.setCustomLabel("2.0.0-SNAPSHOT-1");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, custom, true, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, true, null);
 
         try {
             s.incrementCurrentVersionIfNecessary(c);
@@ -432,7 +437,9 @@ public class QualificationSequenceTest extends SequenceTest {
         ReleaseMode custom = ReleaseMode.custom;
         custom.setCustomLabel("1.0.0-SNAPSHOT-1");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, custom, true, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, true, null);
 
         s.incrementCurrentVersionIfNecessary(c);
 
@@ -454,7 +461,9 @@ public class QualificationSequenceTest extends SequenceTest {
         ReleaseMode custom = ReleaseMode.custom;
         custom.setCustomLabel("2");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(null, mp, custom, true, null);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, true, null);
 
         s.incrementCurrentVersionIfNecessary(c);
 
@@ -494,7 +503,8 @@ public class QualificationSequenceTest extends SequenceTest {
     public void failIfInstalledVersionIsEqualOrNewer_CommandToCheckNotConfigured() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        assertNull(mc.get(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION));
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, null);
+
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
         mr.init(mc);

@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package io.novaordis.release.sequences;
+package io.novaordis.release.clad;
 
-import io.novaordis.release.MockConfiguration;
-import io.novaordis.release.MockReleaseApplicationRuntime;
+import io.novaordis.utilities.env.EnvironmentVariableProvider;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 11/17/16
+ * @since 12/20/16
  */
-public abstract class SequenceTest {
+public class NortVariableProviderTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -38,23 +39,32 @@ public abstract class SequenceTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    // Tests -----------------------------------------------------------------------------------------------------------
+
+    // environment variable provider -----------------------------------------------------------------------------------
+
     @Test
-    public void ifThereWasNoExecutionUndoIsNoop() throws Exception {
+    public void environmentVariableProvider() {
 
-        Sequence s = getSequenceToTest();
+        NortVariableProvider p = new NortVariableProvider();
 
-        // noop
+        EnvironmentVariableProvider original = p.getEnvironmentVariableProvider();
 
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+        assertNotNull(original);
 
-        assertFalse(s.undo(new SequenceExecutionContext(mr, null, null, true, null)));
+        MockEnvironmentVariableProvider p2 = new MockEnvironmentVariableProvider();
+
+        p.setEnvironmentVariableProvider(p2);
+
+        EnvironmentVariableProvider p3 = p.getEnvironmentVariableProvider();
+
+        assertEquals(p3, p2);
+        assertNotEquals(p3, original);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    protected abstract Sequence getSequenceToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 
