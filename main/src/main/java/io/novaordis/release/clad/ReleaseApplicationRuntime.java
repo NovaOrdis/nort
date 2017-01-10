@@ -125,7 +125,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         log.debug("set '" + label + "' to \"" + configuration.get(label) + "\"");
 
         label = ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY;
-        configuration.set(label, "mvn jar:jar install:install");
+        configuration.set(label, "mvn jar:jar source:jar install:install");
         log.debug("set '" + label + "' to \"" + configuration.get(label) + "\"");
 
         label = ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY;
