@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#
+# A wrapper around mvn test
+#
+# Usage:
+#
+# t [-c] [-d] [test-class-name]
+#
+
+function main() {
+
+    local debug
+    local clean
+    local class_name
+    while [ -n "$1" ]; do
+        if [ "$1" = "-c" ]; then
+            clean="clean"
+        elif [ "$1" = "-d" ]; then
+            debug="-Dmaven.surefire.debug=\"\""
+        elif [ "${class_name}" = "" ]; then
+            class_name=$1
+        fi    
+        shift
+    done
+    
+    mvn "${debug}" "${clean}" test ${class_name} 
+}
+
+main $@
