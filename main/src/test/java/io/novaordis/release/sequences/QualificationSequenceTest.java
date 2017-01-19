@@ -523,7 +523,7 @@ public class QualificationSequenceTest extends SequenceTest {
         //
 
         String warning = mr.getWarningContent();
-        warning = Util.dropLineThatStartsWith("default configuration file", warning);
+        warning = Util.dropLineThatStartsWith("no default configuration file", warning);
         assertEquals("cannot get the version of currently installed blah: command to read it is not configured\n", warning);
     }
 
@@ -551,7 +551,7 @@ public class QualificationSequenceTest extends SequenceTest {
         //
 
         String warning = mr.getWarningContent();
-        warning = Util.dropLineThatStartsWith("default configuration file", warning);
+        warning = Util.dropLineThatStartsWith("no default configuration file", warning);
         assertEquals(
                 "failed to execute the command that gets the version of the already installed release (mock-release-version-command)\n" +
                         "mock stdout content\n" +
@@ -582,7 +582,7 @@ public class QualificationSequenceTest extends SequenceTest {
         //
 
         String warning = mr.getWarningContent();
-        warning = Util.dropLineThatStartsWith("default configuration file", warning);
+        warning = Util.dropLineThatStartsWith("no default configuration file", warning);
         assertTrue(warning.startsWith("invalid 'mock-release-version-command' output:"));
     }
 
@@ -675,7 +675,7 @@ public class QualificationSequenceTest extends SequenceTest {
         s.failIfInstalledVersionIsEqualOrNewer(c);
 
         String warning = mr.getWarningContent();
-        warning = Util.dropLineThatStartsWith("default configuration file", warning);
+        warning = Util.dropLineThatStartsWith("no default configuration file", warning);
         log.info(warning);
         assertTrue(warning.isEmpty());
     }
