@@ -55,7 +55,12 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
     private static final Logger log = LoggerFactory.getLogger(ReleaseApplicationRuntime.class);
 
-    public static final String DEFAULT_CONFIGURATION_FILE = "./.nort/project.yaml";
+    //
+    // this is where ./.nort/project.yaml or ./.nort/project.yml comes from
+    //
+    public static String DEFAULT_CONFIGURATION_DIRECTORY = "./.nort"; // not final for testing
+    public static final String DEFAULT_CONFIGURATION_FILE_NAME = "project";
+    public static final String[] DEFAULT_EXTENSIONS = { "yaml", "yml" };
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -79,7 +84,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         // not have that yet. Currently we rely on the -c <configuration-file> global variable.
         //
 
-        String configurationFile;
+        File configurationFile = null;
 
         StringOption configurationFileOption = (StringOption)configuration.getGlobalOption(new StringOption('c'));
 
@@ -89,21 +94,19 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
             // command line configuration file takes precedence
             //
 
-            configurationFile = configurationFileOption.getString();
+            String s = configurationFileOption.getString();
+
+            if (s != null) {
+                configurationFile = new File(s);
+            }
         }
         else {
 
-            configurationFile = DEFAULT_CONFIGURATION_FILE;
-
-            if (!new File(configurationFile).isFile()) {
-
-                console.warn("default configuration file " + configurationFile + " not found");
-                configurationFile = null;
-            }
-
+            configurationFile = locateDefaultConfigurationFile(console);
         }
 
         if (configurationFile != null) {
+
             loadConfiguration(configurationFile, configuration, provider);
         }
 
@@ -143,7 +146,39 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         label = ConfigurationLabels.OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY;
         configuration.set(label, "git push --follow-tags");
         log.debug("set '" + label + "' to \"" + configuration.get(label) + "\"");
+    }
 
+    /**
+     * @return a File instance that corresponds to a file that exists on disk, or null. If null is returned, the
+     * method also logs a console warning.
+     */
+    static File locateDefaultConfigurationFile(Console console) {
+
+        String path = DEFAULT_CONFIGURATION_DIRECTORY + File.separatorChar + DEFAULT_CONFIGURATION_FILE_NAME;
+
+        //
+        // we try various equivalent extensions
+        //
+
+        for(String ext: DEFAULT_EXTENSIONS) {
+
+            String fn = path + "." + ext;
+            File f = new File(fn);
+            if (f.isFile()) {
+                return f;
+            }
+        }
+
+        String warningMessage = "no default configuration file " + path + ".[";
+        for(int i = 0; i < DEFAULT_EXTENSIONS.length; i ++) {
+            warningMessage += DEFAULT_EXTENSIONS[i];
+            if (i < DEFAULT_EXTENSIONS.length - 1) {
+                warningMessage += "|";
+            }
+        }
+        warningMessage += "] found";
+        console.warn(warningMessage);
+        return null;
     }
 
     /**
@@ -152,26 +187,26 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
      * it (QualificationSequence, etc.) will complain. This is because we don't know yet what specific configuration is
      * required and what not.
      *
-     * @param path the configuration file path. Must exist, be readable and parseable, otherwise the method throws
-     *             a UserErrorException.
+     * @param configFile the configuration file. Must exist, be readable and parseable, otherwise the method throws a
+     *             UserErrorException.
      *
      * @param provider the VariableProvider implementation to use to resolve environment variables and other variables.
      *
      * @throws UserErrorException on configuration file parsing errors or on invalid values
      */
-    static void loadConfiguration(String path, Configuration configuration, VariableProvider provider)
+    static void loadConfiguration(File configFile, Configuration configuration, VariableProvider provider)
             throws UserErrorException {
-
-        File configFile = new File(path);
 
         if (!configFile.isFile()) {
 
-            throw new UserErrorException("configuration file " + Files.normalizePath(path) + " does not exist");
+            throw new UserErrorException(
+                    "configuration file " + Files.normalizePath(configFile.getPath()) + " does not exist");
         }
 
         if (!configFile.canRead()) {
 
-            throw new UserErrorException("configuration file " + Files.normalizePath(path) + " is not readable");
+            throw new UserErrorException(
+                    "configuration file " + Files.normalizePath(configFile.getPath()) + " is not readable");
         }
 
         BufferedInputStream bis = null;
@@ -189,7 +224,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         catch(YAMLException e) {
 
             throw new UserErrorException(
-                    "YAML file " + Files.normalizePath(path) + " parsing error: " + e.getMessage(), e);
+                    "YAML file " + Files.normalizePath(configFile.getPath()) + " parsing error: " + e.getMessage(), e);
         }
         catch(IOException e) {
 

@@ -130,6 +130,61 @@ public class ReleaseApplicationRuntimeTest {
         }
     }
 
+    // locateDefaultConfigurationFile() --------------------------------------------------------------------------------
+
+    @Test
+    public void locateDefaultConfigurationFile_NoDefaultConfigFile() throws Exception {
+
+        String originalContent = ReleaseApplicationRuntime.DEFAULT_CONFIGURATION_DIRECTORY;
+
+        try {
+
+            File d = new File(scratchDirectory, "mock-config");
+            assertTrue(d.mkdir());
+
+            ReleaseApplicationRuntime.DEFAULT_CONFIGURATION_DIRECTORY = d.getPath();
+
+            MockConsole mc = new MockConsole();
+            File f = ReleaseApplicationRuntime.locateDefaultConfigurationFile(mc);
+            assertNull(f);
+
+            String w = mc.getWarningContent();
+            log.info(w);
+        }
+        finally {
+
+            ReleaseApplicationRuntime.DEFAULT_CONFIGURATION_DIRECTORY = originalContent;
+        }
+    }
+
+    @Test
+    public void locateDefaultConfigurationFile() throws Exception {
+
+        String originalContent = ReleaseApplicationRuntime.DEFAULT_CONFIGURATION_DIRECTORY;
+
+        try {
+
+            File d = new File(scratchDirectory, "mock-config");
+            assertTrue(d.mkdir());
+            ReleaseApplicationRuntime.DEFAULT_CONFIGURATION_DIRECTORY = d.getPath();
+
+            File f = new File(d, ReleaseApplicationRuntime.DEFAULT_CONFIGURATION_FILE_NAME + ".yml");
+            assertTrue(Files.write(f, "..."));
+
+            MockConsole mc = new MockConsole();
+            File f2 = ReleaseApplicationRuntime.locateDefaultConfigurationFile(mc);
+            assertEquals(f, f2);
+
+            String w = mc.getWarningContent();
+            assertNull(w);
+        }
+        finally {
+
+            ReleaseApplicationRuntime.DEFAULT_CONFIGURATION_DIRECTORY = originalContent;
+        }
+    }
+
+
     // loadConfiguration() ---------------------------------------------------------------------------------------------
 
     @Test
@@ -139,7 +194,7 @@ public class ReleaseApplicationRuntimeTest {
 
         try {
 
-            ReleaseApplicationRuntime.loadConfiguration("/I/am/sure/this/file/does/not/exist.yaml", mc, null);
+            ReleaseApplicationRuntime.loadConfiguration(new File("/I/am/sure/this/file/does/not/exist.yaml"), mc, null);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -162,7 +217,7 @@ public class ReleaseApplicationRuntimeTest {
 
         try {
 
-            ReleaseApplicationRuntime.loadConfiguration(f.getPath(), mc, null);
+            ReleaseApplicationRuntime.loadConfiguration(f, mc, null);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -185,7 +240,7 @@ public class ReleaseApplicationRuntimeTest {
 
         try {
 
-            ReleaseApplicationRuntime.loadConfiguration(f.getPath(), mc, null);
+            ReleaseApplicationRuntime.loadConfiguration(f, mc, null);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -222,7 +277,7 @@ public class ReleaseApplicationRuntimeTest {
         MockConfiguration mc = new MockConfiguration();
 
         try {
-            ReleaseApplicationRuntime.loadConfiguration(config.getPath(), mc, mp);
+            ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -258,7 +313,7 @@ public class ReleaseApplicationRuntimeTest {
         MockConfiguration mc = new MockConfiguration();
 
         try {
-            ReleaseApplicationRuntime.loadConfiguration(config.getPath(), mc, mp);
+            ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -293,7 +348,7 @@ public class ReleaseApplicationRuntimeTest {
         MockConfiguration mc = new MockConfiguration();
 
         try {
-            ReleaseApplicationRuntime.loadConfiguration(config.getPath(), mc, mp);
+            ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -325,7 +380,7 @@ public class ReleaseApplicationRuntimeTest {
 
         MockConfiguration mc = new MockConfiguration();
 
-        ReleaseApplicationRuntime.loadConfiguration(config.getPath(), mc, mp);
+        ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
 
         String value;
 
