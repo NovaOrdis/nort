@@ -7,3 +7,5 @@
   * 'installation.directory'
 
 * Additional qualification sequence tests (installed version constraints).
+
+* Added support for externally configurable release tag ('release.tag' in the publish sequence configuration).
