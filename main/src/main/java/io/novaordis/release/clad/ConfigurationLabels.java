@@ -38,10 +38,19 @@ public class ConfigurationLabels {
     public static final String OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY = "os.command.to.push.to.remote.source.repository";
 
     public static final String LOCAL_ARTIFACT_REPOSITORY_ROOT = "local.artifact.repository.root";
+    public static final String RELEASE_TAG = "release.tag";
 
     public static final String OS_COMMAND_TO_GET_INSTALLED_VERSION = "os.command.to.get.installed.version";
 
     public static final String INSTALLATION_DIRECTORY = "installation.directory";
+
+
+    //
+    // temporarily using this for runtime variable names, this needs to be refactored anyway
+    //
+
+
+    public static final String CURRENT_VERSION = "current.version";
 
 
     // Attributes ------------------------------------------------------------------------------------------------------

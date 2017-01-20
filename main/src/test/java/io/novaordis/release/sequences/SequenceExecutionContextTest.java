@@ -82,6 +82,27 @@ public class SequenceExecutionContextTest {
         assertEquals(new Version("1.2.3-SNAPSHOT-4"), v);
     }
 
+    @Test
+    public void setCurrentVersion_ValidValue() throws Exception {
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
+        c.setCurrentVersion(new Version("6.7.8"));
+        assertEquals(new Version("6.7.8"), c.getCurrentVersion());
+    }
+
+    @Test
+    public void setCurrentVersion_Null() throws Exception {
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
+        c.setCurrentVersion(new Version("6.7.8"));
+        assertEquals(new Version("6.7.8"), c.getCurrentVersion());
+
+        c.setCurrentVersion(null);
+        assertNull(c.getCurrentVersion());
+    }
+
     // typed access - tests were executed ------------------------------------------------------------------------------
 
     @Test

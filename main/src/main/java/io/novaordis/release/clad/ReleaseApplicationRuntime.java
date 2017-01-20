@@ -249,8 +249,8 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         //
 
         Map qualificationMap = (Map) yamlFileConfiguration.get("qualification");
-        extractString(
-                qualificationMap, ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, provider, configuration);
+        extractString(qualificationMap, ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION,
+                provider, configuration, true);
 
         //
         // Publish Sequence Configuration
@@ -258,6 +258,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         Map publishMap = (Map) yamlFileConfiguration.get("publish");
         extractDirectory(publishMap, ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, provider, configuration);
+        extractString(publishMap, ConfigurationLabels.RELEASE_TAG, provider, configuration, false);
 
         //
         // Installation Sequence Configuration
@@ -272,30 +273,49 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
      * configuration.
      *
      * @param map the corresponding configuration map. If null,the whole method is a noop.
+     * @param failOnUnresolvedVariable if true, the method will throw UserErrorException on a variable that cannot
+     *                                 be resolved. Otherwise it will just render the variable into the resulted
+     *                                 string, allowing for deferred resolution.
      */
-    static void extractString(Map map, String configKey, VariableProvider provider, Configuration c)
-            throws UserErrorException {
+    static void extractString(Map map, String configKey, VariableProvider provider, Configuration c,
+                              boolean failOnUnresolvedVariable) throws UserErrorException {
 
         if (map == null) {
 
             return;
         }
 
-        String s = (String) map.get(configKey);
+        String unresolvedVariableString = (String) map.get(configKey);
 
-        if (s == null) {
+        if (unresolvedVariableString == null) {
 
             log.debug("'" + configKey + "' not defined");
             return;
         }
 
+        String s;
+
         try {
 
-            s = new StringWithVariables(s, true).resolve(provider);
+            //
+            // attempt to resolve anyway, and fail or not depending on 'failOnUnresolvedVariable'
+            //
+
+            s = new StringWithVariables(unresolvedVariableString, true).resolve(provider);
         }
         catch(Exception e) {
 
-            throw new UserErrorException(e);
+            if (failOnUnresolvedVariable) {
+                throw new UserErrorException(e);
+            }
+            else {
+
+                //
+                // go forward with the unresolved variable
+                //
+
+                s = unresolvedVariableString;
+            }
         }
 
         c.set(configKey, s);

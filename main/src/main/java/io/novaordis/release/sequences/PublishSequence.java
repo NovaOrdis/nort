@@ -25,6 +25,7 @@ import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
 import io.novaordis.utilities.variable.StringWithVariables;
+import io.novaordis.utilities.variable.VariableProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ public class PublishSequence implements Sequence {
     /**
      *  Install the artifacts into the local repository, fail if the local artifacts are not available
      */
-    static boolean publishArtifacts(ApplicationRuntime r, Configuration c, Version currentVersion) throws Exception {
+    static boolean publishArtifacts(ApplicationRuntime r, Configuration c) throws Exception {
 
         String localPublishingCommand = c.get(
                 ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY);
@@ -62,7 +63,7 @@ public class PublishSequence implements Sequence {
 
         if (er.isFailure()) { throw new UserErrorException("local publishing failed"); }
 
-        r.info(currentVersion + " local publishing ok");
+        r.info(r.getVariableValue(ConfigurationLabels.CURRENT_VERSION) + " local publishing ok");
 
         return true;
     }
@@ -73,16 +74,15 @@ public class PublishSequence implements Sequence {
      * @param noPush true means only apply changes to local repositories, don't attempt to push anything over the
      *               network
      */
-    static boolean publishCodeChanges(ApplicationRuntime r, Configuration c, Version currentVersion, boolean noPush)
-            throws Exception {
+    static boolean publishCodeChanges(ApplicationRuntime r, Configuration c, boolean noPush) throws Exception {
 
         log.debug("publishing code changes into local repository ...");
 
         boolean stateChanged = false;
 
         //noinspection ConstantConditions
-        stateChanged |= addAndCommitIntoLocalCodeRepository(r, c, currentVersion);
-        stateChanged |= tagLocalCodeRepository(r, c, currentVersion);
+        stateChanged |= addAndCommitIntoLocalCodeRepository(r, c);
+        stateChanged |= tagLocalCodeRepository(r, c);
 
         if (noPush) {
 
@@ -92,14 +92,15 @@ public class PublishSequence implements Sequence {
             return stateChanged;
         }
 
-        stateChanged |= pushToRemoteCodeRepository(r, c, currentVersion);
+        stateChanged |= pushToRemoteCodeRepository(r, c);
         return stateChanged;
     }
 
-    static boolean addAndCommitIntoLocalCodeRepository(ApplicationRuntime r, Configuration c, Version currentVersion)
-            throws Exception {
+    static boolean addAndCommitIntoLocalCodeRepository(ApplicationRuntime r, Configuration c) throws Exception {
 
         log.debug("adding and committing to the local code repository ...");
+
+        Version currentVersion = new Version(r.getVariableValue(ConfigurationLabels.CURRENT_VERSION));
 
         String addCommand = c.get(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY);
         String commitCommand = c.get(ConfigurationLabels.OS_COMMAND_TO_COMMIT_TO_LOCAL_SOURCE_REPOSITORY);
@@ -142,8 +143,9 @@ public class PublishSequence implements Sequence {
     /**
      * We don't tag if we're a snapshot.
      */
-    static boolean tagLocalCodeRepository(ApplicationRuntime r, Configuration c, Version currentVersion)
-            throws Exception {
+    static boolean tagLocalCodeRepository(ApplicationRuntime r, Configuration c) throws Exception {
+
+        Version currentVersion = new Version(r.getVariableValue(ConfigurationLabels.CURRENT_VERSION));
 
         if (currentVersion.isSnapshot()) {
 
@@ -160,14 +162,7 @@ public class PublishSequence implements Sequence {
                     "the OS command to use to tag the local source repository was not configured for this project");
         }
 
-        //
-        // resolve the current version and the tag
-        //
-
-        //
-        // TODO release.tag should be configured externally
-        //
-        String tag = "release-" + currentVersion;
+        String tag = computeTag(c, r);
 
         tagCommand = new StringWithVariables(tagCommand).
                 resolve("current_version", currentVersion.toString(), "tag", tag);
@@ -183,10 +178,11 @@ public class PublishSequence implements Sequence {
         return true;
     }
 
-    static boolean pushToRemoteCodeRepository(ApplicationRuntime r, Configuration c, Version currentVersion)
-            throws Exception {
+    static boolean pushToRemoteCodeRepository(ApplicationRuntime r, Configuration c) throws Exception {
 
         log.debug("pushing to the remote code repository ...");
+
+        Version currentVersion = new Version(r.getVariableValue(ConfigurationLabels.CURRENT_VERSION));
 
         String pushCommand = c.get(ConfigurationLabels.OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY);
 
@@ -204,6 +200,31 @@ public class PublishSequence implements Sequence {
         r.info(currentVersion + " source push ok");
 
         return true;
+    }
+
+    /**
+     * TODO we should not need this method, the underlying logic should be built into Configuration
+     */
+    static String computeTag(Configuration c, VariableProvider p) throws UserErrorException {
+
+        //
+        // attempt first to use an externally configured tag
+        //
+        String tag = c.get(ConfigurationLabels.RELEASE_TAG);
+
+        if (tag == null) {
+
+            tag = "release-${current.version}";
+        }
+
+        try {
+
+            return new StringWithVariables(tag, true).resolve(p);
+        }
+        catch(Exception e) {
+
+            throw new UserErrorException(e);
+        }
     }
 
     // Attributes ------------------------------------------------------------------------------------------------------
@@ -226,12 +247,11 @@ public class PublishSequence implements Sequence {
 
         Configuration conf = c.getConfiguration();
         ApplicationRuntime r = c.getRuntime();
-        Version currentVersion = c.getCurrentVersion();
         boolean noPush = c.isNoPush();
 
         //noinspection ConstantConditions
-        stateChanged |= publishArtifacts(r, conf, currentVersion);
-        stateChanged |= publishCodeChanges(r, conf, currentVersion, noPush);
+        stateChanged |= publishArtifacts(r, conf);
+        stateChanged |= publishCodeChanges(r, conf, noPush);
 
         this.executeChangedState = stateChanged;
         return stateChanged;

@@ -18,6 +18,7 @@ package io.novaordis.release.sequences;
 
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.ReleaseMode;
+import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
@@ -50,7 +51,6 @@ public class SequenceExecutionContext {
     // Constants -------------------------------------------------------------------------------------------------------
 
     public static final String TESTS_WERE_EXECUTED_KEY = "TESTS_WERE_EXECUTED";
-    public static final String CURRENT_VERSION_KEY = "CURRENT_VERSION";
     public static final String NO_PUSH_KEY = "NO_PUSH";
     public static final String RELEASE_MODE_KEY = "RELEASE_MODE";
 
@@ -159,7 +159,25 @@ public class SequenceExecutionContext {
      */
     public Version getCurrentVersion() {
 
-        return (Version) state.get(CURRENT_VERSION_KEY);
+        //
+        // because the current version must be exposed as a runtime variable, use the underlying variable provider
+        // for storage
+        //
+        String s = runtime.getVariableValue(ConfigurationLabels.CURRENT_VERSION);
+
+        if (s == null) {
+
+            return null;
+        }
+
+        try {
+
+            return new Version(s);
+        }
+        catch(Exception e) {
+
+            throw new IllegalStateException(e);
+        }
     }
 
     public boolean isNoPush() {
@@ -210,7 +228,18 @@ public class SequenceExecutionContext {
 
     void setCurrentVersion(Version v) {
 
-        state.put(CURRENT_VERSION_KEY, v);
+        //
+        // because the current version must be exposed as a runtime variable, use the underlying variable provider
+        // for storage
+        //
+
+        String literal = null;
+
+        if (v != null) {
+            literal = v.getLiteral();
+        }
+
+        runtime.setVariableValue(ConfigurationLabels.CURRENT_VERSION, literal);
     }
 
     void setNoPush(boolean b) {

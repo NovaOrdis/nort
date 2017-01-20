@@ -390,6 +390,9 @@ public class ReleaseApplicationRuntimeTest {
         value = mc.get(ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT);
         assertEquals(localRepositoryDirectory.getPath(), value);
 
+        value = mc.get(ConfigurationLabels.RELEASE_TAG);
+        assertEquals("release-some-marker-${current.version}", value);
+
         value = mc.get(ConfigurationLabels.INSTALLATION_DIRECTORY);
         assertEquals(installationDirectory.getPath(), value);
     }
@@ -397,7 +400,7 @@ public class ReleaseApplicationRuntimeTest {
     // extractString() -------------------------------------------------------------------------------------------------
 
     @Test
-    public void extractString() throws Exception {
+    public void extractString_FailOnUnresolvedVariable_VariableCanBeResolved() throws Exception {
 
         String configKey = "a";
 
@@ -407,10 +410,69 @@ public class ReleaseApplicationRuntimeTest {
         MockVariableProvider mp = new MockVariableProvider();
         mp.setVariableValue("b", "B");
 
-        ReleaseApplicationRuntime.extractString(map, configKey, mp, mc);
+        ReleaseApplicationRuntime.extractString(map, configKey, mp, mc, true);
 
         String s = mc.get(configKey);
         assertEquals("B", s);
+    }
+
+    @Test
+    public void extractString_FailOnUnresolvedVariable_VariableCannotBeResolved() throws Exception {
+
+        String configKey = "a";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put(configKey, "${b}");
+        MockConfiguration mc = new MockConfiguration();
+        MockVariableProvider mp = new MockVariableProvider();
+
+        try {
+
+            ReleaseApplicationRuntime.extractString(map, configKey, mp, mc, true);
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("\"b\" not defined", msg);
+        }
+
+        String s = mc.get(configKey);
+        assertNull(s);
+    }
+
+    @Test
+    public void extractString_DoNotFailOnUnresolvedVariable_VariableCanBeResolved() throws Exception {
+
+        String configKey = "a";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put(configKey, "${b}");
+        MockConfiguration mc = new MockConfiguration();
+        MockVariableProvider mp = new MockVariableProvider();
+        mp.setVariableValue("b", "B");
+
+        ReleaseApplicationRuntime.extractString(map, configKey, mp, mc, false);
+
+        String s = mc.get(configKey);
+        assertEquals("B", s);
+    }
+
+    @Test
+    public void extractString_DoNotFailOnUnresolvedVariable_VariableCannotBeResolved() throws Exception {
+
+        String configKey = "a";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put(configKey, "${b}");
+        MockConfiguration mc = new MockConfiguration();
+        MockVariableProvider mp = new MockVariableProvider();
+
+        ReleaseApplicationRuntime.extractString(map, configKey, mp, mc, false);
+
+        String s = mc.get(configKey);
+        assertEquals("${b}", s);
     }
 
     // extractDirectory() ----------------------------------------------------------------------------------------------

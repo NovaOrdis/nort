@@ -311,6 +311,7 @@ public class QualificationSequence implements Sequence {
         try {
 
             installedVersion = VersionUtil.fromCommandStdout(stdoutContent);
+
         }
         catch(Exception e) {
 
