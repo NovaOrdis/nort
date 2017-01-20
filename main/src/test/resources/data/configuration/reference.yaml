@@ -9,6 +9,7 @@ build:
 
 publish:
   local.artifact.repository.root: ${M2}
+#  release.tag: release-${current.version}
 
 install:
   installation.directory: ${RUNTIME_DIR}

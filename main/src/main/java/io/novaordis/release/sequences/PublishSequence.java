@@ -164,8 +164,13 @@ public class PublishSequence implements Sequence {
         // resolve the current version and the tag
         //
 
-        tagCommand = new StringWithVariables(tagCommand).resolve(
-                "current_version", currentVersion.toString(), "tag", "release-" + currentVersion);
+        //
+        // TODO release.tag should be configured externally
+        //
+        String tag = "release-" + currentVersion;
+
+        tagCommand = new StringWithVariables(tagCommand).
+                resolve("current_version", currentVersion.toString(), "tag", tag);
 
         NativeExecutionResult er = OutputUtil.handleNativeCommandOutput(OS.getInstance().execute(tagCommand), r, c);
 
