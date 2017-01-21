@@ -99,7 +99,7 @@ public class CompletionSequenceTest extends SequenceTest {
         //
         // snapshot release, the version on disk is snapshot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         assertTrue(mp.getVersion().isSnapshot());
         assertEquals(new Version("1.2.3-SNAPSHOT-4"), mp.getVersion());
@@ -136,7 +136,7 @@ public class CompletionSequenceTest extends SequenceTest {
         //
         // snapshot release, the version on disk is dot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
 
         assertTrue(mp.getVersion().isDot());
@@ -186,7 +186,7 @@ public class CompletionSequenceTest extends SequenceTest {
         //
         // dot release, the version on disk is dot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, null);
 
         assertTrue(mp.getVersion().isDot());
         assertEquals(new Version("1.2.3"), mp.getVersion());
@@ -223,7 +223,7 @@ public class CompletionSequenceTest extends SequenceTest {
         //
         // dot release, the version on disk is snapshot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, null);
 
         assertTrue(mp.getVersion().isSnapshot());
         assertEquals(new Version("1.2.3-SNAPSHOT-4"), mp.getVersion());
@@ -266,7 +266,7 @@ public class CompletionSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1-SNAPSHOT-1");
         ReleaseMode rm = ReleaseMode.snapshot;
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, null);
 
         CompletionSequence s = new CompletionSequence();
 
@@ -289,7 +289,7 @@ public class CompletionSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0.1");
         ReleaseMode rm = ReleaseMode.patch;
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, null);
 
         CompletionSequence s = new CompletionSequence();
 
@@ -315,7 +315,7 @@ public class CompletionSequenceTest extends SequenceTest {
         ReleaseMode rm = ReleaseMode.custom;
         rm.setCustomLabel(versionBeingReleased);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, null);
 
         CompletionSequence s = new CompletionSequence();
 
@@ -341,7 +341,7 @@ public class CompletionSequenceTest extends SequenceTest {
         ReleaseMode rm = ReleaseMode.custom;
         rm.setCustomLabel(versionBeingReleased);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, rm, null);
 
         CompletionSequence s = new CompletionSequence();
 

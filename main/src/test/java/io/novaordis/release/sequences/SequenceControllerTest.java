@@ -211,7 +211,7 @@ public class SequenceControllerTest {
         MockSequence s2 = new MockSequence();
         MockSequence s3 = new MockSequence();
 
-        SequenceController c = new SequenceController(ReleaseMode.snapshot, true, s1, s2, s3);
+        SequenceController c = new SequenceController(ReleaseMode.snapshot, s1, s2, s3);
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
@@ -251,7 +251,7 @@ public class SequenceControllerTest {
         MockSequence s3 = new MockSequence();
         s3.setUndoBroken(true); // we break the last one because we start the undo process with this
 
-        SequenceController c = new SequenceController(ReleaseMode.snapshot, true, s1, s2, s3);
+        SequenceController c = new SequenceController(ReleaseMode.snapshot, s1, s2, s3);
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 

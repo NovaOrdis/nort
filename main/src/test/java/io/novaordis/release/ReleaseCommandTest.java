@@ -29,6 +29,7 @@ import io.novaordis.release.sequences.InstallSequence;
 import io.novaordis.release.sequences.PublishSequence;
 import io.novaordis.release.sequences.QualificationSequence;
 import io.novaordis.release.sequences.Sequence;
+import io.novaordis.release.sequences.SequenceController;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.release.sequences.SequenceOperation;
 import io.novaordis.release.version.Version;
@@ -236,6 +237,26 @@ public class ReleaseCommandTest {
     }
 
     @Test
+    public void configure_InvalidReleaseModeOrCustomReleaseLabel() throws Exception {
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        List<String> args = new ArrayList<>(Collections.singletonList("something"));
+
+        try {
+
+            c.configure(0, args);
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("invalid custom release label \"something\"", msg);
+        }
+    }
+
+    @Test
     public void configure_FirstArgumentVersionLabel() throws Exception {
 
         ReleaseCommand c = new ReleaseCommand();
@@ -254,6 +275,59 @@ public class ReleaseCommandTest {
 
         assertEquals(1, args.size());
         assertEquals("else", args.get(0));
+    }
+
+    // configure()/options ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void configure_NoTests() throws Exception {
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        List<String> args = new ArrayList<>(Arrays.asList("snapshot", "--no-tests", "something"));
+
+        c.configure(0, args);
+
+        assertTrue(c.isNoTests());
+        assertFalse(c.isNoPush());
+        assertFalse(c.isNoInstall());
+
+        assertEquals(1, args.size());
+        assertEquals("something", args.get(0));
+    }
+
+    @Test
+    public void configure_NoPush() throws Exception {
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        List<String> args = new ArrayList<>(Arrays.asList("snapshot", "--no-push", "something"));
+
+        c.configure(0, args);
+
+        assertFalse(c.isNoTests());
+        assertTrue(c.isNoPush());
+        assertFalse(c.isNoInstall());
+
+        assertEquals(1, args.size());
+        assertEquals("something", args.get(0));
+    }
+
+    @Test
+    public void configure_NoInstall() throws Exception {
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        List<String> args = new ArrayList<>(Arrays.asList("snapshot", "--no-install", "something"));
+
+        c.configure(0, args);
+
+        assertFalse(c.isNoTests());
+        assertFalse(c.isNoPush());
+        assertTrue(c.isNoInstall());
+
+        assertEquals(1, args.size());
+        assertEquals("something", args.get(0));
     }
 
     // info command ----------------------------------------------------------------------------------------------------
@@ -288,15 +362,131 @@ public class ReleaseCommandTest {
     // release sequence ------------------------------------------------------------------------------------------------
 
     @Test
-    public void types() throws Exception {
+    public void types_WithInstall() throws Exception {
 
-        List<Class<? extends Sequence>> types = ReleaseCommand.getSequenceTypes();
+        List<Class<? extends Sequence>> types = ReleaseCommand.getSequenceTypes(false);
         assertEquals(5, types.size());
         assertEquals(QualificationSequence.class, types.get(0));
         assertEquals(BuildSequence.class, types.get(1));
         assertEquals(PublishSequence.class, types.get(2));
         assertEquals(InstallSequence.class, types.get(3));
         assertEquals(CompletionSequence.class, types.get(4));
+    }
+
+    @Test
+    public void types_WithoutInstall() throws Exception {
+
+        List<Class<? extends Sequence>> types = ReleaseCommand.getSequenceTypes(true);
+        assertEquals(4, types.size());
+        assertEquals(QualificationSequence.class, types.get(0));
+        assertEquals(BuildSequence.class, types.get(1));
+        assertEquals(PublishSequence.class, types.get(2));
+        assertEquals(CompletionSequence.class, types.get(3));
+    }
+
+    /**
+     * This test is aimed at insuring that a "release" command configuration propagates successfully to the internal
+     * machinery - when there are no special configurations.
+     */
+    @Test
+    public void execute_ExecutionOptionsTransfer_NoOptions() throws Exception {
+
+        MockProject mp = new MockProject("1");
+        MockProjectBuilder mpb = new MockProjectBuilder(mp);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        c.setProjectBuilder(mpb);
+
+        assertFalse(c.isNoTests());
+        assertFalse(c.isNoPush());
+        assertFalse(c.isNoInstall());
+
+        try {
+
+            c.execute(mr);
+            fail("should throw exception");
+        }
+        catch(Exception e) {
+
+            //
+            // that is fine, the state is not appropriately set to execute all sequences, but we're only interested
+            // in whether the state of the variable provider was changed
+            //
+
+            String msg = e.getMessage();
+            log.info(msg);
+        }
+
+        assertEquals("false", mr.getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS));
+        assertEquals("false", mr.getVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH));
+        assertEquals("false", mr.getVariableValue(ConfigurationLabels.INSTALL_NO_INSTALL));
+
+        //
+        // also make sure that all sequences are about to be executed
+        //
+
+        SequenceController sc = c.getSequenceController();
+        List<Sequence> sequences = sc.getSequences();
+        assertEquals(5, sequences.size());
+        assertTrue(sequences.get(0) instanceof QualificationSequence);
+        assertTrue(sequences.get(1) instanceof BuildSequence);
+        assertTrue(sequences.get(2) instanceof PublishSequence);
+        assertTrue(sequences.get(3) instanceof InstallSequence);
+        assertTrue(sequences.get(4) instanceof CompletionSequence);
+    }
+
+    /**
+     * This test is aimed at insuring that a "release" command configuration propagates successfully to the internal
+     * machinery - when there are special configurations.
+     */
+    @Test
+    public void execute_ExecutionOptionsTransfer_ThereAreOptions() throws Exception {
+
+        MockProject mp = new MockProject("1");
+        MockProjectBuilder mpb = new MockProjectBuilder(mp);
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        ReleaseCommand c = new ReleaseCommand();
+
+        c.setProjectBuilder(mpb);
+
+        c.setNoTests(true);
+        c.setNoPush(true);
+        c.setNoInstall(true);
+
+        try {
+
+            c.execute(mr);
+            fail("should throw exception");
+        }
+        catch(Exception e) {
+
+            //
+            // that is fine, the state is not appropriately set to execute all sequences, but we're only interested
+            // in whether the state of the variable provider was changed
+            //
+
+            String msg = e.getMessage();
+            log.info(msg);
+        }
+
+        assertEquals("true", mr.getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS));
+        assertEquals("true", mr.getVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH));
+        assertEquals("true", mr.getVariableValue(ConfigurationLabels.INSTALL_NO_INSTALL));
+
+        //
+        // also make sure that all the install sequence is missing from the execution list
+        //
+
+        SequenceController sc = c.getSequenceController();
+        List<Sequence> sequences = sc.getSequences();
+        assertEquals(4, sequences.size());
+        assertTrue(sequences.get(0) instanceof QualificationSequence);
+        assertTrue(sequences.get(1) instanceof BuildSequence);
+        assertTrue(sequences.get(2) instanceof PublishSequence);
+        assertTrue(sequences.get(3) instanceof CompletionSequence);
     }
 
     @Test

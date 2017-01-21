@@ -96,7 +96,7 @@ public class InstallSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         assertFalse(is.execute(c));
     }
@@ -110,7 +110,7 @@ public class InstallSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("/does/not/matter.zip"), null);
 
@@ -139,7 +139,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0");
         mp.addArtifact(ArtifactType.BINARY_DISTRIBUTION, new File("/does/not/matter.zip"), null);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -173,7 +173,7 @@ public class InstallSequenceTest extends SequenceTest {
                 new File("I/am/sure/there/is/no/such/file/in/repository.zip"),
                 new File("I/am/sure/there/is/no/such/file/locally.zip"));
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -207,7 +207,7 @@ public class InstallSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -243,7 +243,7 @@ public class InstallSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -283,7 +283,7 @@ public class InstallSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -324,7 +324,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockOS mockOS = (MockOS) OS.getInstance();
         mockOS.allCommandsFail();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -365,7 +365,7 @@ public class InstallSequenceTest extends SequenceTest {
         MockOS mockOS = (MockOS) OS.getInstance();
         mockOS.allCommandsSucceedByDefault();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -422,7 +422,7 @@ public class InstallSequenceTest extends SequenceTest {
         assertTrue(Files.write(installationScript, "#/bin/bash\n\necho ."));
         assertTrue(Files.chmod(installationScript, "r-xr--r--"));
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -480,7 +480,7 @@ public class InstallSequenceTest extends SequenceTest {
         assertTrue(Files.write(installationScript, "#/bin/bash\n\necho ."));
         assertTrue(Files.chmod(installationScript, "r-xr--r--"));
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         assertTrue(is.execute(c));
 
@@ -542,7 +542,7 @@ public class InstallSequenceTest extends SequenceTest {
         assertTrue(Files.write(installationScript, "#/bin/bash\n\necho ."));
         assertTrue(Files.chmod(installationScript, "r-xr--r--"));
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         assertTrue(is.execute(c));
 

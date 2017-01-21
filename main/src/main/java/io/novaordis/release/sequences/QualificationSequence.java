@@ -19,6 +19,7 @@ package io.novaordis.release.sequences;
 import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.ReleaseMode;
+import io.novaordis.release.ToRelocate;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
@@ -64,15 +65,29 @@ public class QualificationSequence implements Sequence {
         incrementCurrentVersionIfNecessary(context);
         failIfInstalledVersionIsEqualOrNewer(context);
 
-        boolean testsPassed = executeTests(context);
+        //
+        // decide whether to execute tests or not
+        //
 
-        if (testsPassed) {
+        boolean executeTests = !ToRelocate.toBoolean(
+                context.getRuntime().getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS));
 
-            context.getRuntime().info(context.getCurrentVersion() + " tests ok");
+        if (executeTests) {
+
+            boolean testsPassed = executeTests(context);
+
+            if (testsPassed) {
+
+                context.getRuntime().info(context.getCurrentVersion() + " tests ok");
+            }
+            else {
+
+                throw new UserErrorException("tests failed");
+            }
         }
         else {
 
-            throw new UserErrorException("tests failed");
+            log.debug("tests were not executed because we were configured so");
         }
 
         return executeChangedState;
@@ -216,6 +231,9 @@ public class QualificationSequence implements Sequence {
     /**
      * Execute tests. The current version (possibly changed by the previous steps) is available in the context.
      *
+     * The method, once invoked, attempts to execute tests regardless of whether the runtime was configured to NOT run
+     * tests ("--no-tests"). The calling layer must not invoke the method if tests are not to be executed.
+     *
      * @return true if all test executed successfully, false otherwise
      *
      * @exception UserErrorException on configuration errors
@@ -225,9 +243,7 @@ public class QualificationSequence implements Sequence {
 
         boolean testsExecutedSuccessfully;
 
-        Version currentVersion = context.getCurrentVersion();
-
-        log.debug("running tests for release " + currentVersion + " ...");
+        log.debug("running tests for release " + context.getCurrentVersion() + " ...");
 
         //
         // make sure we have the command required to run all tests

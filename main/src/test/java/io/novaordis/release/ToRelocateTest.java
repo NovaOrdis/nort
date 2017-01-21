@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nova Ordis LLC
+ * Copyright (c) 2017 Nova Ordis LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package io.novaordis.release.sequences;
+package io.novaordis.release;
 
-import io.novaordis.release.MockConfiguration;
-import io.novaordis.release.MockReleaseApplicationRuntime;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 11/17/16
+ * @since 1/20/17
  */
-public abstract class SequenceTest {
+public class ToRelocateTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    private static final Logger log = LoggerFactory.getLogger(ToRelocateTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -38,23 +43,59 @@ public abstract class SequenceTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    // Tests -----------------------------------------------------------------------------------------------------------
+
+    // toBoolean -------------------------------------------------------------------------------------------------------
+
     @Test
-    public void ifThereWasNoExecutionUndoIsNoop() throws Exception {
+    public void toBoolean_Null() throws Exception {
 
-        Sequence s = getSequenceToTest();
+        assertFalse(ToRelocate.toBoolean(null));
+    }
 
-        // noop
+    @Test
+    public void toBoolean_InvalidValue() throws Exception {
 
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+        try {
 
-        assertFalse(s.undo(new SequenceExecutionContext(mr, null, null, null)));
+            ToRelocate.toBoolean("something");
+            fail("should throw Exception");
+        }
+        catch(IllegalArgumentException e) {
+
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("\"something\" is not a valid boolean value", msg);
+        }
+    }
+
+    @Test
+    public void toBoolean_False() throws Exception {
+
+        assertFalse(ToRelocate.toBoolean("false"));
+    }
+
+    @Test
+    public void toBoolean_False_2() throws Exception {
+
+        assertFalse(ToRelocate.toBoolean("False"));
+    }
+
+    @Test
+    public void toBoolean_True() throws Exception {
+
+        assertTrue(ToRelocate.toBoolean("true"));
+    }
+
+    @Test
+    public void toBoolean_True_2() throws Exception {
+
+        assertTrue(ToRelocate.toBoolean("True"));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    protected abstract Sequence getSequenceToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

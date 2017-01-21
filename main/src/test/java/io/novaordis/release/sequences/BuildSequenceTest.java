@@ -78,7 +78,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
         c.setTestsExecuted(false);
 
         try {
@@ -107,7 +107,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
         c.setTestsExecuted(true);
 
         try {
@@ -141,7 +141,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
         c.setTestsExecuted(false);
 
         s.execute(c);
@@ -169,7 +169,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
         c.setTestsExecuted(true);
 
         s.execute(c);
@@ -197,7 +197,7 @@ public class BuildSequenceTest extends SequenceTest {
 
         BuildSequence s = new BuildSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
         c.setTestsExecuted(false);
 
         try {

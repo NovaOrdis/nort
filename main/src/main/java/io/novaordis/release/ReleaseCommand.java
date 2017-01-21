@@ -20,6 +20,7 @@ import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.command.CommandBase;
 import io.novaordis.clad.option.BooleanOption;
 import io.novaordis.clad.option.Option;
+import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.model.ProjectBuilder;
@@ -39,7 +40,7 @@ import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,21 +58,42 @@ public class ReleaseCommand extends CommandBase {
 
     private static final Logger log = LoggerFactory.getLogger(ReleaseCommand.class);
 
+    public static final String NO_TESTS_OPTION_LITERAL = "no-tests";
+    public static final String NO_PUSH_OPTION_LITERAL = "no-push";
+    public static final String NO_INSTALL_OPTION_LITERAL = "no-install";
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     /**
-     * @return the types of sequences that will be executed as part of the command, in the order in which will be
-     * executed.
+     * @return the default types of sequences that will be executed as part of the command, in the order in which will
+     * be executed.
      */
     public static List<Class<? extends Sequence>> getSequenceTypes() {
 
-        return Arrays.asList(
-                QualificationSequence.class,
-                BuildSequence.class,
-                PublishSequence.class,
-                InstallSequence.class,
-                CompletionSequence.class
-        );
+        return getSequenceTypes(false);
+    }
+
+    /**
+     * @param noInstall if true, the InstallSequence won't be part of the result.
+     *
+     * @return the types of sequences that will be executed as part of the command, in the order in which will be
+     * executed.
+     */
+    public static List<Class<? extends Sequence>> getSequenceTypes(boolean noInstall) {
+
+        List<Class<? extends Sequence>> result = new ArrayList<>();
+
+        result.add(QualificationSequence.class);
+        result.add(BuildSequence.class);
+        result.add(PublishSequence.class);
+
+        if (!noInstall) {
+            result.add(InstallSequence.class);
+        }
+
+        result.add(CompletionSequence.class);
+
+        return result;
     }
 
     // Package protected static ----------------------------------------------------------------------------------------
@@ -80,7 +102,12 @@ public class ReleaseCommand extends CommandBase {
 
     private ProjectBuilder projectBuilder;
     private ReleaseMode mode;
+
+    private boolean noTests;
     private boolean noPush;
+    private boolean noInstall;
+
+    private SequenceController controller;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -99,10 +126,15 @@ public class ReleaseCommand extends CommandBase {
     public Set<Option> optionalOptions() {
 
         Set<Option> result = new HashSet<>();
-        result.add(new BooleanOption("no-push"));
+        result.add(new BooleanOption(NO_TESTS_OPTION_LITERAL));
+        result.add(new BooleanOption(NO_PUSH_OPTION_LITERAL));
+        result.add(new BooleanOption(NO_INSTALL_OPTION_LITERAL));
         return result;
     }
 
+    /**
+     * The command requires at least one argument, which is the release mode and possibly a custom release label.
+     */
     @Override
     public void configure(int from, List<String> commandLineArguments) throws Exception {
 
@@ -110,12 +142,14 @@ public class ReleaseCommand extends CommandBase {
 
         super.configure(from, commandLineArguments);
 
-        //noinspection Convert2streamapi
-        for(Option o: getOptions()) {
-            if (new BooleanOption("no-push").equals(o)) {
-                noPush = ((BooleanOption)o).getValue();
-            }
-        }
+        BooleanOption o = (BooleanOption)getOption(new BooleanOption(NO_TESTS_OPTION_LITERAL));
+        noTests = o != null && o.getValue();
+
+        o = (BooleanOption)getOption(new BooleanOption(NO_PUSH_OPTION_LITERAL));
+        noPush = o != null && o.getValue();
+
+        o = (BooleanOption)getOption(new BooleanOption(NO_INSTALL_OPTION_LITERAL));
+        noInstall = o != null && o.getValue();
 
         //
         // identifying release mode
@@ -230,6 +264,44 @@ public class ReleaseCommand extends CommandBase {
 
     // Protected -------------------------------------------------------------------------------------------------------
 
+    boolean isNoTests() {
+
+        return noTests;
+    }
+
+    void setNoTests(boolean b) {
+
+        this.noTests = b;
+    }
+
+    boolean isNoPush() {
+
+        return noPush;
+    }
+
+    void setNoPush(boolean b) {
+
+        this.noPush = b;
+    }
+
+    boolean isNoInstall() {
+
+        return noInstall;
+    }
+
+    void setNoInstall(boolean b) {
+
+        this.noInstall = b;
+    }
+
+    /**
+     * Use for testing only. May return null.
+     */
+    SequenceController getSequenceController() {
+
+        return controller;
+    }
+
     // Private ---------------------------------------------------------------------------------------------------------
 
     private void info(ReleaseApplicationRuntime r, Project p) throws UserErrorException {
@@ -246,13 +318,24 @@ public class ReleaseCommand extends CommandBase {
 
     }
 
-    private void executeReleaseSequence(ReleaseApplicationRuntime r, Project p, ReleaseMode rm)
-            throws Exception {
+    private void executeReleaseSequence(ReleaseApplicationRuntime r, Project p, ReleaseMode rm) throws Exception {
 
         //
-        // Install the "known" sequences required by a release into a new controller instance created for this run
+        // transfer execution option as runtime variables to the runtime
         //
-        SequenceController controller = new SequenceController(rm, noPush, getSequenceTypes());
+
+        r.setVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS, Boolean.toString(isNoTests()));
+        r.setVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH, Boolean.toString(isNoPush()));
+        r.setVariableValue(ConfigurationLabels.INSTALL_NO_INSTALL, Boolean.toString(isNoInstall()));
+
+        //
+        // Install the "known" sequences required by a release into a new controller instance created for this run.
+        // The composition of the sequence is influenced by the release command options.
+        //
+
+        List<Class<? extends Sequence>> sequenceTypes = getSequenceTypes(isNoInstall());
+
+        controller = new SequenceController(rm, sequenceTypes);
 
         boolean successfulRelease = false;
 
@@ -289,6 +372,7 @@ public class ReleaseCommand extends CommandBase {
                     " does not seem to contain a valid top-level project POM. Make sure the release process is started from the project directory.");
         }
     }
+
     // Inner classes ---------------------------------------------------------------------------------------------------
 
 }

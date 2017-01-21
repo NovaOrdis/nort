@@ -44,14 +44,19 @@ public class ConfigurationLabels {
 
     public static final String INSTALLATION_DIRECTORY = "installation.directory";
 
-
     //
     // temporarily using this for runtime variable names, this needs to be refactored anyway
     //
 
+    //
+    // TODO properly handle these
+    //
 
     public static final String CURRENT_VERSION = "current.version";
 
+    public static final String QUALIFICATION_NO_TESTS = "qualification.no.tests";
+    public static final String PUBLISH_NO_PUSH = "publish.no.push";
+    public static final String INSTALL_NO_INSTALL = "install.no.install";
 
     // Attributes ------------------------------------------------------------------------------------------------------
 

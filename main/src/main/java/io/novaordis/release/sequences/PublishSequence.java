@@ -19,7 +19,9 @@ package io.novaordis.release.sequences;
 import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.OutputUtil;
+import io.novaordis.release.ToRelocate;
 import io.novaordis.release.clad.ConfigurationLabels;
+import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.os.NativeExecutionResult;
@@ -246,8 +248,8 @@ public class PublishSequence implements Sequence {
         boolean stateChanged = false;
 
         Configuration conf = c.getConfiguration();
-        ApplicationRuntime r = c.getRuntime();
-        boolean noPush = c.isNoPush();
+        ReleaseApplicationRuntime r = c.getRuntime();
+        boolean noPush = ToRelocate.toBoolean(r.getVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH));
 
         //noinspection ConstantConditions
         stateChanged |= publishArtifacts(r, conf);
@@ -283,12 +285,12 @@ public class PublishSequence implements Sequence {
         return "publish sequence";
     }
 
-
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
 
     // Private ---------------------------------------------------------------------------------------------------------
+
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 

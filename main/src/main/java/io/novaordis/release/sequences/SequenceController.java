@@ -51,16 +51,15 @@ public class SequenceController {
     private List<Sequence> sequences;
 
     private ReleaseMode rm;
-    private boolean noPush;
 
     private ExecutionHistory history;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public SequenceController(ReleaseMode rm, boolean noPush, List<Class<? extends Sequence>> sequenceTypes)
+    public SequenceController(ReleaseMode rm, List<Class<? extends Sequence>> sequenceTypes)
             throws Exception{
 
-        this(rm, noPush);
+        this(rm);
 
         for(Class<? extends Sequence> type: sequenceTypes) {
 
@@ -69,10 +68,9 @@ public class SequenceController {
         }
     }
 
-    public SequenceController(ReleaseMode rm, boolean noPush, Sequence ... sequences) {
+    public SequenceController(ReleaseMode rm, Sequence ... sequences) {
 
         this.rm = rm;
-        this.noPush = noPush;
         this.sequences = new ArrayList<>();
         this.history = new ExecutionHistory();
 
@@ -85,7 +83,7 @@ public class SequenceController {
     }
 
     protected SequenceController() {
-        this(null, true);
+        this(null);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -100,7 +98,7 @@ public class SequenceController {
      */
     public SequenceExecutionContext execute(ReleaseApplicationRuntime r, Project m) throws Exception {
 
-        SequenceExecutionContext context = new SequenceExecutionContext(r, m, rm, noPush, history);
+        SequenceExecutionContext context = new SequenceExecutionContext(r, m, rm, history);
 
         for(Sequence s: sequences) {
 
@@ -129,7 +127,7 @@ public class SequenceController {
      */
     public SequenceExecutionContext undo(ReleaseApplicationRuntime r, Project m) {
 
-        SequenceExecutionContext context = new SequenceExecutionContext(r, m, rm, noPush, history);
+        SequenceExecutionContext context = new SequenceExecutionContext(r, m, rm, history);
 
         //
         // undo in the reverse order
@@ -174,6 +172,14 @@ public class SequenceController {
     public int getCount() {
 
         return sequences.size();
+    }
+
+    /**
+     * @return the actual storage, not a copy.
+     */
+    public List<Sequence> getSequences() {
+
+        return sequences;
     }
 
     public ExecutionHistory getHistory() {

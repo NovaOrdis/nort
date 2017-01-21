@@ -50,7 +50,7 @@ public class SequenceExecutionContextTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, null);
 
         assertNull(c.get("something"));
         assertNull(c.get(null));
@@ -61,7 +61,7 @@ public class SequenceExecutionContextTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, null);
 
         c.set("something", "somethingelse");
         assertEquals("somethingelse", c.get("something"));
@@ -76,7 +76,7 @@ public class SequenceExecutionContextTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         Version v = c.getCurrentVersion();
         assertEquals(new Version("1.2.3-SNAPSHOT-4"), v);
@@ -86,7 +86,7 @@ public class SequenceExecutionContextTest {
     public void setCurrentVersion_ValidValue() throws Exception {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, null);
         c.setCurrentVersion(new Version("6.7.8"));
         assertEquals(new Version("6.7.8"), c.getCurrentVersion());
     }
@@ -95,7 +95,7 @@ public class SequenceExecutionContextTest {
     public void setCurrentVersion_Null() throws Exception {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, null);
         c.setCurrentVersion(new Version("6.7.8"));
         assertEquals(new Version("6.7.8"), c.getCurrentVersion());
 
@@ -110,7 +110,7 @@ public class SequenceExecutionContextTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, null);
 
         assertFalse(c.wereTestsExecuted());
 
@@ -124,7 +124,7 @@ public class SequenceExecutionContextTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, false, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, null, null, null);
 
         assertNull(c.getCurrentVersion());
 

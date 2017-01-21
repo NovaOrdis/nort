@@ -80,7 +80,7 @@ public class PublishSequenceTest extends SequenceTest {
 
         PublishSequence s = new PublishSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -113,7 +113,7 @@ public class PublishSequenceTest extends SequenceTest {
 
         PublishSequence s = new PublishSequence();
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -482,9 +482,10 @@ public class PublishSequenceTest extends SequenceTest {
         //
         // NO push
         //
-        final boolean noPush = true;
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, noPush, null);
+        mr.setVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH, "true");
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         c.setCurrentVersion(new Version("99.9"));
 
@@ -516,17 +517,11 @@ public class PublishSequenceTest extends SequenceTest {
 
         PublishSequence s = new PublishSequence();
 
-        //
-        // push
-        //
+        mr.setVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH, "false");
 
-        final boolean noPush = false;
-
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, noPush, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         c.setCurrentVersion(new Version("99.9"));
-
-        assertFalse(c.isNoPush());
 
         s.execute(c);
 
@@ -538,7 +533,6 @@ public class PublishSequenceTest extends SequenceTest {
         assertEquals("mock-source-tag 99.9 release-99.9", executedCommands.get(3));
         assertEquals("mock-push", executedCommands.get(4));
     }
-
 
     // Package protected -----------------------------------------------------------------------------------------------
 

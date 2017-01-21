@@ -105,7 +105,7 @@ public class QualificationSequenceTest extends SequenceTest {
         mc.set(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS, null);
 
         QualificationSequence s = new QualificationSequence();
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -149,7 +149,7 @@ public class QualificationSequenceTest extends SequenceTest {
         MavenProject mp = new MavenProject(work);
 
         QualificationSequence s = new QualificationSequence();
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -196,7 +196,7 @@ public class QualificationSequenceTest extends SequenceTest {
         mockOS.addToCommandsThatFail("mock all test execution");
 
         QualificationSequence s = new QualificationSequence();
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
         try {
 
@@ -243,7 +243,7 @@ public class QualificationSequenceTest extends SequenceTest {
         //
         // snapshot release - current version is snapshot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         assertTrue(mp.getVersion().isSnapshot());
 
@@ -294,7 +294,7 @@ public class QualificationSequenceTest extends SequenceTest {
         //
         // dot release - current version is snapshot
         //
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, null);
 
         assertTrue(mp.getVersion().isSnapshot());
 
@@ -332,7 +332,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         s.incrementCurrentVersionIfNecessary(c);
 
@@ -353,7 +353,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.patch, null);
 
         s.incrementCurrentVersionIfNecessary(c);
 
@@ -379,7 +379,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, null);
 
         try {
             s.incrementCurrentVersionIfNecessary(c);
@@ -409,7 +409,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, null);
 
         try {
             s.incrementCurrentVersionIfNecessary(c);
@@ -439,7 +439,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, null);
 
         s.incrementCurrentVersionIfNecessary(c);
 
@@ -463,7 +463,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, custom, null);
 
         s.incrementCurrentVersionIfNecessary(c);
 
@@ -476,7 +476,7 @@ public class QualificationSequenceTest extends SequenceTest {
         assertEquals(new Version("2"), saved.get(0));
     }
 
-    // executeTests() --------------------------------------------------------------------------------------------------
+    // executing tests, executeTests() ---------------------------------------------------------------------------------
 
     @Test
     public void executeTests() throws Exception {
@@ -486,15 +486,59 @@ public class QualificationSequenceTest extends SequenceTest {
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
         mr.init(mc);
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         ((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
 
         QualificationSequence s = new QualificationSequence();
 
+        //
+        // make sure that configuring the environment to skip tests does not interfere with the execution of this
+        // method
+        //
+
+        mr.setVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS, "true");
+
+        assertFalse(c.wereTestsExecuted());
+
         boolean result = s.executeTests(c);
 
         assertTrue(result);
+
+        //
+        // make sure the tests were executed
+        //
+
+        assertTrue(c.wereTestsExecuted());
+    }
+
+    @Test
+    public void preventTestsFromExecutingViaConfiguration() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS, "mock successful command");
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
+        MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
+
+        ((MockOS)OS.getInstance()).allCommandsSucceedByDefault();
+
+        QualificationSequence s = new QualificationSequence();
+
+        //
+        // this is how we prevent tests from executing
+        //
+
+        mr.setVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS, "true");
+
+        assertFalse(c.wereTestsExecuted());
+
+        boolean stateChanged = s.execute(c);
+
+        assertFalse(stateChanged);
+        assertFalse(c.wereTestsExecuted());
     }
 
     // failIfInstalledVersionIsEqualOrNewer() --------------------------------------------------------------------------------------------------
@@ -512,7 +556,7 @@ public class QualificationSequenceTest extends SequenceTest {
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
         mp.setName("blah");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         QualificationSequence s = new QualificationSequence();
 
@@ -540,7 +584,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         QualificationSequence s = new QualificationSequence();
 
@@ -571,7 +615,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         QualificationSequence s = new QualificationSequence();
 
@@ -601,7 +645,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockProject mp = new MockProject("1.0.0");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         QualificationSequence s = new QualificationSequence();
 
@@ -634,7 +678,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockProject mp = new MockProject("2.0.0");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         QualificationSequence s = new QualificationSequence();
 
@@ -665,7 +709,7 @@ public class QualificationSequenceTest extends SequenceTest {
 
         MockProject mp = new MockProject("1.0.0");
 
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, true, null);
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
 
         QualificationSequence s = new QualificationSequence();
 

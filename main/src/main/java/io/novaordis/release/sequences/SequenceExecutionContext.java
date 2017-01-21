@@ -51,7 +51,6 @@ public class SequenceExecutionContext {
     // Constants -------------------------------------------------------------------------------------------------------
 
     public static final String TESTS_WERE_EXECUTED_KEY = "TESTS_WERE_EXECUTED";
-    public static final String NO_PUSH_KEY = "NO_PUSH";
     public static final String RELEASE_MODE_KEY = "RELEASE_MODE";
 
     // Static ----------------------------------------------------------------------------------------------------------
@@ -76,8 +75,7 @@ public class SequenceExecutionContext {
      *
      * @throws IllegalStateException on invalid project state
      */
-    public SequenceExecutionContext(
-            ReleaseApplicationRuntime r, Project m, ReleaseMode rm, boolean noPush, ExecutionHistory h) {
+    public SequenceExecutionContext(ReleaseApplicationRuntime r, Project m, ReleaseMode rm, ExecutionHistory h) {
 
         this.state = new HashMap<>();
 
@@ -114,7 +112,6 @@ public class SequenceExecutionContext {
         }
 
         setReleaseMode(rm);
-        setNoPush(noPush);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -180,17 +177,6 @@ public class SequenceExecutionContext {
         }
     }
 
-    public boolean isNoPush() {
-
-        Boolean b = (Boolean) state.get(NO_PUSH_KEY);
-
-        if (b == null) {
-            return false;
-        }
-
-        return b;
-    }
-
     // generic state access --------------------------------------------------------------------------------------------
 
     /**
@@ -240,11 +226,6 @@ public class SequenceExecutionContext {
         }
 
         runtime.setVariableValue(ConfigurationLabels.CURRENT_VERSION, literal);
-    }
-
-    void setNoPush(boolean b) {
-
-        state.put(NO_PUSH_KEY, b);
     }
 
     void setReleaseMode(ReleaseMode rm) {
