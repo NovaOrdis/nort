@@ -526,6 +526,62 @@ public class VersionTest {
         }
     }
 
+    @Test
+    public void nextVersion_Minor_From_Snapshot() throws Exception {
+
+        Version v = new Version("1.2.10-SNAPSHOT-1");
+        Version nv = Version.nextVersion(v, ReleaseMode.minor);
+        assertEquals(new Version("1.3"), nv);
+    }
+
+    @Test
+    public void nextVersion_Minor_From_Patch() throws Exception {
+
+        Version v = new Version("1.2.10");
+        Version nv = Version.nextVersion(v, ReleaseMode.minor);
+        assertEquals(new Version("1.3"), nv);
+    }
+
+    @Test
+    public void nextVersion_Minor_From_Patch_Zero() throws Exception {
+
+        Version v = new Version("1.2.0");
+        Version nv = Version.nextVersion(v, ReleaseMode.minor);
+        assertEquals(new Version("1.3"), nv);
+    }
+
+    @Test
+    public void nextVersion_Minor_From_Minor() throws Exception {
+
+        Version v = new Version("1.2");
+        Version nv = Version.nextVersion(v, ReleaseMode.minor);
+        assertEquals(new Version("1.3"), nv);
+    }
+
+    @Test
+    public void nextVersion_Minor_From_Major_Missing() throws Exception {
+
+        Version v = new Version("1");
+        Version nv = Version.nextVersion(v, ReleaseMode.minor);
+        assertEquals(new Version("1.1"), nv);
+    }
+
+    @Test
+    public void nextVersion_Minor_From_Major_Zero() throws Exception {
+
+        Version v = new Version("1.0");
+        Version nv = Version.nextVersion(v, ReleaseMode.minor);
+        assertEquals(new Version("1.1"), nv);
+    }
+
+    @Test
+    public void nextVersion_Minor_From_Major() throws Exception {
+
+        Version v = new Version("1.2");
+        Version nv = Version.nextVersion(v, ReleaseMode.minor);
+        assertEquals(new Version("1.3"), nv);
+    }
+
     // isSnapshot() ----------------------------------------------------------------------------------------------------
 
     @Test

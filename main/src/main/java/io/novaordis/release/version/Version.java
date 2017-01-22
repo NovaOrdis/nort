@@ -68,7 +68,17 @@ public class Version implements Comparable<Version> {
         }
         else if (ReleaseMode.minor.equals(releaseMode)) {
 
-            throw new NotYetImplementedException();
+            if (minor == null) {
+
+                minor = 1;
+            }
+            else {
+
+                minor = minor + 1;
+            }
+
+            patch = null;
+            snapshot = null;
         }
         else if (ReleaseMode.patch.equals(releaseMode)) {
 
