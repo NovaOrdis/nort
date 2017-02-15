@@ -543,6 +543,14 @@ public class VersionTest {
     }
 
     @Test
+    public void nextVersion_Minor_From_Patch2() throws Exception {
+
+        Version v = new Version("1.0.0-SNAPSHOT-2");
+        Version nv = Version.nextVersion(v, ReleaseMode.minor);
+        assertEquals(new Version("1.0"), nv);
+    }
+
+    @Test
     public void nextVersion_Minor_From_Patch_Zero() throws Exception {
 
         Version v = new Version("1.2.0");

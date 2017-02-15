@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.novaordis.nort</groupId>
         <artifactId>NORT</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT-1</version>
     </parent>
 
     <artifactId>nort</artifactId>
@@ -33,8 +33,8 @@
         <maven.build.timestamp.format>MM/dd/yy</maven.build.timestamp.format>
         <release_date>${maven.build.timestamp}</release_date>
 
-        <novaordis.utilities.version>4.4.0-SNAPSHOT-5</novaordis.utilities.version>
-        <clad.version>3.4.0-SNAPSHOT-3</clad.version>
+        <novaordis.utilities.version>4.6</novaordis.utilities.version>
+        <clad.version>3.5</clad.version>
     </properties>
 
     <build>

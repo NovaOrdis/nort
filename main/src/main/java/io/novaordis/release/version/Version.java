@@ -16,8 +16,10 @@
 
 package io.novaordis.release.version;
 
+import io.novaordis.clad.option.VerboseOption;
 import io.novaordis.release.ReleaseMode;
-import io.novaordis.utilities.NotYetImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Correctly implements equals() and hashCode()
@@ -28,6 +30,8 @@ import io.novaordis.utilities.NotYetImplementedException;
 public class Version implements Comparable<Version> {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    private static final Logger log = LoggerFactory.getLogger(Version.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -68,15 +72,24 @@ public class Version implements Comparable<Version> {
         }
         else if (ReleaseMode.minor.equals(releaseMode)) {
 
-            if (minor == null) {
+            if (current.isSnapshot() && (patch == null || patch == 0)) {
 
-                minor = 1;
+                //
+                // if we're a "beginning of minor" snapshot, stay on the same minor version, without the snapshot
+                //
+
+                log.debug("beginning of minor snapshot");
             }
             else {
 
-                minor = minor + 1;
-            }
+                if (minor == null) {
 
+                    minor = 1;
+                } else {
+
+                    minor = minor + 1;
+                }
+            }
             patch = null;
             snapshot = null;
         }

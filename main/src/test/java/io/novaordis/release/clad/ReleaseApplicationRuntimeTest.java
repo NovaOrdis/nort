@@ -435,7 +435,7 @@ public class ReleaseApplicationRuntimeTest {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("\"b\" not defined", msg);
+            assertEquals("VariableNotDefinedException \"b\" not defined", msg);
         }
 
         String s = mc.get(configKey);

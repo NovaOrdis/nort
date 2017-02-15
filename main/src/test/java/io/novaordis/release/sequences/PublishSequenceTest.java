@@ -377,7 +377,7 @@ public class PublishSequenceTest extends SequenceTest {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("\"somethingelse\" not defined", msg);
+            assertEquals("VariableNotDefinedException \"somethingelse\" not defined", msg);
         }
     }
 

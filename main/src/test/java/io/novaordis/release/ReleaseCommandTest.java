@@ -199,7 +199,7 @@ public class ReleaseCommandTest {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("invalid custom release label \"something\"", msg);
+            assertEquals("invalid custom release label \"something\": VersionFormatException invalid numeric version component \"something\"", msg);
 
         }
     }
@@ -228,7 +228,7 @@ public class ReleaseCommandTest {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("invalid custom release label \"something\"", msg);
+            assertEquals("invalid custom release label \"something\": VersionFormatException invalid numeric version component \"something\"", msg);
 
             VersionFormatException e2 = (VersionFormatException)e.getCause();
             String msg2 = e2.getMessage();
@@ -252,7 +252,7 @@ public class ReleaseCommandTest {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("invalid custom release label \"something\"", msg);
+            assertEquals("invalid custom release label \"something\": VersionFormatException invalid numeric version component \"something\"", msg);
         }
     }
 
