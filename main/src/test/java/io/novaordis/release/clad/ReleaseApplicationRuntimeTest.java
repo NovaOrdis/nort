@@ -256,6 +256,20 @@ public class ReleaseApplicationRuntimeTest {
     }
 
     @Test
+    public void loadConfiguration_FileIsEmpty() throws Exception {
+
+        File config = new File(scratchDirectory, "test.yml");
+        Files.write(config, "");
+        assertTrue(config.isFile());
+
+        MockConfiguration mc = new MockConfiguration();
+        MockVariableProvider mp = new MockVariableProvider();
+        ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
+
+        assertNull(mc.get("something"));
+    }
+
+    @Test
     public void loadConfiguration_localArtifactRepositoryRootVariableNotDefined() throws Exception {
 
         File config = Util.cp("configuration/reference.yaml", scratchDirectory);

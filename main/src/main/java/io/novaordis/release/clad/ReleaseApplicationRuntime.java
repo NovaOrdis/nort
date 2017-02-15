@@ -245,6 +245,16 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         }
 
         //
+        // if the file is empty, we get a null map
+        //
+
+        if (yamlFileConfiguration == null) {
+
+            log.debug("empty configuration file " + configFile);
+            return;
+        }
+
+        //
         // Qualification Sequence Configuration
         //
 

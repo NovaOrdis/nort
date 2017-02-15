@@ -14,9 +14,9 @@ function main() {
     # sets verbose, debug, args, ...
     process-command-line $@
 
-    local verbose_option
+    local verbose_system_property
     local debug_option
-    ${verbose} && verbose_option="--verbose"
+    ${verbose} && verbose_system_property="-Dverbose=true"
     ${debug} && debug_option="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"
 
     local classpath
@@ -37,9 +37,9 @@ function main() {
     java \
         -cp ${classpath} \
         -Dapplication.name=${application_name} \
+        ${verbose_system_property} \
         ${debug_option} \
         io.novaordis.clad.CommandLineApplication \
-        ${verbose_option} \
         ${command} \
         ${args}
 }
