@@ -29,7 +29,9 @@ package io.novaordis.release.model;
 public enum ArtifactType {
 
     JAR_LIBRARY("jar", "JAR library"),
-    BINARY_DISTRIBUTION("zip", "binary distribution");
+    BINARY_DISTRIBUTION("zip", "binary distribution"),
+    WEB_ARCHIVE("war", "web archive"),
+    ;
 
     // Static ----------------------------------------------------------------------------------------------------------
 

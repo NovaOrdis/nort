@@ -64,6 +64,13 @@ public class ArtifactTypeTest {
     }
 
     @Test
+    public void fromString_war() throws Exception {
+
+        ArtifactType t = ArtifactType.fromString("war");
+        assertEquals(ArtifactType.WEB_ARCHIVE, t);
+    }
+
+    @Test
     public void fromString_pom() throws Exception {
 
         ArtifactType t = ArtifactType.fromString("pom");
