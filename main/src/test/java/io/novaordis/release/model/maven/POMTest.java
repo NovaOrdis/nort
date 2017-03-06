@@ -213,6 +213,18 @@ public class POMTest {
         assertEquals("99", s);
     }
 
+    @Test
+    public void constructor_MissingPackaging_DefaultIsJAR() throws Exception {
+
+        File file = new File(baseDirectory, "src/test/resources/data/maven/pom-missing-packaging.xml");
+        assertTrue(file.isFile());
+
+        POM pom = new POM(file);
+
+        ArtifactType t = pom.getArtifactType();
+        assertEquals(ArtifactType.JAR_LIBRARY, t);
+    }
+
     // multiple modules ------------------------------------------------------------------------------------------------
 
     @Test

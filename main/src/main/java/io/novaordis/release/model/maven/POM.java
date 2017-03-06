@@ -51,6 +51,8 @@ public class POM {
 
     private static final Logger log = LoggerFactory.getLogger(POM.class);
 
+    public static final String IMPLICIT_PACKAGING = "jar";
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
@@ -131,6 +133,18 @@ public class POM {
         this.groupId = resolveGroupId(pomEditor);
         this.artifactId = pomEditor.get("/project/artifactId");
         this.packaging = pomEditor.get("/project/packaging");
+
+        if (packaging == null) {
+
+            //
+            // if not explicitly specified, we assume the default ("jar")
+            //
+
+            this.packaging = IMPLICIT_PACKAGING;
+
+            log.debug(this + "'s <packaging> is not explicitely specified, using default \"" + this.packaging + "\"");
+        }
+
         this.artifactType = ArtifactType.fromString(packaging);
         this.extension = artifactType == null ? null : artifactType.getExtension();
 
@@ -141,7 +155,6 @@ public class POM {
         //
 
         this.finalNamePath = "/project/build/finalName";
-
 
         if ("pom".equals(packaging)) {
             handlePomPackaging(parent, pomEditor);
