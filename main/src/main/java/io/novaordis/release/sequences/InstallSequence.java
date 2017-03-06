@@ -96,7 +96,12 @@ public class InstallSequence implements Sequence {
         //
 
         if (artifacts.size() > 1) {
-            throw new RuntimeException("NOT YET IMPLEMENTED: for the time being we only can install one binary distribution");
+
+            log.warn("the project has more than one artifact: " + artifacts + ", we don't know how to install so we skip the installation sequence");
+            return false;
+            //
+            // throw new RuntimeException("NOT YET IMPLEMENTED: for the time being we only can install one binary distribution");
+            //
         }
 
         ArtifactType t = artifacts.get(0).getType();
