@@ -18,6 +18,7 @@ package io.novaordis.release.sequences;
 
 import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
+import io.novaordis.release.ReleaseCommand;
 import io.novaordis.release.ReleaseMode;
 import io.novaordis.release.ToRelocate;
 import io.novaordis.release.clad.ConfigurationLabels;
@@ -87,7 +88,7 @@ public class QualificationSequence implements Sequence {
         }
         else {
 
-            log.debug("tests were not executed because we were configured so");
+            log.debug("tests were not executed because we were invoked with " + ReleaseCommand.NO_TESTS_OPTION_LITERAL);
         }
 
         return executeChangedState;

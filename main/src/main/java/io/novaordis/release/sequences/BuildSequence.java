@@ -59,17 +59,35 @@ public class BuildSequence implements Sequence {
         ApplicationRuntime r = context.getRuntime();
         Project m = context.getProject();
 
+        boolean executeTests = true;
+
         //
-        // make sure we have the command required to build all tests; depending on where we are in the release (or
-        // build) sequence, we may want to run or not to run tests
-        //
+        // If the tests were executed during the qualification sequence and they passed, we don't want to execute them
+        // again here, redundantly.
         //
 
-        boolean doWeNeedToExecuteTests = !context.wereTestsExecuted();
+        if (context.wereTestsExecuted()) {
+
+            log.debug("test were executed already, won't execute here again");
+
+            executeTests = false;
+
+        }
+
+        //
+        // even if tests were not executed so far and normally we should, we won't if we were instructed not to
+        //
+
+        if ("true".equals(r.getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS))) {
+
+            log.debug("we were configured not to execute tests, so we won't execute them here");
+
+            executeTests = false;
+        }
 
         String osBuildCommand;
 
-        if (doWeNeedToExecuteTests) {
+        if (executeTests) {
 
             osBuildCommand = c.get(ConfigurationLabels.OS_COMMAND_TO_BUILD_WITH_TESTS);
         }
@@ -80,7 +98,7 @@ public class BuildSequence implements Sequence {
 
         if (osBuildCommand == null) {
             throw new UserErrorException(
-                    "the OS command to use to build " + (doWeNeedToExecuteTests ? "with" : "without") +
+                    "the OS command to use to build " + (executeTests ? "with" : "without") +
                             " tests was not configured for this project");
         }
 

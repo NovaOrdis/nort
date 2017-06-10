@@ -145,11 +145,17 @@ public class ReleaseCommand extends CommandBase {
         BooleanOption o = (BooleanOption)getOption(new BooleanOption(NO_TESTS_OPTION_LITERAL));
         noTests = o != null && o.getValue();
 
+        log.debug("no tests: " + noTests);
+
         o = (BooleanOption)getOption(new BooleanOption(NO_PUSH_OPTION_LITERAL));
         noPush = o != null && o.getValue();
 
+        log.debug("no push: " + noPush);
+
         o = (BooleanOption)getOption(new BooleanOption(NO_INSTALL_OPTION_LITERAL));
         noInstall = o != null && o.getValue();
+
+        log.debug("no install: " + noInstall);
 
         //
         // identifying release mode

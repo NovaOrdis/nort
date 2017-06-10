@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -177,6 +178,68 @@ public class BuildSequenceTest extends SequenceTest {
         List<String> executedCommands = mockOS.getHistory();
         assertEquals(1, executedCommands.size());
         assertEquals("mock build without tests", executedCommands.get(0));
+    }
+
+    @Test
+    public void buildSuccess_TestsNotPreviouslyExecuted_ConfiguredToExecuteTests() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
+
+        // no configuration that instructs the release NOT to run tests
+        assertNull(mr.getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS));
+
+        MockMavenProject mp = new MockMavenProject();
+
+        //
+        // instruct the mock OS instance to succeed when building without tests
+        //
+        MockOS mockOS = (MockOS) OS.getInstance();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_BUILD_WITH_TESTS, "mock-build-with-tests");
+        mockOS.addToCommandsThatSucceed("mock-build-with-tests");
+
+        BuildSequence s = new BuildSequence();
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
+        c.setTestsExecuted(false);
+
+        s.execute(c);
+
+        List<String> executedCommands = mockOS.getHistory();
+        assertEquals(1, executedCommands.size());
+        assertEquals("mock-build-with-tests", executedCommands.get(0));
+    }
+
+    @Test
+    public void buildSuccess_TestsNotPreviouslyExecuted_ConfiguredToNotExecuteTests() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        mr.init(mc);
+
+        // "configure" the runtime to NOT run tests
+        mr.setVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS, "true");
+
+        MockMavenProject mp = new MockMavenProject();
+
+        //
+        // instruct the mock OS instance to succeed when building without tests
+        //
+        MockOS mockOS = (MockOS) OS.getInstance();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_BUILD_WITHOUT_TESTS, "mock-build-without-tests");
+        mockOS.addToCommandsThatSucceed("mock-build-without-tests");
+
+        BuildSequence s = new BuildSequence();
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
+        c.setTestsExecuted(false);
+
+        s.execute(c);
+
+        List<String> executedCommands = mockOS.getHistory();
+        assertEquals(1, executedCommands.size());
+        assertEquals("mock-build-without-tests", executedCommands.get(0));
     }
 
     @Test
