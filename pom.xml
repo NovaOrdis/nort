@@ -26,9 +26,49 @@
     <version>1.1.7-SNAPSHOT-1</version>
     <packaging>pom</packaging>
 
+    <properties>
+
+        <!--
+            Dependencies
+        -->
+
+        <novaordis.utilities.version>4.6</novaordis.utilities.version>
+        <clad.version>3.5</clad.version>
+        <slf4j.version>1.7.12</slf4j.version>
+        <snakeyaml.version>1.17</snakeyaml.version>
+        <!--
+            End of Dependencies
+        -->
+    </properties>
+
     <modules>
         <module>main</module>
         <module>release</module>    
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.novaordis.utilities</groupId>
+            <artifactId>novaordis-utilities</artifactId>
+            <version>${novaordis.utilities.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.novaordis.clad</groupId>
+            <artifactId>novaordis-clad</artifactId>
+            <version>${clad.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
+        </dependency>
+    </dependencies>
+
+
 
 </project>

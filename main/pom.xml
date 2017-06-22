@@ -32,9 +32,6 @@
         <test.scratch.directory>target/test-scratch</test.scratch.directory>
         <maven.build.timestamp.format>MM/dd/yy</maven.build.timestamp.format>
         <release_date>${maven.build.timestamp}</release_date>
-
-        <novaordis.utilities.version>4.6</novaordis.utilities.version>
-        <clad.version>3.5</clad.version>
     </properties>
 
     <build>
@@ -84,28 +81,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>io.novaordis.utilities</groupId>
-            <artifactId>novaordis-utilities</artifactId>
-            <version>${novaordis.utilities.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.novaordis.clad</groupId>
-            <artifactId>novaordis-clad</artifactId>
-            <version>${clad.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.17</version>
-        </dependency>
-    </dependencies>
 
 </project>
