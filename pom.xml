@@ -34,8 +34,10 @@
 
         <novaordis.utilities.version>4.6</novaordis.utilities.version>
         <clad.version>3.5</clad.version>
+
         <slf4j.version>1.7.12</slf4j.version>
         <snakeyaml.version>1.17</snakeyaml.version>
+        
         <!--
             End of Dependencies
         -->
