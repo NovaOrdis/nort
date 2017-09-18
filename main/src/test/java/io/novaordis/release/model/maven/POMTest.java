@@ -22,7 +22,7 @@ import io.novaordis.release.model.ArtifactType;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.variable.VariableProvider;
+import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.xml.editor.BasicInLineXMLEditor;
 import org.junit.After;
 import org.junit.Before;
@@ -355,20 +355,21 @@ public class POMTest {
 
         File f = Util.cp("maven/poms-with-variables/pom-with-variable-1.xml", scratchDirectory);
         POM parent = new POM(f);
-        POMVariableProvider parentVp = parent.getVariableProvider();
 
-        assertEquals("A", parentVp.getVariableValue("custom.property.1"));
+        POMScope parentVp = parent.getScope();
+
+        assertEquals("A", parentVp.getVariable("custom.property.1").get());
 
         File f2 = Util.cp("maven/poms-with-variables/pom-with-variable-2.xml", scratchDirectory);
         POM child = new POM(parent, f2);
-        POMVariableProvider childVp = child.getVariableProvider();
+        POMScope childVp = child.getScope();
 
         //
         // verify that the variable provider relationship is established, in that we can read parent's properties
         //
 
-        assertEquals("B", childVp.getVariableValue("custom.property.2"));
-        assertEquals("A", childVp.getVariableValue("custom.property.1"));
+        assertEquals("B", childVp.getVariable("custom.property.2").get());
+        assertEquals("A", childVp.getVariable("custom.property.1").get());
     }
 
     // variable support ------------------------------------------------------------------------------------------------
@@ -380,9 +381,9 @@ public class POMTest {
 
         POM p = new POM(f);
 
-        VariableProvider provider = p.getVariableProvider();
+        Scope provider = p.getScope();
 
-        String v = provider.getVariableValue("my.version");
+        String v = (String)provider.getVariable("my.version").get();
 
         assertEquals("3.2.1", v);
 

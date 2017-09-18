@@ -23,6 +23,7 @@ import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
+import io.novaordis.utilities.expressions.Variable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -158,9 +159,12 @@ public class SequenceExecutionContext {
 
         //
         // because the current version must be exposed as a runtime variable, use the underlying variable provider
-        // for storage
+        // for storage; the ConfigurationLabels.CURRENT_VERSION must have already been declared
         //
-        String s = runtime.getVariableValue(ConfigurationLabels.CURRENT_VERSION);
+
+        Variable v = runtime.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION);
+
+        String s = (String)v.get();
 
         if (s == null) {
 
@@ -222,10 +226,17 @@ public class SequenceExecutionContext {
         String literal = null;
 
         if (v != null) {
+
             literal = v.getLiteral();
         }
 
-        runtime.setVariableValue(ConfigurationLabels.CURRENT_VERSION, literal);
+        //
+        // the associated variable must have already been declared
+        //
+        Variable rsv = runtime.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION);
+
+        //noinspection unchecked
+        rsv.set(literal);
     }
 
     void setReleaseMode(ReleaseMode rm) {

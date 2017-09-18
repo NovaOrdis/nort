@@ -32,7 +32,8 @@
             Dependencies
         -->
 
-        <clad.version>3.5.1</clad.version>
+        <novaordis.utilities.version>4.7.12-SNAPSHOT-10</novaordis.utilities.version>
+        <clad.version>3.6.0-SNAPSHOT-5</clad.version>
 
         <slf4j.version>1.7.12</slf4j.version>
         <snakeyaml.version>1.17</snakeyaml.version>
@@ -48,6 +49,11 @@
     </modules>
 
     <dependencies>
+        <dependency>
+            <groupId>io.novaordis.utilities</groupId>
+            <artifactId>novaordis-utilities</artifactId>
+            <version>${novaordis.utilities.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.novaordis.clad</groupId>
             <artifactId>novaordis-clad</artifactId>

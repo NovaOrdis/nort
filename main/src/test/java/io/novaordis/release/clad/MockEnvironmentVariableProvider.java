@@ -16,7 +16,7 @@
 
 package io.novaordis.release.clad;
 
-import io.novaordis.utilities.env.EnvironmentVariableProvider;
+import io.novaordis.utilities.expressions.env.EnvironmentVariableProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +48,16 @@ public class MockEnvironmentVariableProvider implements EnvironmentVariableProvi
     public String getenv(String s) {
 
         return simulatedEnvironmentVariables.get(s);
+    }
+
+    @Override
+    public void export(String name, String value) {
+        throw new RuntimeException("export() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public void unset(String name) {
+        throw new RuntimeException("unset() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

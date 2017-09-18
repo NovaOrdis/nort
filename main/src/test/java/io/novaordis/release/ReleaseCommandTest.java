@@ -36,6 +36,7 @@ import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.os.OS;
 import org.junit.After;
 import org.junit.Before;
@@ -394,6 +395,7 @@ public class ReleaseCommandTest {
         MockProject mp = new MockProject("1");
         MockProjectBuilder mpb = new MockProjectBuilder(mp);
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        Scope s = mr.getRootScope();
 
         ReleaseCommand c = new ReleaseCommand();
 
@@ -419,9 +421,9 @@ public class ReleaseCommandTest {
             log.info(msg);
         }
 
-        assertEquals("false", mr.getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS));
-        assertEquals("false", mr.getVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH));
-        assertEquals("false", mr.getVariableValue(ConfigurationLabels.INSTALL_NO_INSTALL));
+        assertFalse((Boolean) s.getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).get());
+        assertFalse((Boolean) s.getVariable(ConfigurationLabels.PUBLISH_NO_PUSH).get());
+        assertFalse((Boolean) s.getVariable(ConfigurationLabels.INSTALL_NO_INSTALL).get());
 
         //
         // also make sure that all sequences are about to be executed
@@ -447,6 +449,7 @@ public class ReleaseCommandTest {
         MockProject mp = new MockProject("1");
         MockProjectBuilder mpb = new MockProjectBuilder(mp);
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        Scope s = mr.getRootScope();
 
         ReleaseCommand c = new ReleaseCommand();
 
@@ -472,9 +475,9 @@ public class ReleaseCommandTest {
             log.info(msg);
         }
 
-        assertEquals("true", mr.getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS));
-        assertEquals("true", mr.getVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH));
-        assertEquals("true", mr.getVariableValue(ConfigurationLabels.INSTALL_NO_INSTALL));
+        assertTrue((Boolean)s.getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).get());
+        assertTrue((Boolean) s.getVariable(ConfigurationLabels.PUBLISH_NO_PUSH).get());
+        assertTrue((Boolean) s.getVariable(ConfigurationLabels.INSTALL_NO_INSTALL).get());
 
         //
         // also make sure that all the install sequence is missing from the execution list

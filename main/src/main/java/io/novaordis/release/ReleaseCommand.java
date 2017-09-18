@@ -37,6 +37,7 @@ import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.expressions.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -330,9 +331,16 @@ public class ReleaseCommand extends CommandBase {
         // transfer execution option as runtime variables to the runtime
         //
 
-        r.setVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS, Boolean.toString(isNoTests()));
-        r.setVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH, Boolean.toString(isNoPush()));
-        r.setVariableValue(ConfigurationLabels.INSTALL_NO_INSTALL, Boolean.toString(isNoInstall()));
+        Scope s = r.getRootScope();
+
+        //noinspection unchecked
+        s.getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).set(isNoTests());
+
+        //noinspection unchecked
+        s.getVariable(ConfigurationLabels.PUBLISH_NO_PUSH).set(isNoPush());
+
+        //noinspection unchecked
+        s.getVariable(ConfigurationLabels.INSTALL_NO_INSTALL).set(isNoInstall());
 
         //
         // Install the "known" sequences required by a release into a new controller instance created for this run.

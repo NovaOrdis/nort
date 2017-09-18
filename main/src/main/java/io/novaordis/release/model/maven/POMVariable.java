@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nova Ordis LLC
+ * Copyright (c) 2017 Nova Ordis LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package io.novaordis.release.clad;
+package io.novaordis.release.model.maven;
 
-import io.novaordis.utilities.NotYetImplementedException;
-import io.novaordis.utilities.env.EnvironmentVariableProvider;
-import io.novaordis.utilities.variable.VariableProvider;
+import io.novaordis.utilities.expressions.Variable;
 
 /**
- * The instance resolves variables from the environment, so far.
+ * Delegates to cached or "live" variables, prevents writing.
  *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 12/20/16
+ * @since 9/18/17
  */
-public class NortVariableProvider implements VariableProvider {
+public class POMVariable implements Variable {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -34,58 +32,45 @@ public class NortVariableProvider implements VariableProvider {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private EnvironmentVariableProvider environmentVariableProvider;
+    private Variable delegate;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public NortVariableProvider() {
-
-        this.environmentVariableProvider = EnvironmentVariableProvider.getInstance();
+    public POMVariable(Variable delegate) {
+        
+        this.delegate = delegate;
     }
 
-    // VariableProvider implementation ---------------------------------------------------------------------------------
+    // Variable implementation -----------------------------------------------------------------------------------------
 
     @Override
-    public String getVariableValue(String s) {
+    public String name() {
 
-        //
-        // we first try environment variables
-        //
-
-        return environmentVariableProvider.getenv(s);
+        return delegate.name();
     }
 
     @Override
-    public String setVariableValue(String s, String s1) {
+    public Class type() {
 
-        throw new NotYetImplementedException("setVariableValue() NOT YET IMPLEMENTED");
+        return String.class;
     }
 
     @Override
-    public VariableProvider getVariableProviderParent() {
+    public Object get() {
 
-        return null;
+        return delegate.get();
     }
 
     @Override
-    public void setVariableProviderParent(VariableProvider variableProvider) {
+    public Object set(Object value) {
 
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(
+                "a POM variable provider is read-only, it cannot be used to set variable values");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public EnvironmentVariableProvider getEnvironmentVariableProvider() {
-
-        return environmentVariableProvider;
-    }
-
     // Package protected -----------------------------------------------------------------------------------------------
-
-    void setEnvironmentVariableProvider(EnvironmentVariableProvider p) {
-
-        this.environmentVariableProvider = p;
-    }
 
     // Protected -------------------------------------------------------------------------------------------------------
 

@@ -27,6 +27,7 @@ import io.novaordis.release.model.maven.MavenProject;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.os.OS;
 import org.junit.After;
 import org.junit.Before;
@@ -484,6 +485,7 @@ public class QualificationSequenceTest extends SequenceTest {
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS, "mock successful command");
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        Scope scope = mr.getRootScope();
         mr.init(mc);
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
@@ -497,7 +499,7 @@ public class QualificationSequenceTest extends SequenceTest {
         // method
         //
 
-        mr.setVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS, "true");
+        scope.declare(ConfigurationLabels.QUALIFICATION_NO_TESTS, true);
 
         assertFalse(c.wereTestsExecuted());
 
@@ -518,6 +520,7 @@ public class QualificationSequenceTest extends SequenceTest {
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS, "mock successful command");
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        Scope scope = mr.getRootScope();
         mr.init(mc);
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
 
@@ -531,7 +534,7 @@ public class QualificationSequenceTest extends SequenceTest {
         // this is how we prevent tests from executing
         //
 
-        mr.setVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS, "true");
+        scope.declare(ConfigurationLabels.QUALIFICATION_NO_TESTS, true);
 
         assertFalse(c.wereTestsExecuted());
 

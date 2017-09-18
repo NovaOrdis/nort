@@ -20,7 +20,6 @@ import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.ReleaseCommand;
 import io.novaordis.release.ReleaseMode;
-import io.novaordis.release.ToRelocate;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
@@ -70,8 +69,8 @@ public class QualificationSequence implements Sequence {
         // decide whether to execute tests or not
         //
 
-        boolean executeTests = !ToRelocate.toBoolean(
-                context.getRuntime().getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS));
+        boolean executeTests = (Boolean)context.getRuntime().getRootScope().
+                getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).get();
 
         if (executeTests) {
 

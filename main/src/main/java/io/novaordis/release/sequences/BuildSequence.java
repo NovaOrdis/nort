@@ -78,7 +78,7 @@ public class BuildSequence implements Sequence {
         // even if tests were not executed so far and normally we should, we won't if we were instructed not to
         //
 
-        if ("true".equals(r.getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS))) {
+        if ((Boolean)r.getRootScope().getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).get()) {
 
             log.debug("we were configured not to execute tests, so we won't execute them here");
 

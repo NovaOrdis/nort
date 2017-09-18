@@ -62,7 +62,7 @@ public class POM {
     // variable resolution to the pom itself. It has access to the properties declared by the pom and by its parent, and
     // handle these properties as variables.
 
-    private POMVariableProvider pomVariableProvider;
+    private POMScope pomScope;
 
     private VariableAwareInLineXMLEditor pomEditor;
 
@@ -116,15 +116,28 @@ public class POM {
     public POM(POM parent, File pomFile) throws Exception {
 
         this.moduleNames = Collections.emptyList();
+
         this.parent = parent;
+
         this.pomEditor = new VariableAwareInLineXMLEditor(pomFile);
-        this.pomVariableProvider = new POMVariableProvider(this, pomEditor);
+
+        this.pomScope = new POMScope(this, pomEditor);
 
         //
-        // install the local variable provider
+        // establish the scope hierarchy
         //
 
-        pomEditor.setVariableProvider(pomVariableProvider);
+        if (parent != null) {
+
+            POMScope parentScope = parent.getScope();
+
+            if (parentScope != null) {
+
+                parentScope.enclose(pomScope);
+            }
+        }
+
+        pomEditor.setScope(pomScope);
 
         //
         // cache the read-only information
@@ -427,12 +440,11 @@ public class POM {
     // Package protected -----------------------------------------------------------------------------------------------
 
     /**
-     * Even we prefer we would  not expose the provider, instead of doing that and adding the variable access API to
-     * the POM interface, we prefer exposing the provider.
+     * Access to the associated variable scope.
      */
-    POMVariableProvider getVariableProvider() {
+    POMScope getScope() {
 
-        return pomVariableProvider;
+        return pomScope;
     }
 
     // Protected -------------------------------------------------------------------------------------------------------

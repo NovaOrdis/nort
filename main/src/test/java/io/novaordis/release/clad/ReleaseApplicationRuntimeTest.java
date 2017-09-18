@@ -21,9 +21,9 @@ import io.novaordis.release.MockConfiguration;
 import io.novaordis.release.Util;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.env.EnvironmentVariableProvider;
-import io.novaordis.utilities.variable.VariableNotDefinedException;
-import io.novaordis.utilities.variable.VariableProvider;
+import io.novaordis.utilities.expressions.Scope;
+import io.novaordis.utilities.expressions.ScopeImpl;
+import io.novaordis.utilities.expressions.env.EnvironmentVariableProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -105,7 +105,7 @@ public class ReleaseApplicationRuntimeTest {
                         "  c: d\n"));
 
         MockConfiguration mc = new MockConfiguration();
-        VariableProvider mp = new MockVariableProvider();
+        Scope scope = new ScopeImpl();
 
         StringOption so = new StringOption('c');
         so.setValue(f.getPath());
@@ -113,7 +113,7 @@ public class ReleaseApplicationRuntimeTest {
 
         try {
 
-            ReleaseApplicationRuntime.initializeEnvironmentRelatedConfiguration(null, mc, mp);
+            ReleaseApplicationRuntime.initializeEnvironmentRelatedConfiguration(null, mc, scope);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -263,8 +263,8 @@ public class ReleaseApplicationRuntimeTest {
         assertTrue(config.isFile());
 
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
-        ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
+        Scope scope = new ScopeImpl();
+        ReleaseApplicationRuntime.loadConfiguration(config, mc, scope);
 
         assertNull(mc.get("something"));
     }
@@ -280,28 +280,32 @@ public class ReleaseApplicationRuntimeTest {
         File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
         assertTrue(installationDirectory.mkdir());
 
-        MockVariableProvider mp = new MockVariableProvider();
+        Scope scope = new ScopeImpl();
 
         //
         // M2 variable not defined
         //
 
-        assertNull(mp.getVariableValue("M2"));
+        assertNull(scope.getVariable("M2"));
 
         MockConfiguration mc = new MockConfiguration();
 
         try {
-            ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
+
+            ReleaseApplicationRuntime.loadConfiguration(config, mc, scope);
+
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
 
             String msg = e.getMessage();
+
             log.info(msg);
 
-            VariableNotDefinedException e2 = (VariableNotDefinedException)e.getCause();
-            assertEquals("\"M2\" not defined", e2.getMessage());
-            assertEquals("M2", e2.getVariableName());
+            fail("return here");
+//            VariableNotDefinedException e2 = (VariableNotDefinedException)e.getCause();
+//            assertEquals("\"M2\" not defined", e2.getMessage());
+//            assertEquals("M2", e2.getVariableName());
         }
     }
 
@@ -316,18 +320,18 @@ public class ReleaseApplicationRuntimeTest {
         File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
         assertTrue(installationDirectory.mkdir());
 
-        MockVariableProvider mp = new MockVariableProvider();
+        Scope scope = new ScopeImpl();
 
         //
         // M2 variable has an invalid value
         //
 
-        mp.setVariableValue("M2", "/I/am/pretty/sure/there/is/no/such/directory");
+        scope.declare("M2", "/I/am/pretty/sure/there/is/no/such/directory");
 
         MockConfiguration mc = new MockConfiguration();
 
         try {
-            ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
+            ReleaseApplicationRuntime.loadConfiguration(config, mc, scope);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -350,19 +354,20 @@ public class ReleaseApplicationRuntimeTest {
         File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
         assertTrue(installationDirectory.mkdir());
 
-        MockVariableProvider mp = new MockVariableProvider();
+        Scope scope = new ScopeImpl();
 
-        mp.setVariableValue("M2", localRepositoryDirectory.getPath());
+        scope.declare("M2", localRepositoryDirectory.getPath());
+
         //
         // RUNTIME_DIR variable not defined
         //
 
-        assertNull(mp.getVariableValue("RUNTIME_DIR"));
+        assertNull(scope.getVariable("RUNTIME_DIR"));
 
         MockConfiguration mc = new MockConfiguration();
 
         try {
-            ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
+            ReleaseApplicationRuntime.loadConfiguration(config, mc, scope);
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
@@ -370,9 +375,11 @@ public class ReleaseApplicationRuntimeTest {
             String msg = e.getMessage();
             log.info(msg);
 
-            VariableNotDefinedException e2 = (VariableNotDefinedException)e.getCause();
-            assertEquals("\"RUNTIME_DIR\" not defined", e2.getMessage());
-            assertEquals("RUNTIME_DIR", e2.getVariableName());
+            fail("return here");
+
+//            VariableNotDefinedException e2 = (VariableNotDefinedException)e.getCause();
+//            assertEquals("\"RUNTIME_DIR\" not defined", e2.getMessage());
+//            assertEquals("RUNTIME_DIR", e2.getVariableName());
         }
     }
 
@@ -387,14 +394,14 @@ public class ReleaseApplicationRuntimeTest {
         File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
         assertTrue(installationDirectory.mkdir());
 
-        MockVariableProvider mp = new MockVariableProvider();
+        Scope scope = new ScopeImpl();
 
-        mp.setVariableValue("M2", localRepositoryDirectory.getPath());
-        mp.setVariableValue("RUNTIME_DIR", installationDirectory.getPath());
+        scope.declare("M2", localRepositoryDirectory.getPath());
+        scope.declare("RUNTIME_DIR", installationDirectory.getPath());
 
         MockConfiguration mc = new MockConfiguration();
 
-        ReleaseApplicationRuntime.loadConfiguration(config, mc, mp);
+        ReleaseApplicationRuntime.loadConfiguration(config, mc, scope);
 
         String value;
 
@@ -421,10 +428,10 @@ public class ReleaseApplicationRuntimeTest {
         Map<String, Object> map = new HashMap<>();
         map.put(configKey, "${b}");
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
-        mp.setVariableValue("b", "B");
+        Scope scope = new ScopeImpl();
+        scope.declare("b", "B");
 
-        ReleaseApplicationRuntime.extractString(map, configKey, mp, mc, true);
+        ReleaseApplicationRuntime.extractString(map, configKey, scope, mc, true);
 
         String s = mc.get(configKey);
         assertEquals("B", s);
@@ -438,11 +445,12 @@ public class ReleaseApplicationRuntimeTest {
         Map<String, Object> map = new HashMap<>();
         map.put(configKey, "${b}");
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
+        Scope scope = new ScopeImpl();
+
 
         try {
 
-            ReleaseApplicationRuntime.extractString(map, configKey, mp, mc, true);
+            ReleaseApplicationRuntime.extractString(map, configKey, scope, mc, true);
             fail("should throw exception");
         }
         catch(UserErrorException e) {
@@ -464,10 +472,10 @@ public class ReleaseApplicationRuntimeTest {
         Map<String, Object> map = new HashMap<>();
         map.put(configKey, "${b}");
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
-        mp.setVariableValue("b", "B");
+        Scope scope = new ScopeImpl();
+        scope.declare("b", "B");
 
-        ReleaseApplicationRuntime.extractString(map, configKey, mp, mc, false);
+        ReleaseApplicationRuntime.extractString(map, configKey, scope, mc, false);
 
         String s = mc.get(configKey);
         assertEquals("B", s);
@@ -481,9 +489,9 @@ public class ReleaseApplicationRuntimeTest {
         Map<String, Object> map = new HashMap<>();
         map.put(configKey, "${b}");
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
+        Scope scope = new ScopeImpl();
 
-        ReleaseApplicationRuntime.extractString(map, configKey, mp, mc, false);
+        ReleaseApplicationRuntime.extractString(map, configKey, scope, mc, false);
 
         String s = mc.get(configKey);
         assertEquals("${b}", s);
@@ -502,10 +510,10 @@ public class ReleaseApplicationRuntimeTest {
         Map<String, Object> map = new HashMap<>();
         map.put(configKey, "${b}");
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
-        mp.setVariableValue("b", someDir.getPath());
+        Scope scope = new ScopeImpl();
+        scope.declare("b", someDir.getPath());
 
-        ReleaseApplicationRuntime.extractDirectory(map, configKey, mp, mc);
+        ReleaseApplicationRuntime.extractDirectory(map, configKey, scope, mc);
 
         String s = mc.get(configKey);
         assertEquals(someDir.getPath(), s);
@@ -519,11 +527,11 @@ public class ReleaseApplicationRuntimeTest {
         Map<String, Object> map = new HashMap<>();
         map.put(configKey, "${b}");
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
-        mp.setVariableValue("b", "/I/am/sure/this/directory/does/not/exist");
+        Scope scope = new ScopeImpl();
+        scope.declare("b", "/I/am/sure/this/directory/does/not/exist");
 
         try {
-            ReleaseApplicationRuntime.extractDirectory(map, configKey, mp, mc);
+            ReleaseApplicationRuntime.extractDirectory(map, configKey, scope, mc);
             fail("should throw exception");
         }
         catch(UserErrorException e) {

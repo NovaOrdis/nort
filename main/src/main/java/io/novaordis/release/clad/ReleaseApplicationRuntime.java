@@ -25,8 +25,9 @@ import io.novaordis.release.ZipHandler;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.variable.StringWithVariables;
-import io.novaordis.utilities.variable.VariableProvider;
+import io.novaordis.utilities.expressions.env.OSProcessScope;
+import io.novaordis.utilities.expressions.Scope;
+import io.novaordis.utilities.expressions.UndeclaredVariableException;
 import io.novaordis.utilities.zip.ZipUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,12 +72,12 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
      * is because we don't know yet what specific configuration is required and what not. Fail on configuration file
      * parsing errors though.
      *
-     * @param provider the provider to be used to resolve configuration file variables.
+     * @param scope the scope in which configuration file variables will be evaluated.
      *
      * @throws UserErrorException on configuration file parsing errors.
      */
     static void initializeEnvironmentRelatedConfiguration(
-            Console console, Configuration configuration, VariableProvider provider) throws UserErrorException {
+            Console console, Configuration configuration, Scope scope) throws UserErrorException {
 
         //
         // TODO hackishly install the command to read the version of the already installed artifact and some other
@@ -107,7 +108,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         if (configurationFile != null) {
 
-            loadConfiguration(configurationFile, configuration, provider);
+            loadConfiguration(configurationFile, configuration, scope);
         }
 
 
@@ -146,6 +147,15 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         label = ConfigurationLabels.OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY;
         configuration.set(label, "git push --follow-tags");
         log.debug("set '" + label + "' to \"" + configuration.get(label) + "\"");
+
+        //
+        // declare the variables we need
+        //
+
+        scope.declare(ConfigurationLabels.CURRENT_VERSION, String.class);
+        scope.declare(ConfigurationLabels.QUALIFICATION_NO_TESTS, false);
+        scope.declare(ConfigurationLabels.PUBLISH_NO_PUSH, false);
+        scope.declare(ConfigurationLabels.INSTALL_NO_INSTALL, false);
     }
 
     /**
@@ -190,12 +200,11 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
      * @param configFile the configuration file. Must exist, be readable and parseable, otherwise the method throws a
      *             UserErrorException.
      *
-     * @param provider the VariableProvider implementation to use to resolve environment variables and other variables.
+     * @param scope the scope in which configuration file variables will be evaluated.
      *
      * @throws UserErrorException on configuration file parsing errors or on invalid values
      */
-    static void loadConfiguration(File configFile, Configuration configuration, VariableProvider provider)
-            throws UserErrorException {
+    static void loadConfiguration(File configFile, Configuration configuration, Scope scope) throws UserErrorException {
 
         if (!configFile.isFile()) {
 
@@ -259,23 +268,23 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         //
 
         Map qualificationMap = (Map) yamlFileConfiguration.get("qualification");
-        extractString(qualificationMap, ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION,
-                provider, configuration, true);
+        extractString(
+                qualificationMap, ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, scope, configuration, true);
 
         //
         // Publish Sequence Configuration
         //
 
         Map publishMap = (Map) yamlFileConfiguration.get("publish");
-        extractDirectory(publishMap, ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, provider, configuration);
-        extractString(publishMap, ConfigurationLabels.RELEASE_TAG, provider, configuration, false);
+        extractDirectory(publishMap, ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, scope, configuration);
+        extractString(publishMap, ConfigurationLabels.RELEASE_TAG, scope, configuration, false);
 
         //
         // Installation Sequence Configuration
         //
 
         Map installMap = (Map)yamlFileConfiguration.get("install");
-        extractDirectory(installMap, ConfigurationLabels.INSTALLATION_DIRECTORY, provider, configuration);
+        extractDirectory(installMap, ConfigurationLabels.INSTALLATION_DIRECTORY, scope, configuration);
     }
 
     /**
@@ -287,8 +296,8 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
      *                                 be resolved. Otherwise it will just render the variable into the resulted
      *                                 string, allowing for deferred resolution.
      */
-    static void extractString(Map map, String configKey, VariableProvider provider, Configuration c,
-                              boolean failOnUnresolvedVariable) throws UserErrorException {
+    static void extractString(Map map, String configKey, Scope scope, Configuration c, boolean failOnUnresolvedVariable)
+            throws UserErrorException {
 
         if (map == null) {
 
@@ -303,42 +312,31 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
             return;
         }
 
+        //
+        // attempt to resolve anyway, and fail or not depending on 'failOnUnresolvedVariable'
+        //
+
         String s;
 
         try {
 
-            //
-            // attempt to resolve anyway, and fail or not depending on 'failOnUnresolvedVariable'
-            //
-
-            s = new StringWithVariables(unresolvedVariableString, true).resolve(provider);
+            s =  scope.evaluate(unresolvedVariableString, failOnUnresolvedVariable);
         }
-        catch(Exception e) {
+        catch(UndeclaredVariableException e) {
 
-            if (failOnUnresolvedVariable) {
-                throw new UserErrorException(e);
-            }
-            else {
-
-                //
-                // go forward with the unresolved variable
-                //
-
-                s = unresolvedVariableString;
-            }
+            throw new UserErrorException("variable '" + e.getUndeclaredVariableName() + "' cannot be resolved");
         }
 
         c.set(configKey, s);
     }
 
     /**
-     * Attempts to extract a string, and if not null, resolves variables, validates and then installs the result into
+     * Attempts to extract a directory, and if not null, resolves variables, validates and then installs the result into
      * the configuration.
      *
      * @param map the corresponding configuration map. If null,the whole method is a noop.
      */
-    static void extractDirectory(Map map, String configKey, VariableProvider provider, Configuration c)
-            throws UserErrorException {
+    static void extractDirectory(Map map, String configKey, Scope scope, Configuration c) throws UserErrorException {
 
         if (map == null) {
 
@@ -355,11 +353,11 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         try {
 
-            s = new StringWithVariables(s, true).resolve(provider);
+            s = scope.evaluate(s, true);
         }
-        catch(Exception e) {
+        catch(UndeclaredVariableException e) {
 
-            throw new UserErrorException(e);
+            throw new UserErrorException("variable '" + e.getUndeclaredVariableName() + "' cannot be resolved");
         }
 
         //
@@ -384,13 +382,16 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
     private SequenceExecutionContext lastExecutionContext;
 
-    private VariableProvider variableProvider;
+    private Scope rootScope;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public ReleaseApplicationRuntime() {
 
-        this.variableProvider = new NortVariableProvider();
+        //
+        // we resolve environment variables
+        //
+        this.rootScope = new OSProcessScope();
     }
 
     // ApplicationRuntimeBase overrides --------------------------------------------------------------------------------
@@ -417,7 +418,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         super.init(configuration);
 
-        initializeEnvironmentRelatedConfiguration(this, configuration, variableProvider);
+        initializeEnvironmentRelatedConfiguration(this, configuration, rootScope);
     }
 
     /**

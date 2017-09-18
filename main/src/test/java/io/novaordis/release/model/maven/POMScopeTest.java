@@ -31,11 +31,11 @@ import static org.junit.Assert.fail;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/27/16
  */
-public class POMVariableProviderTest {
+public class POMScopeTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = LoggerFactory.getLogger(POMVariableProviderTest.class);
+    private static final Logger log = LoggerFactory.getLogger(POMScopeTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ public class POMVariableProviderTest {
     public void constructor_NullPom() throws Exception {
 
         try {
-            new POMVariableProvider(null, null);
+            new POMScope(null, null);
             fail("should have thrown exception");
         }
         catch(IllegalArgumentException e) {
@@ -64,7 +64,7 @@ public class POMVariableProviderTest {
     public void constructor_NullEditor() throws Exception {
 
         try {
-            new POMVariableProvider(new MockPOM(), null);
+            new POMScope(new MockPOM(), null);
             fail("should have thrown exception");
         }
         catch(IllegalArgumentException e) {
@@ -81,7 +81,7 @@ public class POMVariableProviderTest {
         MockPOM mockPom = new MockPOM();
         MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
 
-        POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
+        POMScope p = new POMScope(mockPom, mockEditor);
 
         assertEquals(mockPom, p.getPom());
     }
@@ -93,10 +93,11 @@ public class POMVariableProviderTest {
 
         MockPOM mockPom = new MockPOM();
         MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
-        POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
+        POMScope p = new POMScope(mockPom, mockEditor);
 
         try {
-            p.setVariableValue("testname", "testvalue");
+
+            p.declare("testname", "testvalue");
             fail("should throw exception");
         }
         catch(UnsupportedOperationException e) {
@@ -114,11 +115,11 @@ public class POMVariableProviderTest {
 
         MockPOM mockPom = new MockPOM();
         MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
-        POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
+        POMScope p = new POMScope(mockPom, mockEditor);
 
         mockPom.setVersion(new Version("5678"));
 
-        String s = p.getVariableValue("version");
+        String s = (String)p.getVariable("version").get();
         assertEquals("5678", s);
     }
 
@@ -127,11 +128,11 @@ public class POMVariableProviderTest {
 
         MockPOM mockPom = new MockPOM();
         MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
-        POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
+        POMScope p = new POMScope(mockPom, mockEditor);
 
         mockPom.setVersion(new Version("6789"));
 
-        String s = p.getVariableValue("project.version");
+        String s = (String)p.getVariable("project.version").get();
         assertEquals("6789", s);
     }
 
@@ -142,9 +143,9 @@ public class POMVariableProviderTest {
         MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
         mockEditor.setElements("/project/properties", new XMLElement("declared.property", "something-123"));
 
-        POMVariableProvider p = new POMVariableProvider(mockPom, mockEditor);
+        POMScope p = new POMScope(mockPom, mockEditor);
 
-        String s = p.getVariableValue("declared.property");
+        String s = (String)p.getVariable("declared.property").get();
         assertEquals("something-123", s);
     }
 
@@ -154,17 +155,17 @@ public class POMVariableProviderTest {
         MockPOM mockParentPom = new MockPOM();
         MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
         mockEditor.setElements("/project/properties", new XMLElement("declared.property", "something-345"));
-        POMVariableProvider parentProvider = new POMVariableProvider(mockParentPom, mockEditor);
+        POMScope parentProvider = new POMScope(mockParentPom, mockEditor);
         mockParentPom.setVariableProvider(parentProvider);
 
         MockPOM pom = new MockPOM();
         MockInLineXMLEditor mockEditor2 = new MockInLineXMLEditor();
-        POMVariableProvider provider = new POMVariableProvider(pom, mockEditor2);
-        pom.setVariableProvider(provider);
+        POMScope scope = new POMScope(pom, mockEditor2);
+        pom.setVariableProvider(scope);
 
         pom.setParent(mockParentPom);
 
-        String s = provider.getVariableValue("declared.property");
+        String s = (String)scope.getVariable("declared.property").get();
         assertEquals("something-345", s);
     }
 
@@ -174,17 +175,17 @@ public class POMVariableProviderTest {
         MockPOM mockParentPom = new MockPOM();
         MockInLineXMLEditor mockEditor = new MockInLineXMLEditor();
         mockEditor.setElements("/project/properties", new XMLElement("declared.property", "something-345"));
-        POMVariableProvider parentProvider = new POMVariableProvider(mockParentPom, mockEditor);
+        POMScope parentProvider = new POMScope(mockParentPom, mockEditor);
         mockParentPom.setVariableProvider(parentProvider);
 
         MockPOM pom = new MockPOM();
         MockInLineXMLEditor mockEditor2 = new MockInLineXMLEditor();
-        POMVariableProvider provider = new POMVariableProvider(pom, mockEditor2);
-        pom.setVariableProvider(provider);
+        POMScope scope = new POMScope(pom, mockEditor2);
+        pom.setVariableProvider(scope);
 
         pom.setParent(mockParentPom);
 
-        String s = provider.getVariableValue("no.such.property");
+        String s = (String)scope.getVariable("no.such.property").get();
         assertNull(s);
     }
 

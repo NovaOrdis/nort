@@ -17,13 +17,14 @@
 package io.novaordis.release.sequences;
 
 import io.novaordis.release.MockConfiguration;
-import io.novaordis.release.clad.MockVariableProvider;
-import io.novaordis.release.model.maven.MockMavenProject;
 import io.novaordis.release.MockOS;
 import io.novaordis.release.MockReleaseApplicationRuntime;
 import io.novaordis.release.clad.ConfigurationLabels;
+import io.novaordis.release.model.maven.MockMavenProject;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.expressions.Scope;
+import io.novaordis.utilities.expressions.ScopeImpl;
 import io.novaordis.utilities.os.OS;
 import org.junit.After;
 import org.junit.Before;
@@ -138,7 +139,7 @@ public class PublishSequenceTest extends SequenceTest {
     public void addAndCommitIntoLocalCodeRepository_AddCommandNotConfigured() throws Exception {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "0");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "0");
         MockConfiguration mc = new MockConfiguration();
 
         try {
@@ -160,7 +161,7 @@ public class PublishSequenceTest extends SequenceTest {
         String mockAddCommand = "mock add to repository";
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "0");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "0");
 
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY, mockAddCommand);
@@ -185,7 +186,7 @@ public class PublishSequenceTest extends SequenceTest {
     public void addAndCommitIntoLocalCodeRepository_CommitCommandNotConfigured() throws Exception {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "0");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "0");
 
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY, "something");
@@ -209,7 +210,7 @@ public class PublishSequenceTest extends SequenceTest {
         String mockCommitCommand = "mock-commit ${current_version}";
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "77.77");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "77.77");
 
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY, mockAddCommand);
@@ -243,7 +244,7 @@ public class PublishSequenceTest extends SequenceTest {
         String mockCommitCommand = "mock-commit ${current_version}";
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "88.88");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "88.88");
 
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY, mockAddCommand);
@@ -269,7 +270,7 @@ public class PublishSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "1.0.0-SNAPSHOT-1");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "1.0.0-SNAPSHOT-1");
 
         //
         // we're a snapshot, we must not tag
@@ -283,7 +284,7 @@ public class PublishSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "1.0.0");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "1.0.0");
 
         try {
 
@@ -303,7 +304,7 @@ public class PublishSequenceTest extends SequenceTest {
         String mockTagCommand = "mock tag";
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "1");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "1");
 
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_TAG_LOCAL_SOURCE_REPOSITORY, mockTagCommand);
@@ -329,7 +330,7 @@ public class PublishSequenceTest extends SequenceTest {
         String mockTagCommand = "mock-tag ${current_version} ${tag}";
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "7.7");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "7.7");
 
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_TAG_LOCAL_SOURCE_REPOSITORY, mockTagCommand);
@@ -351,12 +352,12 @@ public class PublishSequenceTest extends SequenceTest {
     public void computeTag_TemplateSet_VariableDefined() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
+        Scope s = new ScopeImpl();
 
         mc.set(ConfigurationLabels.RELEASE_TAG, "something-${somethingelse}");
-        mp.setVariableValue("somethingelse", "blue");
+        s.declare("somethingelse", "blue");
 
-        String tag = PublishSequence.computeTag(mc, mp);
+        String tag = PublishSequence.computeTag(mc, s);
         assertEquals("something-blue", tag);
     }
 
@@ -364,13 +365,13 @@ public class PublishSequenceTest extends SequenceTest {
     public void computeTag_TemplateSet_VariableNotDefined() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
+        Scope s = new ScopeImpl();
 
         mc.set(ConfigurationLabels.RELEASE_TAG, "something-${somethingelse}");
 
         try {
 
-            PublishSequence.computeTag(mc, mp);
+            PublishSequence.computeTag(mc, s);
             fail("should throw exception");
         }
         catch(UserErrorException e) {
@@ -385,9 +386,9 @@ public class PublishSequenceTest extends SequenceTest {
     public void computeTag_TemplateNotSet_DefaultTagValue() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
-        MockVariableProvider mp = new MockVariableProvider();
-        mp.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "1.2.3-SNAPSHOT-4");
-        String tag = PublishSequence.computeTag(mc, mp);
+        Scope s = new ScopeImpl();
+        s.declare(ConfigurationLabels.CURRENT_VERSION, "1.2.3-SNAPSHOT-4");
+        String tag = PublishSequence.computeTag(mc, s);
         assertEquals("release-1.2.3-SNAPSHOT-4", tag);
     }
 
@@ -397,7 +398,7 @@ public class PublishSequenceTest extends SequenceTest {
     public void pushToRemoteCodeRepository_pushCommandNotConfigured() throws Exception {
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "0");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "0");
         MockConfiguration mc = new MockConfiguration();
 
         try {
@@ -418,7 +419,7 @@ public class PublishSequenceTest extends SequenceTest {
         String mockCommand = "mock push";
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "0");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "0");
 
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY, mockCommand);
@@ -444,7 +445,7 @@ public class PublishSequenceTest extends SequenceTest {
         String mockCommand = "mock push";
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.setVariableValue(ConfigurationLabels.CURRENT_VERSION, "0");
+        mr.getRootScope().declare(ConfigurationLabels.CURRENT_VERSION, "0");
 
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY, mockCommand);
@@ -483,7 +484,7 @@ public class PublishSequenceTest extends SequenceTest {
         // NO push
         //
 
-        mr.setVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH, "true");
+        mr.getRootScope().declare(ConfigurationLabels.PUBLISH_NO_PUSH, "true");
 
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
@@ -517,7 +518,7 @@ public class PublishSequenceTest extends SequenceTest {
 
         PublishSequence s = new PublishSequence();
 
-        mr.setVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH, "false");
+        mr.getRootScope().declare(ConfigurationLabels.PUBLISH_NO_PUSH, "false");
 
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 

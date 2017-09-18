@@ -22,6 +22,7 @@ import io.novaordis.release.MockOS;
 import io.novaordis.release.MockReleaseApplicationRuntime;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.os.OS;
 import org.junit.After;
 import org.junit.Before;
@@ -185,10 +186,11 @@ public class BuildSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        Scope scope = mr.getRootScope();
         mr.init(mc);
 
         // no configuration that instructs the release NOT to run tests
-        assertNull(mr.getVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS));
+        assertNull(scope.getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS));
 
         MockMavenProject mp = new MockMavenProject();
 
@@ -216,10 +218,11 @@ public class BuildSequenceTest extends SequenceTest {
 
         MockConfiguration mc = new MockConfiguration();
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        Scope scope = mr.getRootScope();
         mr.init(mc);
 
         // "configure" the runtime to NOT run tests
-        mr.setVariableValue(ConfigurationLabels.QUALIFICATION_NO_TESTS, "true");
+        scope.declare(ConfigurationLabels.QUALIFICATION_NO_TESTS, true);
 
         MockMavenProject mp = new MockMavenProject();
 

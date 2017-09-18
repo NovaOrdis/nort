@@ -19,15 +19,14 @@ package io.novaordis.release.sequences;
 import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.OutputUtil;
-import io.novaordis.release.ToRelocate;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.expressions.Scope;
+import io.novaordis.utilities.expressions.VariableReferenceResolver;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
-import io.novaordis.utilities.variable.StringWithVariables;
-import io.novaordis.utilities.variable.VariableProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,7 @@ public class PublishSequence implements Sequence {
 
         if (er.isFailure()) { throw new UserErrorException("local publishing failed"); }
 
-        r.info(r.getVariableValue(ConfigurationLabels.CURRENT_VERSION) + " local publishing ok");
+        r.info(r.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION).get() + " local publishing ok");
 
         return true;
     }
@@ -102,17 +101,20 @@ public class PublishSequence implements Sequence {
 
         log.debug("adding and committing to the local code repository ...");
 
-        Version currentVersion = new Version(r.getVariableValue(ConfigurationLabels.CURRENT_VERSION));
+        Version currentVersion =
+                new Version((String)r.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION).get());
 
         String addCommand = c.get(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY);
         String commitCommand = c.get(ConfigurationLabels.OS_COMMAND_TO_COMMIT_TO_LOCAL_SOURCE_REPOSITORY);
 
         if (addCommand == null) {
+
             throw new UserErrorException(
                     "the OS command to use to add to the local source repository was not configured for this project");
         }
 
         if (commitCommand == null) {
+
             throw new UserErrorException(
                     "the OS command to use to commit to the local source repository was not configured for this project");
         }
@@ -120,10 +122,12 @@ public class PublishSequence implements Sequence {
         NativeExecutionResult er = OutputUtil.handleNativeCommandOutput(OS.getInstance().execute(addCommand), r, c);
 
         if (er.isFailure()) {
+
             throw new UserErrorException("failed to add code to the local repository");
         }
 
-        commitCommand = new StringWithVariables(commitCommand).resolve("current_version", currentVersion.getLiteral());
+        commitCommand = new VariableReferenceResolver().
+                resolve(commitCommand, true, "current_version", currentVersion.getLiteral());
 
         er = OutputUtil.handleNativeCommandOutput(OS.getInstance().execute(commitCommand), r, c);
 
@@ -147,7 +151,8 @@ public class PublishSequence implements Sequence {
      */
     static boolean tagLocalCodeRepository(ApplicationRuntime r, Configuration c) throws Exception {
 
-        Version currentVersion = new Version(r.getVariableValue(ConfigurationLabels.CURRENT_VERSION));
+        Version currentVersion =
+                new Version((String)r.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION).get());
 
         if (currentVersion.isSnapshot()) {
 
@@ -160,18 +165,20 @@ public class PublishSequence implements Sequence {
         String tagCommand = c.get(ConfigurationLabels.OS_COMMAND_TO_TAG_LOCAL_SOURCE_REPOSITORY);
 
         if (tagCommand == null) {
+
             throw new UserErrorException(
                     "the OS command to use to tag the local source repository was not configured for this project");
         }
 
-        String tag = computeTag(c, r);
+        String tag = computeTag(c, r.getRootScope());
 
-        tagCommand = new StringWithVariables(tagCommand).
-                resolve("current_version", currentVersion.toString(), "tag", tag);
+        tagCommand = new VariableReferenceResolver().
+                resolve(tagCommand, true, "current_version", currentVersion.toString(), "tag", tag);
 
         NativeExecutionResult er = OutputUtil.handleNativeCommandOutput(OS.getInstance().execute(tagCommand), r, c);
 
         if (er.isFailure()) {
+
             throw new UserErrorException("failed to tag the local source repository");
         }
 
@@ -184,11 +191,13 @@ public class PublishSequence implements Sequence {
 
         log.debug("pushing to the remote code repository ...");
 
-        Version currentVersion = new Version(r.getVariableValue(ConfigurationLabels.CURRENT_VERSION));
+        Version currentVersion =
+                new Version((String)r.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION).get());
 
         String pushCommand = c.get(ConfigurationLabels.OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY);
 
         if (pushCommand == null) {
+
             throw new UserErrorException(
                     "the OS command to use to push to the remote source repository was not configured for this project");
         }
@@ -196,6 +205,7 @@ public class PublishSequence implements Sequence {
         NativeExecutionResult er = OutputUtil.handleNativeCommandOutput(OS.getInstance().execute(pushCommand), r, c);
 
         if (er.isFailure()) {
+
             throw new UserErrorException("failed to push to remote source repository");
         }
 
@@ -207,11 +217,12 @@ public class PublishSequence implements Sequence {
     /**
      * TODO we should not need this method, the underlying logic should be built into Configuration
      */
-    static String computeTag(Configuration c, VariableProvider p) throws UserErrorException {
+    static String computeTag(Configuration c, Scope s) throws UserErrorException {
 
         //
         // attempt first to use an externally configured tag
         //
+
         String tag = c.get(ConfigurationLabels.RELEASE_TAG);
 
         if (tag == null) {
@@ -221,7 +232,7 @@ public class PublishSequence implements Sequence {
 
         try {
 
-            return new StringWithVariables(tag, true).resolve(p);
+            return s.evaluate(tag, true);
         }
         catch(Exception e) {
 
@@ -248,8 +259,10 @@ public class PublishSequence implements Sequence {
         boolean stateChanged = false;
 
         Configuration conf = c.getConfiguration();
+
         ReleaseApplicationRuntime r = c.getRuntime();
-        boolean noPush = ToRelocate.toBoolean(r.getVariableValue(ConfigurationLabels.PUBLISH_NO_PUSH));
+
+        boolean noPush = (Boolean)r.getRootScope().getVariable(ConfigurationLabels.PUBLISH_NO_PUSH).get();
 
         //noinspection ConstantConditions
         stateChanged |= publishArtifacts(r, conf);
@@ -290,7 +303,6 @@ public class PublishSequence implements Sequence {
     // Protected -------------------------------------------------------------------------------------------------------
 
     // Private ---------------------------------------------------------------------------------------------------------
-
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 
