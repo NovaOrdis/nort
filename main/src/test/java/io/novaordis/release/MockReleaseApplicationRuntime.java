@@ -55,9 +55,11 @@ public class MockReleaseApplicationRuntime extends ReleaseApplicationRuntime {
     public MockReleaseApplicationRuntime(Configuration c) throws UserErrorException {
 
         this.warningContent = "";
+
         this.binaryDistributionTopLevelDirectoryName = "mock-top-level-directory";
 
         if (c != null) {
+
             init(c);
         }
     }
@@ -160,6 +162,7 @@ public class MockReleaseApplicationRuntime extends ReleaseApplicationRuntime {
     }
 
     public void setBinaryDistributionTopLevelDirectoryName(String s) {
+
         this.binaryDistributionTopLevelDirectoryName = s;
     }
 

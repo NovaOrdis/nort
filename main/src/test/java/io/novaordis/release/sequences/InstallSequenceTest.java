@@ -94,7 +94,7 @@ public class InstallSequenceTest extends SequenceTest {
 
         mp.addArtifact(ArtifactType.JAR_LIBRARY, new File("mock.jar"), null);
 
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
 
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 

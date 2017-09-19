@@ -18,29 +18,36 @@ package io.novaordis.release.model.maven;
 
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
-import io.novaordis.utilities.expressions.ScopeImpl;
+import io.novaordis.utilities.expressions.EncloseableScope;
+import io.novaordis.utilities.expressions.Scope;
+import io.novaordis.utilities.expressions.UndeclaredVariableException;
 import io.novaordis.utilities.expressions.Variable;
+import io.novaordis.utilities.expressions.VariableReferenceResolver;
 import io.novaordis.utilities.xml.editor.InLineXMLEditor;
 import io.novaordis.utilities.xml.editor.XMLElement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A variable scope associated with a POM. It does not maintain local variables but instead it reads (and in some
- * cases caches) them from the POM and from its parents. We cannot use it to set property values - Variable.set() will
- * will throw UnsupportedOperationException.
+ * A variable scope associated with a POM. It does not maintain local variables but instead it reads them in-line from
+ * the POM and from its parents. We cannot use it to set property values - Variable.set() will will throw
+ * UnsupportedOperationException.
  *
  * TODO: this is a quick "bolt-on" solution after the introduction of the generic variable and expressions system
  * https://kb.novaordis.com/index.php/Nova_Ordis_Generic_Variable_and_Expression_System. A better implementation can be
  * written, by taking advantage of variable and expression features introduced by the generic variable and expressions
- * system.
+ * system. Move Maven support to novaordis-utilities.
  *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 11/27/16
  */
-public class POMScope extends ScopeImpl {
+public class POMScope implements EncloseableScope {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    public static final String VERSION_VARIABLE_NAME = "version";
+    public static final String PROJECT_VERSION_VARIABLE_NAME = "project.version";
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -50,6 +57,11 @@ public class POMScope extends ScopeImpl {
     // the associated POM. Through that instance it has access to the higher level of the hierarchy
     //
     private POM pom;
+    private InLineXMLEditor editor;
+
+    private VariableReferenceResolver variableReferenceResolver;
+
+    private Scope parent;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -60,75 +72,169 @@ public class POMScope extends ScopeImpl {
      *
      * @param pom can never be null.
      */
-    public POMScope(POM pom, InLineXMLEditor pomEditor) {
+    public POMScope(POM pom, InLineXMLEditor editor) {
 
         if (pom == null) {
 
             throw new IllegalArgumentException("null pom");
         }
 
-        if (pomEditor == null) {
+        if (editor == null) {
 
             throw new IllegalArgumentException("null in-line XML editor");
         }
 
         this.pom = pom;
+        this.editor = editor;
+        this.variableReferenceResolver = new VariableReferenceResolver();
 
-        //
-        // initialize "known" properties first
-        //
-
-        //
-        // "version", "project.version"
-        //
-
-        try {
-
-            Version v = pom.getVersion();
-
-            String s = v.getLiteral();
-
-            declare("version", s);
-            declare("project.version", s);
-        }
-        catch(VersionFormatException e) {
-
-            throw new IllegalStateException(e);
-        }
-
-        //
-        // initialize local variables in scope with name/values corresponding to the properties declared in the
-        // associated XML file
-        //
-
-        List<XMLElement> propertyElements = pomEditor.getElements("/project/properties");
-
-        if (!propertyElements.isEmpty()) {
-
-            for(XMLElement p: propertyElements) {
-
-                declare(p.getName(), p.getValue());
-            }
-        }
     }
 
     // Scope overrides -------------------------------------------------------------------------------------------------
 
     @Override
-    public Variable getVariable(String name) {
+    public <T> Variable<T> declare(String name, Class<? extends T> type) {
 
-        //
-        // wrap the underling instance in our own implementation
-        //
+        throw new UnsupportedOperationException("a POM scope is read-only, it cannot be used to declare variables");
+    }
 
-        Variable v = super.getVariable(name);
+    @Override
+    public <T> Variable<T> declare(String name, T value) {
 
-        if (v == null) {
+        throw new UnsupportedOperationException("a POM scope is read-only, it cannot be used to declare variables");
+    }
 
-            return null;
+    @Override
+    public Variable undeclare(String name) {
+
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Variable> getVariablesDeclaredInScope() {
+
+        List<Variable> result = new ArrayList<>();
+
+        Variable v = getVariable(VERSION_VARIABLE_NAME);
+
+        if (v != null) {
+
+            result.add(v);
         }
 
-        return new POMVariable(v);
+        v = getVariable(PROJECT_VERSION_VARIABLE_NAME);
+
+        if (v != null) {
+
+            result.add(v);
+        }
+
+        //
+        // expose properties declared in the associated XML file as variables
+        //
+
+        List<XMLElement> propertyElements = editor.getElements("/project/properties");
+
+        if (!propertyElements.isEmpty()) {
+
+            //noinspection Convert2streamapi
+            for(XMLElement p: propertyElements) {
+
+                result.add(new POMVariable(p.getName(), p.getValue()));
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public Variable getVariable(String name) {
+
+        if (VERSION_VARIABLE_NAME.equals(name) || PROJECT_VERSION_VARIABLE_NAME.equals(name)) {
+
+            try {
+
+                Version v = pom.getVersion();
+
+                //
+                // version may be null
+                //
+
+                if (v != null) {
+
+                    String s = v.getLiteral();
+
+                    return new POMVariable(name, s);
+                }
+            }
+            catch(VersionFormatException e) {
+
+                throw new IllegalStateException(e);
+            }
+        }
+
+        List<XMLElement> propertyElements = editor.getElements("/project/properties");
+
+        for(XMLElement p: propertyElements) {
+
+            if (p.getName().equals(name)) {
+
+                return new POMVariable(p.getName(), p.getValue());
+            }
+        }
+
+        if (parent != null) {
+
+            return parent.getVariable(name);
+        }
+
+        return null;
+    }
+
+    @Override
+    public void enclose(EncloseableScope scope) {
+
+        if (scope == null) {
+
+            throw new IllegalArgumentException("null scope");
+        }
+
+        scope.setParent(this);
+    }
+
+    @Override
+    public String evaluate(String stringWithVariableReferences) {
+
+        try {
+
+            return evaluate(stringWithVariableReferences, false);
+        }
+        catch(UndeclaredVariableException e) {
+
+            //
+            // should not happen
+            //
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public String evaluate(String stringWithVariableReferences, boolean failOnUndeclaredVariable)
+            throws UndeclaredVariableException {
+
+        return variableReferenceResolver.resolve(stringWithVariableReferences, failOnUndeclaredVariable, this);
+    }
+
+    @Override
+    public Scope getEnclosing() {
+
+        return parent;
+    }
+
+    @Override
+    public void setParent(Scope parent) {
+
+        this.parent = parent;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

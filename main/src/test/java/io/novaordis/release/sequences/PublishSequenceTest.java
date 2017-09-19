@@ -365,6 +365,7 @@ public class PublishSequenceTest extends SequenceTest {
     public void computeTag_TemplateSet_VariableNotDefined() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         Scope s = new ScopeImpl();
 
         mc.set(ConfigurationLabels.RELEASE_TAG, "something-${somethingelse}");
@@ -372,13 +373,14 @@ public class PublishSequenceTest extends SequenceTest {
         try {
 
             PublishSequence.computeTag(mc, s);
+
             fail("should throw exception");
         }
         catch(UserErrorException e) {
 
             String msg = e.getMessage();
-            log.info(msg);
-            assertEquals("VariableNotDefinedException \"somethingelse\" not defined", msg);
+            assertTrue(msg.contains("not defined"));
+            assertTrue(msg.contains("somethingelse"));
         }
     }
 
@@ -484,7 +486,9 @@ public class PublishSequenceTest extends SequenceTest {
         // NO push
         //
 
-        mr.getRootScope().declare(ConfigurationLabels.PUBLISH_NO_PUSH, "true");
+        //noinspection unchecked
+        mr.getRootScope().getVariable(ConfigurationLabels.PUBLISH_NO_PUSH).set(true);
+
 
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
@@ -504,6 +508,7 @@ public class PublishSequenceTest extends SequenceTest {
     public void endToEndPublishingSuccess_RemotePush() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
 
         MockMavenProject mp = new MockMavenProject();
@@ -518,7 +523,8 @@ public class PublishSequenceTest extends SequenceTest {
 
         PublishSequence s = new PublishSequence();
 
-        mr.getRootScope().declare(ConfigurationLabels.PUBLISH_NO_PUSH, "false");
+        //noinspection unchecked
+        mr.getRootScope().getVariable(ConfigurationLabels.PUBLISH_NO_PUSH).set(false);
 
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 

@@ -25,7 +25,6 @@ import io.novaordis.release.ZipHandler;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.expressions.env.OSProcessScope;
 import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.expressions.UndeclaredVariableException;
 import io.novaordis.utilities.zip.ZipUtil;
@@ -98,6 +97,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
             String s = configurationFileOption.getString();
 
             if (s != null) {
+
                 configurationFile = new File(s);
             }
         }
@@ -382,17 +382,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
     private SequenceExecutionContext lastExecutionContext;
 
-    private Scope rootScope;
-
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    public ReleaseApplicationRuntime() {
-
-        //
-        // we resolve environment variables
-        //
-        this.rootScope = new OSProcessScope();
-    }
 
     // ApplicationRuntimeBase overrides --------------------------------------------------------------------------------
 
@@ -418,7 +408,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         super.init(configuration);
 
-        initializeEnvironmentRelatedConfiguration(this, configuration, rootScope);
+        initializeEnvironmentRelatedConfiguration(this, configuration, getRootScope());
     }
 
     /**

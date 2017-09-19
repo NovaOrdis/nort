@@ -275,9 +275,11 @@ public class ReleaseApplicationRuntimeTest {
         File config = Util.cp("configuration/reference.yaml", scratchDirectory);
 
         File localRepositoryDirectory = new File(scratchDirectory, "mock-repository-directory");
+
         assertTrue(localRepositoryDirectory.mkdir());
 
         File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
+
         assertTrue(installationDirectory.mkdir());
 
         Scope scope = new ScopeImpl();
@@ -299,13 +301,8 @@ public class ReleaseApplicationRuntimeTest {
         catch(UserErrorException e) {
 
             String msg = e.getMessage();
-
-            log.info(msg);
-
-            fail("return here");
-//            VariableNotDefinedException e2 = (VariableNotDefinedException)e.getCause();
-//            assertEquals("\"M2\" not defined", e2.getMessage());
-//            assertEquals("M2", e2.getVariableName());
+            assertTrue(msg.contains("M2"));
+            assertTrue(msg.contains("cannot be resolved"));
         }
     }
 
@@ -367,19 +364,16 @@ public class ReleaseApplicationRuntimeTest {
         MockConfiguration mc = new MockConfiguration();
 
         try {
+
             ReleaseApplicationRuntime.loadConfiguration(config, mc, scope);
+
             fail("should have thrown exception");
         }
         catch(UserErrorException e) {
 
             String msg = e.getMessage();
-            log.info(msg);
-
-            fail("return here");
-
-//            VariableNotDefinedException e2 = (VariableNotDefinedException)e.getCause();
-//            assertEquals("\"RUNTIME_DIR\" not defined", e2.getMessage());
-//            assertEquals("RUNTIME_DIR", e2.getVariableName());
+            assertTrue(msg.contains("RUNTIME_DIR"));
+            assertTrue(msg.contains("cannot be resolved"));
         }
     }
 
@@ -451,13 +445,14 @@ public class ReleaseApplicationRuntimeTest {
         try {
 
             ReleaseApplicationRuntime.extractString(map, configKey, scope, mc, true);
+
             fail("should throw exception");
         }
         catch(UserErrorException e) {
 
             String msg = e.getMessage();
-            log.info(msg);
-            assertEquals("VariableNotDefinedException \"b\" not defined", msg);
+            assertTrue(msg.contains("'b'"));
+            assertTrue(msg.contains("cannot be resolved"));
         }
 
         String s = mc.get(configKey);

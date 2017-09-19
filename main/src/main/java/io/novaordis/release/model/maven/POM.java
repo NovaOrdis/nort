@@ -188,6 +188,7 @@ public class POM {
     public File getFile() {
 
         if (pomEditor == null) {
+
             return null;
         }
 

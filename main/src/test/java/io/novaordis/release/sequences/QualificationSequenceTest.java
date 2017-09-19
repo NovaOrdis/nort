@@ -27,7 +27,6 @@ import io.novaordis.release.model.maven.MavenProject;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.os.OS;
 import org.junit.After;
 import org.junit.Before;
@@ -485,7 +484,6 @@ public class QualificationSequenceTest extends SequenceTest {
         MockConfiguration mc = new MockConfiguration();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS, "mock successful command");
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        Scope scope = mr.getRootScope();
         mr.init(mc);
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
@@ -499,7 +497,8 @@ public class QualificationSequenceTest extends SequenceTest {
         // method
         //
 
-        scope.declare(ConfigurationLabels.QUALIFICATION_NO_TESTS, true);
+        //noinspection unchecked
+        mr.getRootScope().getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).set(true);
 
         assertFalse(c.wereTestsExecuted());
 
@@ -518,10 +517,13 @@ public class QualificationSequenceTest extends SequenceTest {
     public void preventTestsFromExecutingViaConfiguration() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         mc.set(ConfigurationLabels.OS_COMMAND_TO_EXECUTE_ALL_TESTS, "mock successful command");
+
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        Scope scope = mr.getRootScope();
+
         mr.init(mc);
+
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
 
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, ReleaseMode.snapshot, null);
@@ -534,7 +536,8 @@ public class QualificationSequenceTest extends SequenceTest {
         // this is how we prevent tests from executing
         //
 
-        scope.declare(ConfigurationLabels.QUALIFICATION_NO_TESTS, true);
+        //noinspection unchecked
+        mr.getRootScope().getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).set(true);
 
         assertFalse(c.wereTestsExecuted());
 
@@ -550,10 +553,11 @@ public class QualificationSequenceTest extends SequenceTest {
     public void failIfInstalledVersionIsEqualOrNewer_CommandToCheckNotConfigured() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, null);
 
-
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
         mr.init(mc);
 
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
@@ -578,11 +582,15 @@ public class QualificationSequenceTest extends SequenceTest {
     public void failIfInstalledVersionIsEqualOrNewer_CommandFails() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+
         MockOS mos = (MockOS) OS.getInstance();
+
         mos.addToCommandsThatFail("mock-release-version-command", "mock stdout content", "mock stderr content");
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
         mr.init(mc);
 
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
@@ -609,11 +617,15 @@ public class QualificationSequenceTest extends SequenceTest {
     public void failIfInstalledVersionIsEqualOrNewer_CommandProducesInvalidOutput() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+
         MockOS mos = (MockOS) OS.getInstance();
+
         mos.addToCommandsThatSucceed("mock-release-version-command", "this can't be a version", "mock stderr content");
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
         mr.init(mc);
 
         MockProject mp = new MockProject("1.0.0-SNAPSHOT-1");
@@ -637,13 +649,17 @@ public class QualificationSequenceTest extends SequenceTest {
     public void failIfInstalledVersionIsEqualOrNewer_InstalledVersionIsNewer() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+
         MockOS mos = (MockOS) OS.getInstance();
+
         mos.addToCommandsThatSucceed("mock-release-version-command",
                 "version 2.0.0\nrelease date 12/05/16\n",
                 "mock stderr content");
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
         mr.init(mc);
 
         MockProject mp = new MockProject("1.0.0");
@@ -668,7 +684,9 @@ public class QualificationSequenceTest extends SequenceTest {
     public void failIfInstalledVersionIsEqualOrNewer_InstalledVersionIsTheSame() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+
         MockOS mos = (MockOS) OS.getInstance();
 
         //
@@ -677,6 +695,7 @@ public class QualificationSequenceTest extends SequenceTest {
         mos.addToCommandsThatSucceed("mock-release-version-command", "2.0.0", "mock stderr content");
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
         mr.init(mc);
 
         MockProject mp = new MockProject("2.0.0");
@@ -701,14 +720,17 @@ public class QualificationSequenceTest extends SequenceTest {
     public void failIfInstalledVersionIsEqualOrNewer_InstalledVersionIsOlder() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         mc.set(ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, "mock-release-version-command");
+
         MockOS mos = (MockOS) OS.getInstance();
+
         mos.addToCommandsThatSucceed("mock-release-version-command",
                 "version 1.0.0-SNAPSHOT-1\ndate some date\n", "mock stderr content");
 
         MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
-        mr.init(mc);
 
+        mr.init(mc);
 
         MockProject mp = new MockProject("1.0.0");
 

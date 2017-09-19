@@ -23,6 +23,7 @@ import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.model.Project;
 import io.novaordis.release.version.Version;
 import io.novaordis.release.version.VersionFormatException;
+import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.expressions.Variable;
 
 import java.util.HashMap;
@@ -230,13 +231,19 @@ public class SequenceExecutionContext {
             literal = v.getLiteral();
         }
 
-        //
-        // the associated variable must have already been declared
-        //
-        Variable rsv = runtime.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION);
+        Scope s = runtime.getRootScope();
 
-        //noinspection unchecked
-        rsv.set(literal);
+        Variable rsv = s.getVariable(ConfigurationLabels.CURRENT_VERSION);
+
+        if (rsv == null) {
+
+            s.declare(ConfigurationLabels.CURRENT_VERSION, literal);
+        }
+        else {
+
+            //noinspection unchecked
+            rsv.set(literal);
+        }
     }
 
     void setReleaseMode(ReleaseMode rm) {

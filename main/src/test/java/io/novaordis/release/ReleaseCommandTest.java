@@ -393,8 +393,11 @@ public class ReleaseCommandTest {
     public void execute_ExecutionOptionsTransfer_NoOptions() throws Exception {
 
         MockProject mp = new MockProject("1");
+
         MockProjectBuilder mpb = new MockProjectBuilder(mp);
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
         Scope s = mr.getRootScope();
 
         ReleaseCommand c = new ReleaseCommand();
@@ -447,8 +450,11 @@ public class ReleaseCommandTest {
     public void execute_ExecutionOptionsTransfer_ThereAreOptions() throws Exception {
 
         MockProject mp = new MockProject("1");
+
         MockProjectBuilder mpb = new MockProjectBuilder(mp);
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(new MockConfiguration());
+
         Scope s = mr.getRootScope();
 
         ReleaseCommand c = new ReleaseCommand();
@@ -758,11 +764,13 @@ public class ReleaseCommandTest {
     @Test
     public void execute_Success_Dot() throws Exception {
 
-        MockReleaseApplicationRuntime r = new MockReleaseApplicationRuntime();
-        r.setBinaryDistributionTopLevelDirectoryName("mock-artifact");
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime();
+
+        mr.setBinaryDistributionTopLevelDirectoryName("mock-artifact");
 
         MockConfiguration conf = new MockConfiguration();
-        r.init(conf);
+
+        mr.init(conf);
 
         ReleaseCommand c = new ReleaseCommand();
 
@@ -810,13 +818,13 @@ public class ReleaseCommandTest {
         // execution must be successful
         //
 
-        c.execute(r);
+        c.execute(mr);
 
         //
         // make sure all sequences have been executed in order and are successful
         //
 
-        SequenceExecutionContext ctx = r.getLastExecutionContext();
+        SequenceExecutionContext ctx = mr.getLastExecutionContext();
         ExecutionHistory history = ctx.getHistory();
 
         List<Class<? extends Sequence>> types = ReleaseCommand.getSequenceTypes();

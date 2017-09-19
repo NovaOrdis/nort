@@ -32,13 +32,15 @@ public class POMVariable implements Variable {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Variable delegate;
+    private String name;
+    private String value;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public POMVariable(Variable delegate) {
-        
-        this.delegate = delegate;
+    public POMVariable(String name, String value) {
+
+        this.name = Variable.validateVariableName(name);
+        this.value = value;
     }
 
     // Variable implementation -----------------------------------------------------------------------------------------
@@ -46,7 +48,7 @@ public class POMVariable implements Variable {
     @Override
     public String name() {
 
-        return delegate.name();
+        return name;
     }
 
     @Override
@@ -56,9 +58,9 @@ public class POMVariable implements Variable {
     }
 
     @Override
-    public Object get() {
+    public String get() {
 
-        return delegate.get();
+        return value;
     }
 
     @Override
@@ -69,6 +71,12 @@ public class POMVariable implements Variable {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    @Override
+    public String toString() {
+
+        return name + "=" + value;
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

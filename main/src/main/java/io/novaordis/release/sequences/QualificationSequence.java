@@ -69,7 +69,7 @@ public class QualificationSequence implements Sequence {
         // decide whether to execute tests or not
         //
 
-        boolean executeTests = (Boolean)context.getRuntime().getRootScope().
+        boolean executeTests = !(Boolean)context.getRuntime().getRootScope().
                 getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).get();
 
         if (executeTests) {

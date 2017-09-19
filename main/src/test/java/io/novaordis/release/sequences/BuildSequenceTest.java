@@ -17,10 +17,10 @@
 package io.novaordis.release.sequences;
 
 import io.novaordis.release.MockConfiguration;
-import io.novaordis.release.model.maven.MockMavenProject;
 import io.novaordis.release.MockOS;
 import io.novaordis.release.MockReleaseApplicationRuntime;
 import io.novaordis.release.clad.ConfigurationLabels;
+import io.novaordis.release.model.maven.MockMavenProject;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.os.OS;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 /**
@@ -190,7 +190,8 @@ public class BuildSequenceTest extends SequenceTest {
         mr.init(mc);
 
         // no configuration that instructs the release NOT to run tests
-        assertNull(scope.getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS));
+
+        assertFalse((Boolean)scope.getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).get());
 
         MockMavenProject mp = new MockMavenProject();
 
@@ -222,7 +223,9 @@ public class BuildSequenceTest extends SequenceTest {
         mr.init(mc);
 
         // "configure" the runtime to NOT run tests
-        scope.declare(ConfigurationLabels.QUALIFICATION_NO_TESTS, true);
+
+        //noinspection unchecked
+        scope.getVariable(ConfigurationLabels.QUALIFICATION_NO_TESTS).set(true);
 
         MockMavenProject mp = new MockMavenProject();
 

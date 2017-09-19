@@ -24,6 +24,7 @@ import io.novaordis.release.clad.ReleaseApplicationRuntime;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.expressions.Scope;
+import io.novaordis.utilities.expressions.UndeclaredVariableException;
 import io.novaordis.utilities.expressions.VariableReferenceResolver;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
@@ -233,6 +234,10 @@ public class PublishSequence implements Sequence {
         try {
 
             return s.evaluate(tag, true);
+        }
+        catch(UndeclaredVariableException e) {
+
+            throw new UserErrorException("variable \"" + e.getUndeclaredVariableName() + "\" not defined");
         }
         catch(Exception e) {
 

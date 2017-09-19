@@ -42,7 +42,7 @@ public class MockPOM extends POM {
     private String groupId;
     private POM parent;
     private Version version;
-    private POMScope variableProvider;
+    private POMScope scope;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -77,6 +77,7 @@ public class MockPOM extends POM {
         if (this.version == null) {
 
             if (version == null) {
+
                 return false;
             }
 
@@ -86,6 +87,7 @@ public class MockPOM extends POM {
         else {
 
             if (this.version.equals(version)) {
+
                 return false;
             }
 
@@ -133,7 +135,7 @@ public class MockPOM extends POM {
     @Override
     public POMScope getScope() {
 
-        return variableProvider;
+        return scope;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -163,11 +165,16 @@ public class MockPOM extends POM {
     void setParent(POM parent) {
 
         this.parent = parent;
+
+        if (parent != null && scope != null) {
+
+            scope.setParent(parent.getScope());
+        }
     }
 
-    void setVariableProvider(POMScope vp) {
+    void setScope(POMScope vp) {
 
-        this.variableProvider = vp;
+        this.scope = vp;
     }
 
     // Protected -------------------------------------------------------------------------------------------------------
