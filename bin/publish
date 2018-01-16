@@ -1,0 +1,163 @@
+#!/bin/bash
+
+#
+# Functionality that will be implemented by NORT to publish in a remote repository.
+# Experimentally developed as a bash script - to be ported to NORT
+#
+# Usage:
+#
+#      publish --repositoryId=<repository_id> --repositoryUrl=<repository_url> <target_dir_in_local_maven_repository>
+#
+#      publish ~/.m2/repository/io/novaordis/utilities/novaordis-utilities/4.7.13
+#
+# Repository must be declared in ~/.m2/settings.xml
+#
+
+export VERBOSE=false
+
+function debug() {
+
+    ${VERBOSE} && echo $@ 1>&2
+}
+
+function publish() {
+
+    local target_dir=$1
+    local repository_id=$2
+    local repository_url=$3
+
+    [ -z "${target_dir}" ] && { echo "'target_dir' not specified" 1>&2; exit 1; }
+    [ -d "${target_dir}" ] || { echo "target_dir ${target_dir} not a directory" 1>&2; exit 1; }
+    [ -z "${repository_id}" ] && { echo "'repository_id' not specified" 1>&2; exit 1; }
+    [ -z "${repository_url}" ] && { echo "'repository_url' not specified" 1>&2; exit 1; }
+
+    debug "publish(${target_dir}, ${repository_id}, ${repository_url})"
+
+    version=$(basename ${target_dir})
+
+    debug "version: ${version}"
+
+    local pom_file
+
+    for i in $(find ${target_dir} -name '*.pom'); do
+
+        [ -n "${pom_file}" ] && { echo "more than one POM file found in ${target_dir}: $(basename ${pom_file}), $(basename ${i})" 1>&2; exit 1; }
+        pom_file=$i
+    done
+
+    debug "POM file: ${pom_file}"
+
+    local target_file=$(dirname ${pom_file})/$(basename ${pom_file} .pom).jar
+
+    [ -f ${target_file} ] || { echo "no target file ${target_file}" 1>&2; exit 1; }
+
+    debug "target file: ${target_file}"
+
+    local groupId
+
+    for i in $(grep "<groupId>" ${pom_file}); do
+
+        #
+        # extract the first one
+        #
+        groupId=$i
+        break;
+    done
+
+    [ -z "${groupId}" ] && { echo "no <groupId> found in ${pom_file}" 1>&2; exit 1; }
+
+    groupId=${groupId#*>}
+    groupId=${groupId%%<*}
+
+    debug "groupId: ${groupId}"
+
+    local artifactId
+
+    for i in $(grep "<artifactId>" ${pom_file}); do
+
+        #
+        # extract the first one
+        #
+        artifactId=$i
+        break;
+    done
+
+    [ -z "${artifactId}" ] && { echo "no <artifactId> found in ${pom_file}" 1>&2; exit 1; }
+
+    artifactId=${artifactId#*>}
+    artifactId=${artifactId%%<*}
+
+    debug "artifactId: ${artifactId}"
+
+
+    #
+    # Create a temporary directory and copy the artifacts here, since Maven won't allow deploying from the
+    # local repository
+    #
+
+    local tmp_dir=./tmp.publish
+
+    if [ -d ${tmp_dir} ]; then
+        rm -r ${tmp_dir} || { echo "failed to delete ${tmp_dir}" 1>&2; exit 1; }
+    fi
+
+    mkdir ${tmp_dir} || { echo "failed to make ${tmp_dir}" 1>&2; exit 1; }
+
+    cp ${target_file} ${tmp_dir}/payload.jar || { echo "failed to copy ${target_file} to ${tmp_dir}/payload.jar" 1>&2; exit 1; }
+    cp ${pom_file} ${tmp_dir}/payload.pom || { echo "failed to copy ${pom_file} to ${tmp_dir}/payload.pom" 1>&2; exit 1; }
+
+    local sources_file=$(dirname ${pom_file})/$(basename ${pom_file} .pom)-sources.jar
+    local sources_arg
+
+    if [ -f ${sources_file} ]; then
+
+        cp ${sources_file} ${tmp_dir}/payload-sources.jar || { echo "failed to copy ${sources_file} to ${tmp_dir}/payload-sources.jar" 1>&2; exit 1; }
+        sources_arg="-Dsources=${tmp_dir}/payload-sources.jar"
+        debug "sources argument: ${sources_arg}"
+    fi
+
+    local command="mvn deploy:deploy-file -DrepositoryId=${repository_id} -Durl=${repository_url} -Dfile=${tmp_dir}/payload.jar -DgroupId=${groupId} -DartifactId=${artifactId} -Dversion=${version} -DpomFile=${tmp_dir}/payload.pom ${sources_arg}"
+
+    debug "command: ${command}"
+
+    echo "executing ${command}"
+
+    ${command}
+}
+
+function main() {
+
+    target_dir=""
+    repository_id=""
+    repository_url=""
+
+    while [ -n "$1" ]; do
+
+        if [ "$1" = "-v" ]; then
+
+            export VERBOSE=true
+
+        elif [[ "$1" =~ --repositoryId= ]]; then
+
+            repository_id=${1#--repositoryId=}
+
+        elif [[ "$1" =~ --repositoryUrl= ]]; then
+
+            repository_url=${1#--repositoryUrl=}
+
+        elif [ -z "${target_dir}" ]; then
+
+            target_dir=$1
+        fi
+
+        shift
+
+    done
+
+    [ -z "${repository_id}" ] && { echo "no repository ID specified, use --repositoryId=<repository_id>" 1>&2; exit 1; }
+    [ -z "${repository_url}" ] && { echo "no repository URL specified, use --repositoryUrl=<repository_url>" 1>&2; exit 1; }
+
+    publish "${target_dir}" "${repository_id}" "${repository_url}"
+}
+
+main $@
