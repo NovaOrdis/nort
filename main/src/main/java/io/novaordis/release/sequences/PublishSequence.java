@@ -69,7 +69,9 @@ public class PublishSequence implements Sequence {
 
         String mavenCommand = "mvn jar:jar source:jar install:install";
 
-        if (isPublishRemotely(currentVersion)) {
+        boolean remotePublishing = isPublishRemotely(currentVersion);
+
+        if (remotePublishing) {
 
             if (noPush) {
 
@@ -84,7 +86,7 @@ public class PublishSequence implements Sequence {
 
         if (er.isFailure()) { throw new UserErrorException("publishing failed"); }
 
-        r.info(currentVersion + " publishing ok");
+        r.info(currentVersion + " local " + (remotePublishing ? "and remote " : "") + "publishing ok");
 
         return true;
     }
