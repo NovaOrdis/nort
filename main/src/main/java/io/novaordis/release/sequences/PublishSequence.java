@@ -16,6 +16,9 @@
 
 package io.novaordis.release.sequences;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.novaordis.clad.application.ApplicationRuntime;
 import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.OutputUtil;
@@ -28,8 +31,6 @@ import io.novaordis.utilities.expressions.UndeclaredVariableException;
 import io.novaordis.utilities.expressions.VariableReferenceResolver;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -43,29 +44,47 @@ public class PublishSequence implements Sequence {
 
     // Static ----------------------------------------------------------------------------------------------------------
 
+    /**
+     * Decide whether to push the release artifacts to a remote repository or not, depending on the release type.
+     *
+     * A snapshot release remains local, a dot release is pushed.
+     */
+    @SuppressWarnings("WeakerAccess")
+    static boolean isPublishRemotely(Version version) {
+
+        return !version.isSnapshot();
+    }
+
     // Package Protected Static ----------------------------------------------------------------------------------------
 
     /**
-     *  Install the artifacts into the local repository, fail if the local artifacts are not available
+     *  Install the artifacts into the local repository, and if the artifacts qualify, into the public repository.
+     *  Fail if the local artifacts are not available.
      */
-    static boolean publishArtifacts(ApplicationRuntime r, Configuration c) throws Exception {
+    @SuppressWarnings("WeakerAccess")
+    static boolean publishArtifacts(ApplicationRuntime r, Configuration c, boolean noPush) throws Exception {
 
-        String localPublishingCommand = c.get(
-                ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY);
+        Version currentVersion =
+                new Version((String)r.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION).get());
 
-        if (localPublishingCommand == null) {
-            throw new UserErrorException(
-                    "the OS command to use to publish project artifacts into the local repository was not configured for this project");
+        String mavenCommand = "mvn jar:jar source:jar install:install";
+
+        if (isPublishRemotely(currentVersion)) {
+
+            if (noPush) {
+
+                throw new UserErrorException(
+                        "cannot make a dot release without pushing externally the binary artifacts");
+            }
+
+            mavenCommand += " deploy:deploy";
         }
 
-        log.debug("publishing artifacts into local repository with \"" + localPublishingCommand + "\" ...");
+        NativeExecutionResult er = OutputUtil.handleNativeCommandOutput(OS.getInstance().execute(mavenCommand), r, c);
 
-        NativeExecutionResult er = OutputUtil.
-                handleNativeCommandOutput(OS.getInstance().execute(localPublishingCommand), r, c);
+        if (er.isFailure()) { throw new UserErrorException("publishing failed"); }
 
-        if (er.isFailure()) { throw new UserErrorException("local publishing failed"); }
-
-        r.info(r.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION).get() + " local publishing ok");
+        r.info(currentVersion + " publishing ok");
 
         return true;
     }
@@ -76,6 +95,7 @@ public class PublishSequence implements Sequence {
      * @param noPush true means only apply changes to local repositories, don't attempt to push anything over the
      *               network
      */
+    @SuppressWarnings("WeakerAccess")
     static boolean publishCodeChanges(ApplicationRuntime r, Configuration c, boolean noPush) throws Exception {
 
         log.debug("publishing code changes into local repository ...");
@@ -270,7 +290,7 @@ public class PublishSequence implements Sequence {
         boolean noPush = (Boolean)r.getRootScope().getVariable(ConfigurationLabels.PUBLISH_NO_PUSH).get();
 
         //noinspection ConstantConditions
-        stateChanged |= publishArtifacts(r, conf);
+        stateChanged |= publishArtifacts(r, conf, noPush);
         stateChanged |= publishCodeChanges(r, conf, noPush);
 
         this.executeChangedState = stateChanged;

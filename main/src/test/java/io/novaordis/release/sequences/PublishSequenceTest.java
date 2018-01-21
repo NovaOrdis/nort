@@ -16,6 +16,14 @@
 
 package io.novaordis.release.sequences;
 
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.novaordis.release.MockConfiguration;
 import io.novaordis.release.MockOS;
 import io.novaordis.release.MockReleaseApplicationRuntime;
@@ -26,13 +34,6 @@ import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.expressions.ScopeImpl;
 import io.novaordis.utilities.os.OS;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -58,7 +59,7 @@ public class PublishSequenceTest extends SequenceTest {
     // Public ----------------------------------------------------------------------------------------------------------
 
     @Before
-    public void before() throws Exception {
+    public void before() {
 
         System.setProperty("os.class", MockOS.class.getName());
     }
@@ -68,34 +69,6 @@ public class PublishSequenceTest extends SequenceTest {
 
         ((MockOS) io.novaordis.utilities.os.OS.getInstance()).reset();
         System.clearProperty("os.class");
-    }
-
-    @Test
-    public void osCommandToPublishLocallyNotConfigured() throws Exception {
-
-        MockConfiguration mc = new MockConfiguration();
-        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
-        MockMavenProject mp = new MockMavenProject();
-
-        mc.set(ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY, null);
-
-        PublishSequence s = new PublishSequence();
-
-        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
-
-        try {
-
-            s.execute(c);
-            fail("should throw Exception");
-        }
-        catch(UserErrorException e) {
-
-            String msg = e.getMessage();
-            log.info(msg);
-            assertEquals(
-                    "the OS command to use to publish project artifacts into the local repository was not configured for this project",
-                    msg);
-        }
     }
 
     @Test
@@ -109,12 +82,13 @@ public class PublishSequenceTest extends SequenceTest {
         // instruct the mock OS instance to fail when publishing
         //
         MockOS mockOS = (MockOS) OS.getInstance();
-        mc.set(ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY, "mock local publishing");
-        mockOS.addToCommandsThatFail("mock local publishing");
+        mockOS.addToCommandsThatFail("mvn jar:jar source:jar install:install deploy:deploy");
 
         PublishSequence s = new PublishSequence();
 
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
+
+        c.setCurrentVersion(new Version("1"));
 
         try {
 
@@ -125,12 +99,12 @@ public class PublishSequenceTest extends SequenceTest {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("local publishing failed", msg);
+            assertEquals("publishing failed", msg);
         }
 
         List<String> executedCommands = mockOS.getHistory();
         assertEquals(1, executedCommands.size());
-        assertEquals("mock local publishing", executedCommands.get(0));
+        assertEquals("mvn jar:jar source:jar install:install deploy:deploy", executedCommands.get(0));
     }
 
     // addAndCommitIntoLocalCodeRepository() ---------------------------------------------------------------------------
@@ -362,7 +336,7 @@ public class PublishSequenceTest extends SequenceTest {
     }
 
     @Test
-    public void computeTag_TemplateSet_VariableNotDefined() throws Exception {
+    public void computeTag_TemplateSet_VariableNotDefined() {
 
         MockConfiguration mc = new MockConfiguration();
 
@@ -473,7 +447,6 @@ public class PublishSequenceTest extends SequenceTest {
         MockMavenProject mp = new MockMavenProject();
 
         MockOS mockOS = (MockOS) OS.getInstance();
-        mc.set(ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY, "mock-publish-artifacts");
         mc.set(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY, "mock-source-add");
         mc.set(ConfigurationLabels.OS_COMMAND_TO_COMMIT_TO_LOCAL_SOURCE_REPOSITORY, "mock-source-commit ${current_version}");
         mc.set(ConfigurationLabels.OS_COMMAND_TO_TAG_LOCAL_SOURCE_REPOSITORY, "mock-source-tag ${current_version} ${tag}");
@@ -492,20 +465,19 @@ public class PublishSequenceTest extends SequenceTest {
 
         SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
 
-        c.setCurrentVersion(new Version("99.9"));
+        c.setCurrentVersion(new Version("99.9-SNAPSHOT-1"));
 
         s.execute(c);
 
         List<String> executedCommands = mockOS.getHistory();
-        assertEquals(4, executedCommands.size());
-        assertEquals("mock-publish-artifacts", executedCommands.get(0));
+        assertEquals(3, executedCommands.size());
+        assertEquals("mvn jar:jar source:jar install:install", executedCommands.get(0));
         assertEquals("mock-source-add", executedCommands.get(1));
-        assertEquals("mock-source-commit 99.9", executedCommands.get(2));
-        assertEquals("mock-source-tag 99.9 release-99.9", executedCommands.get(3));
+        assertEquals("mock-source-commit 99.9-SNAPSHOT-1", executedCommands.get(2));
     }
 
     @Test
-    public void endToEndPublishingSuccess_RemotePush() throws Exception {
+    public void endToEndPublishingSuccess_LocalArtifactRepositoryOnly_RemotePush() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
 
@@ -514,7 +486,41 @@ public class PublishSequenceTest extends SequenceTest {
         MockMavenProject mp = new MockMavenProject();
 
         MockOS mockOS = (MockOS) OS.getInstance();
-        mc.set(ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY, "mock-publish-artifacts");
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY, "mock-source-add");
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_COMMIT_TO_LOCAL_SOURCE_REPOSITORY, "mock-source-commit ${current_version}");
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_TAG_LOCAL_SOURCE_REPOSITORY, "mock-source-tag ${current_version} ${tag}");
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY, "mock-push");
+        mockOS.allCommandsSucceedByDefault();
+
+        PublishSequence s = new PublishSequence();
+
+        //noinspection unchecked
+        mr.getRootScope().getVariable(ConfigurationLabels.PUBLISH_NO_PUSH).set(false);
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
+
+        c.setCurrentVersion(new Version("99.9-SNAPSHOT-2"));
+
+        s.execute(c);
+
+        List<String> executedCommands = mockOS.getHistory();
+        assertEquals(4, executedCommands.size());
+        assertEquals("mvn jar:jar source:jar install:install", executedCommands.get(0));
+        assertEquals("mock-source-add", executedCommands.get(1));
+        assertEquals("mock-source-commit 99.9-SNAPSHOT-2", executedCommands.get(2));
+        assertEquals("mock-push", executedCommands.get(3));
+    }
+
+    @Test
+    public void endToEndPublishingSuccess_LocalAndRemoteArtifactRepository_RemotePush() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
+
+        MockMavenProject mp = new MockMavenProject();
+
+        MockOS mockOS = (MockOS) OS.getInstance();
         mc.set(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY, "mock-source-add");
         mc.set(ConfigurationLabels.OS_COMMAND_TO_COMMIT_TO_LOCAL_SOURCE_REPOSITORY, "mock-source-commit ${current_version}");
         mc.set(ConfigurationLabels.OS_COMMAND_TO_TAG_LOCAL_SOURCE_REPOSITORY, "mock-source-tag ${current_version} ${tag}");
@@ -534,11 +540,79 @@ public class PublishSequenceTest extends SequenceTest {
 
         List<String> executedCommands = mockOS.getHistory();
         assertEquals(5, executedCommands.size());
-        assertEquals("mock-publish-artifacts", executedCommands.get(0));
+        assertEquals("mvn jar:jar source:jar install:install deploy:deploy", executedCommands.get(0));
         assertEquals("mock-source-add", executedCommands.get(1));
         assertEquals("mock-source-commit 99.9", executedCommands.get(2));
         assertEquals("mock-source-tag 99.9 release-99.9", executedCommands.get(3));
         assertEquals("mock-push", executedCommands.get(4));
+    }
+
+    @Test
+    public void endToEndPublishingSuccess_LocalAndRemoteArtifactRepository_NoPush() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+
+        MockReleaseApplicationRuntime mr = new MockReleaseApplicationRuntime(mc);
+
+        MockMavenProject mp = new MockMavenProject();
+
+        MockOS mockOS = (MockOS) OS.getInstance();
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY, "mock-source-add");
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_COMMIT_TO_LOCAL_SOURCE_REPOSITORY, "mock-source-commit ${current_version}");
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_TAG_LOCAL_SOURCE_REPOSITORY, "mock-source-tag ${current_version} ${tag}");
+        mc.set(ConfigurationLabels.OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY, "mock-push");
+        mockOS.allCommandsSucceedByDefault();
+
+        PublishSequence s = new PublishSequence();
+
+        //noinspection unchecked
+        mr.getRootScope().getVariable(ConfigurationLabels.PUBLISH_NO_PUSH).set(true);
+
+        SequenceExecutionContext c = new SequenceExecutionContext(mr, mp, null, null);
+
+        c.setCurrentVersion(new Version("99.9"));
+
+        //
+        // we cannot make a dot release without a push, as the artifact must be shared on the external artifact
+        // repository
+        //
+
+        try {
+
+            s.execute(c);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("cannot make a dot release without pushing externally the binary artifacts"));
+        }
+    }
+
+    // isPublishRemotely() ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void isPublishRemotely_Snapshot() throws Exception {
+
+        assertFalse(PublishSequence.isPublishRemotely(new Version("1-SNAPSHOT-1")));
+    }
+
+    @Test
+    public void isPublishRemotely_Patch() throws Exception {
+
+        assertTrue(PublishSequence.isPublishRemotely(new Version("1.1.1")));
+    }
+
+    @Test
+    public void isPublishRemotely_Minor() throws Exception {
+
+        assertTrue(PublishSequence.isPublishRemotely(new Version("1.1")));
+    }
+
+    @Test
+    public void isPublishRemotely_Major() throws Exception {
+
+        assertTrue(PublishSequence.isPublishRemotely(new Version("1")));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
@@ -546,7 +620,7 @@ public class PublishSequenceTest extends SequenceTest {
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected PublishSequence getSequenceToTest() throws Exception {
+    protected PublishSequence getSequenceToTest() {
 
         return new PublishSequence();
     }

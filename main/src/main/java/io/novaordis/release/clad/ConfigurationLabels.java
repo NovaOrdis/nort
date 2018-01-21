@@ -29,7 +29,6 @@ public class ConfigurationLabels {
     public static final String OS_COMMAND_TO_EXECUTE_ALL_TESTS = "os.command.to.execute.all.tests";
     public static final String OS_COMMAND_TO_BUILD_WITH_TESTS = "os.command.to.build.with.tests";
     public static final String OS_COMMAND_TO_BUILD_WITHOUT_TESTS = "os.command.to.build.without.tests";
-    public static final String OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY = "os.command.to.publish.into.local.repository";
 
     public static final String OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY = "os.command.to.add.to.local.source.repository";
     public static final String OS_COMMAND_TO_COMMIT_TO_LOCAL_SOURCE_REPOSITORY = "os.command.to.commit.to.local.source.repository";

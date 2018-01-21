@@ -16,6 +16,19 @@
 
 package io.novaordis.release.clad;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
+
 import io.novaordis.clad.application.ApplicationRuntimeBase;
 import io.novaordis.clad.application.Console;
 import io.novaordis.clad.configuration.Configuration;
@@ -28,18 +41,6 @@ import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.expressions.UndeclaredVariableException;
 import io.novaordis.utilities.zip.ZipUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.YAMLException;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The instance will be created by reflection.
@@ -126,10 +127,6 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
 
         label = ConfigurationLabels.OS_COMMAND_TO_BUILD_WITHOUT_TESTS;
         configuration.set(label, "mvn -Dmaven.test.skip=true clean package");
-        log.debug("set '" + label + "' to \"" + configuration.get(label) + "\"");
-
-        label = ConfigurationLabels.OS_COMMAND_TO_PUBLISH_INTO_LOCAL_REPOSITORY;
-        configuration.set(label, "mvn jar:jar source:jar install:install");
         log.debug("set '" + label + "' to \"" + configuration.get(label) + "\"");
 
         label = ConfigurationLabels.OS_COMMAND_TO_ADD_TO_LOCAL_SOURCE_REPOSITORY;
