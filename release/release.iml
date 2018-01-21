@@ -9,7 +9,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="nort" />
+    <orderEntry type="library" name="Maven: io.novaordis.nort:nort:1.1.9-SNAPSHOT-4" level="project" />
     <orderEntry type="library" name="Maven: io.novaordis.utilities:novaordis-utilities:4.7.14-SNAPSHOT-2" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.12" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.11" level="project" />

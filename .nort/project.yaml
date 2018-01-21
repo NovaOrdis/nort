@@ -12,7 +12,7 @@ publish:
   release.tag: nort-release-${current.version}
   truststore:
     file: /Users/ovidiu/.m2/maven.apps.openshift.novaordis.io.truststore
-    password: ${NEXUS_TRUSTORE_PASSWORD}
+    password: ${NOVAORDIS_NEXUS_TRUSTSTORE_PASSWORD}
 
 install:
   installation.directory: ${RUNTIME_DIR}
