@@ -24,6 +24,7 @@ import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.release.OutputUtil;
 import io.novaordis.release.clad.ConfigurationLabels;
 import io.novaordis.release.clad.ReleaseApplicationRuntime;
+import io.novaordis.release.model.maven.MavenCommandLine;
 import io.novaordis.release.version.Version;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.expressions.Scope;
@@ -67,7 +68,7 @@ public class PublishSequence implements Sequence {
         Version currentVersion =
                 new Version((String)r.getRootScope().getVariable(ConfigurationLabels.CURRENT_VERSION).get());
 
-        String mavenCommand = "mvn jar:jar source:jar install:install";
+        MavenCommandLine mvnCL = new MavenCommandLine("jar:jar", "source:jar", "install:install");
 
         boolean remotePublishing = isPublishRemotely(currentVersion);
 
@@ -79,10 +80,17 @@ public class PublishSequence implements Sequence {
                         "cannot make a dot release without pushing externally the binary artifacts");
             }
 
-            mavenCommand += " deploy:deploy";
+            mvnCL.append("deploy:deploy");
+
+            //
+            // deploying externally may require setting a local truststore on command line if the remote repository
+            // has a self-signed certificate
+            //
+            mvnCL.configureLocalTruststore(c);
         }
 
-        NativeExecutionResult er = OutputUtil.handleNativeCommandOutput(OS.getInstance().execute(mavenCommand), r, c);
+        NativeExecutionResult er = OutputUtil.handleNativeCommandOutput(
+                OS.getInstance().execute(mvnCL.getCommandLine()), r, c);
 
         if (er.isFailure()) { throw new UserErrorException("publishing failed"); }
 
@@ -273,7 +281,7 @@ public class PublishSequence implements Sequence {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public PublishSequence() {
+    PublishSequence() {
 
         this.executeChangedState = false;
     }

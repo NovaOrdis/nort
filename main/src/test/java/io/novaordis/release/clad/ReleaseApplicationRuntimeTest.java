@@ -63,6 +63,7 @@ public class ReleaseApplicationRuntimeTest {
     // Public ----------------------------------------------------------------------------------------------------------
 
     protected File scratchDirectory;
+    @SuppressWarnings("WeakerAccess")
     protected File baseDirectory;
 
     @Before

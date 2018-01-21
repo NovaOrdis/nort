@@ -218,7 +218,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         }
 
         BufferedInputStream bis = null;
-        Map<String, Object> yamlFileConfiguration = null;
+        Map<String, Object> yamlFileConfiguration;
 
         try {
 
