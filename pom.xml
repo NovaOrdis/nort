@@ -23,7 +23,7 @@
 
     <groupId>io.novaordis.nort</groupId>
     <artifactId>NORT</artifactId>
-    <version>1.1.9-SNAPSHOT-3</version>
+    <version>1.1.9-SNAPSHOT-4</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -32,7 +32,7 @@
             Dependencies
         -->
 
-        <novaordis.utilities.version>4.7.12</novaordis.utilities.version>
+        <novaordis.utilities.version>4.7.14-SNAPSHOT-2</novaordis.utilities.version>
         <clad.version>3.6.0</clad.version>
 
         <slf4j.version>1.7.12</slf4j.version>

@@ -16,6 +16,17 @@
 
 package io.novaordis.release.clad;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.error.YAMLException;
+
 import io.novaordis.clad.option.StringOption;
 import io.novaordis.release.MockConfiguration;
 import io.novaordis.release.Util;
@@ -24,17 +35,9 @@ import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.expressions.ScopeImpl;
 import io.novaordis.utilities.expressions.env.EnvironmentVariableProvider;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.error.YAMLException;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
+import static io.novaordis.release.clad.ConfigurationLabels.INTERNAL_KEY_TRUSTSTORE_FILE;
+import static io.novaordis.release.clad.ConfigurationLabels.INTERNAL_KEY_TRUSTSTORE_PASSWORD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -97,7 +100,7 @@ public class ReleaseApplicationRuntimeTest {
     // initializeEnvironmentRelatedConfiguration() ---------------------------------------------------------------------
 
     @Test
-    public void initializeEnvironmentRelatedConfiguration_ConfigurationFileParsingError() throws Exception {
+    public void initializeEnvironmentRelatedConfiguration_ConfigurationFileParsingError() {
 
         File f = new File(scratchDirectory, "invalid.yaml");
         assertTrue(Files.write(f,
@@ -133,7 +136,7 @@ public class ReleaseApplicationRuntimeTest {
     // locateDefaultConfigurationFile() --------------------------------------------------------------------------------
 
     @Test
-    public void locateDefaultConfigurationFile_NoDefaultConfigFile() throws Exception {
+    public void locateDefaultConfigurationFile_NoDefaultConfigFile() {
 
         String originalContent = ReleaseApplicationRuntime.DEFAULT_CONFIGURATION_DIRECTORY;
 
@@ -158,7 +161,7 @@ public class ReleaseApplicationRuntimeTest {
     }
 
     @Test
-    public void locateDefaultConfigurationFile() throws Exception {
+    public void locateDefaultConfigurationFile() {
 
         String originalContent = ReleaseApplicationRuntime.DEFAULT_CONFIGURATION_DIRECTORY;
 
@@ -184,11 +187,10 @@ public class ReleaseApplicationRuntimeTest {
         }
     }
 
-
     // loadConfiguration() ---------------------------------------------------------------------------------------------
 
     @Test
-    public void loadConfiguration_FileDoesNotExist() throws Exception {
+    public void loadConfiguration_FileDoesNotExist() {
 
         MockConfiguration mc = new MockConfiguration();
 
@@ -206,7 +208,7 @@ public class ReleaseApplicationRuntimeTest {
     }
 
     @Test
-    public void loadConfiguration_FileNotReadable() throws Exception {
+    public void loadConfiguration_FileNotReadable() {
 
         File f = new File(scratchDirectory, "cannot-read.yaml");
         assertTrue(Files.write(f, "something"));
@@ -229,7 +231,7 @@ public class ReleaseApplicationRuntimeTest {
     }
 
     @Test
-    public void loadConfiguration_ParsingError() throws Exception {
+    public void loadConfiguration_ParsingError() {
 
         File f = new File(scratchDirectory, "invalid.yaml");
         assertTrue(Files.write(f,
@@ -270,7 +272,7 @@ public class ReleaseApplicationRuntimeTest {
     }
 
     @Test
-    public void loadConfiguration_localArtifactRepositoryRootVariableNotDefined() throws Exception {
+    public void loadConfiguration_localArtifactRepositoryRootVariableNotDefined() {
 
         File config = Util.cp("configuration/reference.yaml", scratchDirectory);
 
@@ -307,7 +309,7 @@ public class ReleaseApplicationRuntimeTest {
     }
 
     @Test
-    public void loadConfiguration_localArtifactRepositoryRootVariableInvalidValue() throws Exception {
+    public void loadConfiguration_localArtifactRepositoryRootVariableInvalidValue() {
 
         File config = Util.cp("configuration/reference.yaml", scratchDirectory);
 
@@ -341,7 +343,7 @@ public class ReleaseApplicationRuntimeTest {
     }
 
     @Test
-    public void loadConfiguration_installationDirectoryVariableNotDefined() throws Exception {
+    public void loadConfiguration_installationDirectoryVariableNotDefined() {
 
         File config = Util.cp("configuration/reference.yaml", scratchDirectory);
 
@@ -351,9 +353,14 @@ public class ReleaseApplicationRuntimeTest {
         File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
         assertTrue(installationDirectory.mkdir());
 
+        File truststoreFile = new File(scratchDirectory, "mock.truststore");
+        assertTrue(Files.write(truststoreFile, "."));
+        assertTrue(truststoreFile.isFile());
+
         Scope scope = new ScopeImpl();
 
         scope.declare("M2", localRepositoryDirectory.getPath());
+        scope.declare("TRUSTSTORE_PASSWORD", "something");
 
         //
         // RUNTIME_DIR variable not defined
@@ -378,6 +385,29 @@ public class ReleaseApplicationRuntimeTest {
     }
 
     @Test
+    public void loadConfiguration_TruststoreNotAMap() {
+
+        File config = new File(scratchDirectory, "test.yml");
+        Files.write(config, "publish:\n  truststore: blah\n");
+        assertTrue(config.isFile());
+
+        MockConfiguration mc = new MockConfiguration();
+        Scope scope = new ScopeImpl();
+
+        try {
+
+            ReleaseApplicationRuntime.loadConfiguration(config, mc, scope);
+
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("truststore declaration is not a map"));
+        }
+    }
+
+    @Test
     public void loadConfiguration_ReferenceConfigurationFile() throws Exception {
 
         File config = Util.cp("configuration/reference.yaml", scratchDirectory);
@@ -388,10 +418,14 @@ public class ReleaseApplicationRuntimeTest {
         File installationDirectory = new File(scratchDirectory, "mock-installation-directory");
         assertTrue(installationDirectory.mkdir());
 
+        File truststoreCopy = Util.cp("configuration/mock.truststore", scratchDirectory);
+        assertTrue(truststoreCopy.isFile());
+
         Scope scope = new ScopeImpl();
 
         scope.declare("M2", localRepositoryDirectory.getPath());
         scope.declare("RUNTIME_DIR", installationDirectory.getPath());
+        scope.declare("TRUSTSTORE_PASSWORD", "mock_truststore_passwd");
 
         MockConfiguration mc = new MockConfiguration();
 
@@ -410,6 +444,11 @@ public class ReleaseApplicationRuntimeTest {
 
         value = mc.get(ConfigurationLabels.INSTALLATION_DIRECTORY);
         assertEquals(installationDirectory.getPath(), value);
+
+        String truststoreFilePath = mc.get(INTERNAL_KEY_TRUSTSTORE_FILE);
+        String normalizedTruststoreFilePath = Files.normalizePath(truststoreFilePath);
+        assertEquals(truststoreCopy.getAbsolutePath(), normalizedTruststoreFilePath);
+        assertEquals("mock_truststore_passwd", mc.get(INTERNAL_KEY_TRUSTSTORE_PASSWORD));
     }
 
     // extractString() -------------------------------------------------------------------------------------------------

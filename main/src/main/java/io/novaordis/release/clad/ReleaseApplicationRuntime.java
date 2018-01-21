@@ -35,6 +35,7 @@ import io.novaordis.clad.configuration.Configuration;
 import io.novaordis.clad.option.Option;
 import io.novaordis.clad.option.StringOption;
 import io.novaordis.release.ZipHandler;
+import io.novaordis.release.clad.configuration.Truststore;
 import io.novaordis.release.sequences.SequenceExecutionContext;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.UserErrorException;
@@ -61,6 +62,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
     //
     public static String DEFAULT_CONFIGURATION_DIRECTORY = "./.nort"; // not final for testing
     public static final String DEFAULT_CONFIGURATION_FILE_NAME = "project";
+    @SuppressWarnings("WeakerAccess")
     public static final String[] DEFAULT_EXTENSIONS = { "yaml", "yml" };
 
     // Static ----------------------------------------------------------------------------------------------------------
@@ -241,6 +243,7 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
             if (bis != null) {
 
                 try {
+
                     bis.close();
                 }
                 catch(Exception e) {
@@ -265,8 +268,8 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         //
 
         Map qualificationMap = (Map) yamlFileConfiguration.get("qualification");
-        extractString(
-                qualificationMap, ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION, scope, configuration, true);
+        extractString(qualificationMap, ConfigurationLabels.OS_COMMAND_TO_GET_INSTALLED_VERSION,
+                scope, configuration, true);
 
         //
         // Publish Sequence Configuration
@@ -275,6 +278,23 @@ public class ReleaseApplicationRuntime extends ApplicationRuntimeBase {
         Map publishMap = (Map) yamlFileConfiguration.get("publish");
         extractDirectory(publishMap, ConfigurationLabels.LOCAL_ARTIFACT_REPOSITORY_ROOT, scope, configuration);
         extractString(publishMap, ConfigurationLabels.RELEASE_TAG, scope, configuration, false);
+
+        //
+        // truststore
+        //
+
+        Object o = publishMap.get(ConfigurationLabels.TRUSTSTORE);
+
+        if (o != null) {
+
+            if (!(o instanceof Map)) {
+
+                throw new UserErrorException("truststore declaration is not a map");
+            }
+
+            Truststore t = new Truststore((Map)o, configFile.getParentFile());
+            t.toConfiguration(configuration, scope);
+        }
 
         //
         // Installation Sequence Configuration

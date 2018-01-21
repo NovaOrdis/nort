@@ -37,11 +37,21 @@ public class ConfigurationLabels {
     public static final String OS_COMMAND_TO_PUSH_TO_REMOTE_SOURCE_REPOSITORY = "os.command.to.push.to.remote.source.repository";
 
     public static final String LOCAL_ARTIFACT_REPOSITORY_ROOT = "local.artifact.repository.root";
+
     public static final String RELEASE_TAG = "release.tag";
 
     public static final String OS_COMMAND_TO_GET_INSTALLED_VERSION = "os.command.to.get.installed.version";
 
     public static final String INSTALLATION_DIRECTORY = "installation.directory";
+
+    public static final String TRUSTSTORE = "truststore";
+
+    //
+    // flattened configuration keys
+    //
+
+    public static final String INTERNAL_KEY_TRUSTSTORE_FILE = "internal.key.truststore.file";
+    public static final String INTERNAL_KEY_TRUSTSTORE_PASSWORD = "internal.key.truststore.password";
 
     //
     // temporarily using this for runtime variable names, this needs to be refactored anyway

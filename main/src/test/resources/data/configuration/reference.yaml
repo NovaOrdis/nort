@@ -10,6 +10,9 @@ build:
 publish:
   local.artifact.repository.root: ${M2}
   release.tag: release-some-marker-${current.version}
+  truststore:
+    file: ./mock.truststore
+    password: ${TRUSTSTORE_PASSWORD}
 
 install:
   installation.directory: ${RUNTIME_DIR}
